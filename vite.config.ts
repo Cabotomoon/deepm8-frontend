@@ -106,6 +106,7 @@ function wrapInlineModuleScripts() {
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/', // Set to root for Vercel deployment
   plugins: [
     react(),
     tailwindcss(),

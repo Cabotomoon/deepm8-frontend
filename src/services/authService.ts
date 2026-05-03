@@ -1,7 +1,11 @@
 /**
  * SeaVerse Authentication Service
  * Handles user authentication via iframe PostMessage
+ * Also supports standalone mode for Vercel deployment
  */
+
+import { config } from '../config';
+ 
 
 export interface AuthUserProfile {
   userId: string;
@@ -156,10 +160,29 @@ function generateMockJWT(userId: string, name: string, email: string): string {
 
 /**
  * Initialize authentication and return user profile
+ * Supports both iframe (SeaVerse) and standalone (Demo) modes
  */
 export async function initAuth(): Promise<{ token: string; user: AuthUserProfile } | null> {
   console.log('🔐 Initializing authentication...');
 
+  // Check if we're in demo mode (standalone Vercel deployment)
+  if (config.isDemoMode) {
+    console.log('🎮 Demo mode enabled - checking for existing local user...');
+
+    // Try to load existing auth
+    const existingAuth = loadAuth();
+    if (existingAuth) {
+      console.log('✅ Found existing local user:', existingAuth.user.name);
+      return existingAuth;
+    }
+
+    // No existing user - create guest user automatically
+    console.log('🆕 No local user found - creating guest user...');
+    const { token, user } = createLocalGuestUser();
+    return { token, user };
+  }
+
+  // Original iframe auth flow
   const token = await getToken();
 
   if (!token) {
@@ -178,7 +201,6 @@ export async function initAuth(): Promise<{ token: string; user: AuthUserProfile
   console.log('✅ Authentication successful:', user.name);
   return { token, user };
 }
-
 /**
  * Check if user is authenticated
  */
