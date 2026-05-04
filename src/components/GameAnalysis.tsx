@@ -11,6 +11,7 @@ import { exportService } from '../services/exportService';
 import { achievementService, type UnlockedAchievement } from '../services/achievementService';
 import { socialShareService, type ShareableAchievement, type ShareableGame } from '../services/socialShareService';
 import { studyRecommendationService, type StudyRecommendation, type SkillMetrics, type WeeklyGoal } from '../services/studyRecommendationService';
+import { localDataService } from '../services/localDataService';
 import ProgressChart from './ProgressChart';
 import AchievementBadge from './AchievementBadge';
 import AchievementNotification from './AchievementNotification';
@@ -238,18 +239,21 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
     const { profile: updatedProfile, newAchievements: unlockedAchievements } =
       await playerProfileService.updateWithGame(newGameRecord);
 
-    setProfile(updatedProfile);
-    setNewAchievements(unlockedAchievements);
+     setProfile(updatedProfile);
+     setNewAchievements(unlockedAchievements);
 
-    // Calculate skill metrics and recommendations
-    const metrics = studyRecommendationService.calculateSkillMetrics(updatedProfile);
-    setSkillMetrics(metrics);
+     // Get game history for metrics calculation
+     const gameHistory = await localDataService.getGameHistory();
 
-    const recs = studyRecommendationService.generateRecommendations(updatedProfile, metrics);
-    setRecommendations(recs);
+     // Calculate skill metrics and recommendations
+     const metrics = studyRecommendationService.calculateSkillMetrics(updatedProfile, gameHistory);
+     setSkillMetrics(metrics);
 
-    const goal = studyRecommendationService.getWeeklyGoal(updatedProfile, metrics);
-    setWeeklyGoal(goal);
+     const recs = studyRecommendationService.generateRecommendations(updatedProfile, gameHistory, metrics);
+     setRecommendations(recs);
+
+     const goal = studyRecommendationService.getWeeklyGoal(updatedProfile, gameHistory, metrics);
+     setWeeklyGoal(goal);
 
     // Show first achievement notification
     if (unlockedAchievements.length > 0) {
