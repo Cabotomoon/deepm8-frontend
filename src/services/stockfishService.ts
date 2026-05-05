@@ -41,8 +41,8 @@ class StockfishEngine {
 
     return new Promise((resolve, reject) => {
       try {
-        // Use local stockfish.js with Vite worker syntax
-        this.worker = new Worker('/stockfish/stockfish.js', { type: 'classic' });
+        // Use local stockfish.js (CORS-safe)
+        this.worker = new Worker('/stockfish/stockfish.js');
 
         this.worker.onmessage = (event) => {
           const message = event.data;
@@ -50,8 +50,12 @@ class StockfishEngine {
 
           if (message === 'uciok') {
             console.log('✅ Stockfish UCI ready');
-            this.isReady = true;
             this.sendCommand('isready');
+          }
+
+          if (message === 'readyok') {
+            console.log('✅ Stockfish engine ready');
+            this.isReady = true;
             resolve();
           }
 
@@ -125,7 +129,22 @@ class StockfishEngine {
 
     await this.waitForReady();
 
+    // Validate FEN string
+    if (!fen || fen.trim().length === 0) {
+      console.error('❌ Invalid FEN: empty string');
+      return null;
+    }
+
+    const fenParts = fen.split(' ');
+    if (fenParts.length < 4) {
+      console.error('❌ Invalid FEN: missing parts', fen);
+      return null;
+    }
+
     const config = DIFFICULTY_CONFIGS[difficulty];
+
+    console.log('🎯 Calculating best move for FEN:', fen);
+    console.log('⚙️ Config:', config);
 
     return new Promise((resolve) => {
       let bestMove: string | null = null;
@@ -161,18 +180,23 @@ class StockfishEngine {
       // Calculate best move
       this.sendCommand(`go depth ${config.depth} movetime ${config.moveTime}`);
 
-      // Timeout fallback
+      console.log('⏳ Waiting for Stockfish to calculate best move...');
+
+      // Timeout fallback - INCREASED to 10 seconds minimum
+      const timeoutMs = Math.max(config.moveTime + 5000, 10000);
       setTimeout(() => {
         if (!resolved) {
           const index = this.messageQueue.indexOf(messageHandler);
           if (index > -1) {
             this.messageQueue.splice(index, 1);
           }
-          console.warn('⚠️ Stockfish timeout, returning null');
+          console.warn(`⚠️ Stockfish timeout after ${timeoutMs}ms, returning null`);
+          console.warn('📋 Last FEN:', fen);
+          console.warn('📋 Difficulty:', difficulty);
           resolved = true;
           resolve(null);
         }
-      }, config.moveTime + 3000);
+      }, timeoutMs);
     });
   }
 
