@@ -2889,15 +2889,19 @@ export default function ChessGame() {
               const metrics = hasEnoughGames
                 ? studyRecommendationService.calculateSkillMetrics(chessGamePro.userProfile)
                 : { openings: 50, tactics: 50, endgames: 50, middlegame: 50 };
+
+              // 🛡️ Safety check: Si metrics es undefined, usar valores por defecto
+              const safeMetrics = metrics || { openings: 50, tactics: 50, endgames: 50, middlegame: 50 };
+
               const recommendations = hasEnoughGames
-                ? studyRecommendationService.generateRecommendations(chessGamePro.userProfile, metrics)
+                ? studyRecommendationService.generateRecommendations(chessGamePro.userProfile, safeMetrics)
                 : [];
 
               // Debug: Log para verificar el estado
               console.log('📊 Debug Recomendaciones:', {
                 hasEnoughGames,
                 totalGames: userGameHistory.length,
-                metrics,
+                metrics: safeMetrics,
                 recommendationsCount: recommendations.length,
                 recommendations
               });
@@ -3009,10 +3013,10 @@ export default function ChessGame() {
                     </h4>
                     <div className="space-y-3">
                       {[
-                        { label: 'Aperturas', score: metrics.openings, icon: '📖' },
-                        { label: 'Táctica', score: metrics.tactics, icon: '⚔️' },
-                        { label: 'Finales', score: metrics.endgames, icon: '♟️' },
-                        { label: 'Medio Juego', score: metrics.middlegame, icon: '🎯' }
+                        { label: 'Aperturas', score: safeMetrics.openings, icon: '📖' },
+                        { label: 'Táctica', score: safeMetrics.tactics, icon: '⚔️' },
+                        { label: 'Finales', score: safeMetrics.endgames, icon: '♟️' },
+                        { label: 'Medio Juego', score: safeMetrics.middlegame, icon: '🎯' }
                       ].map((area, i) => (
                         <div key={i} className="flex items-center gap-3">
                           <span className="w-28 text-slate-300 font-medium text-sm">
