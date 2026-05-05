@@ -256,3 +256,27 @@ export async function clearAllGameHistory(): Promise<void> {
 
 // Export all functions from dataService.ts that don't involve API calls
 export { calculateEloChange, getKFactor, generatePGN } from './dataService';
+
+// Import the re-exported functions for the default export
+import { calculateEloChange, getKFactor, generatePGN } from './dataService';
+
+// Default export for compatibility
+const localDataService = {
+  createUserProfile,
+  getUserProfile,
+  checkUsernameAvailable,
+  updateUserProfile,
+  saveGameHistory,
+  getGameHistory,
+  getGameById,
+  updatePieceStats,
+  getPieceStats,
+  updateLeaderboard,
+  getLeaderboard,
+  clearAllGameHistory,
+  calculateEloChange,
+  getKFactor,
+  generatePGN
+};
+
+export default localDataService;
