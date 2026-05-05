@@ -105,7 +105,7 @@ class StudyRecommendationService {
    */
   generateRecommendations(
     profile: PlayerProfile,
-    metrics: SkillMetrics
+    metrics: SkillMetrics | undefined
   ): StudyRecommendation[] {
     const gameHistory = profile.gameHistory || [];
     const recommendations: StudyRecommendation[] = [];
@@ -113,18 +113,19 @@ class StudyRecommendationService {
     console.log('🎯 Generando recomendaciones con métricas:', metrics);
 
     // 🛡️ Safety check: Si metrics es undefined, usar valores por defecto
+    const safeMetrics: SkillMetrics = metrics || {
+      openings: 50,
+      endgames: 50,
+      tactics: 50,
+      middlegame: 50
+    };
+
     if (!metrics) {
       console.error('❌ Metrics is undefined! Using default values');
-      metrics = {
-        openings: 50,
-        endgames: 50,
-        tactics: 50,
-        middlegame: 50
-      };
     }
 
     // 1. Highest priority: Critical weaknesses (score < 50)
-    if (metrics.endgames < 50) {
+    if (safeMetrics.endgames < 50) {
       const recentGames = gameHistory.slice(-10);
       const longGames = recentGames.filter(g => g.totalMoves > 40);
       const endgameLosses = longGames.filter(g => g.result === 'loss').length;
@@ -135,7 +136,7 @@ class StudyRecommendationService {
         description: 'Domina los finales de peones para convertir ventajas mínimas en victorias',
         reason: endgameLosses > 0
           ? `Perdiste ${endgameLosses} partida${endgameLosses > 1 ? 's' : ''} larga${endgameLosses > 1 ? 's' : ''} en tus últimas 10 partidas`
-          : `Tu puntuación de finales (${metrics.endgames}) indica necesidad de refuerzo`,
+          : `Tu puntuación de finales (${safeMetrics.endgames}) indica necesidad de refuerzo`,
         priority: 'high',
         category: 'endgames',
         actionLabel: 'Empezar Ahora',
@@ -143,7 +144,7 @@ class StudyRecommendationService {
       });
     }
 
-    if (metrics.tactics < 50) {
+    if (safeMetrics.tactics < 50) {
       const recentGames = gameHistory.slice(-10);
       const losses = recentGames.filter(g => g.result === 'loss').length;
 
@@ -159,7 +160,7 @@ class StudyRecommendationService {
       });
     }
 
-    if (metrics.openings < 50) {
+    if (safeMetrics.openings < 50) {
       const recentGames = gameHistory.slice(-10);
       const shortLosses = recentGames.filter(g =>
         g.totalMoves < 15 && g.result === 'loss'
@@ -171,7 +172,7 @@ class StudyRecommendationService {
         description: 'Domina los fundamentos: desarrollo, centro y seguridad del rey',
         reason: shortLosses > 0
           ? `${shortLosses} derrota${shortLosses > 1 ? 's' : ''} rápida${shortLosses > 1 ? 's' : ''} (<15 movimientos) en tus últimas partidas`
-          : `Tu puntuación de aperturas (${metrics.openings}) necesita refuerzo`,
+          : `Tu puntuación de aperturas (${safeMetrics.openings}) necesita refuerzo`,
         priority: 'high',
         category: 'openings',
         actionLabel: 'Empezar Ahora',
@@ -180,7 +181,7 @@ class StudyRecommendationService {
     }
 
     // 2. Medium priority: Areas that need work (50-70)
-    if (metrics.tactics >= 50 && metrics.tactics < 70 && recommendations.length < 3) {
+    if (safeMetrics.tactics >= 50 && safeMetrics.tactics < 70 && recommendations.length < 3) {
       recommendations.push({
         id: 'advanced-tactics',
         title: 'Táctica Avanzada: Clavadas y Enfiladas',
@@ -193,7 +194,7 @@ class StudyRecommendationService {
       });
     }
 
-    if (metrics.middlegame >= 50 && metrics.middlegame < 65 && recommendations.length < 3) {
+    if (safeMetrics.middlegame >= 50 && safeMetrics.middlegame < 65 && recommendations.length < 3) {
       recommendations.push({
         id: 'middlegame-plans',
         title: 'Planes en el Medio Juego',
@@ -206,7 +207,7 @@ class StudyRecommendationService {
       });
     }
 
-    if (metrics.endgames >= 50 && metrics.endgames < 65 && recommendations.length < 3) {
+    if (safeMetrics.endgames >= 50 && safeMetrics.endgames < 65 && recommendations.length < 3) {
       recommendations.push({
         id: 'rook-endgames',
         title: 'Finales de Torre',
@@ -274,21 +275,19 @@ class StudyRecommendationService {
    * Get weekly goal data
    * FIXED: Now works with PlayerProfile type
    */
-  getWeeklyGoal(profile: PlayerProfile, metrics: SkillMetrics): WeeklyGoal {
+  getWeeklyGoal(profile: PlayerProfile, metrics: SkillMetrics | undefined): WeeklyGoal {
     const gameHistory = profile.gameHistory || [];
 
     // 🛡️ Safety check
-    if (!metrics) {
-      metrics = {
-        openings: 50,
-        endgames: 50,
-        tactics: 50,
-        middlegame: 50
-      };
-    }
+    const safeMetrics: SkillMetrics = metrics || {
+      openings: 50,
+      endgames: 50,
+      tactics: 50,
+      middlegame: 50
+    };
 
     // Find lowest skill for improvement target
-    const skills = Object.entries(metrics) as [keyof SkillMetrics, number][];
+    const skills = Object.entries(safeMetrics) as [keyof SkillMetrics, number][];
     const lowestSkill = skills.reduce((min, [skill, score]) =>
       score < min.score ? { skill, score } : min,
       { skill: skills[0][0], score: skills[0][1] }
@@ -329,13 +328,20 @@ class StudyRecommendationService {
   /**
    * Get coach tip based on weakest area
    */
-  getCoachTip(metrics: SkillMetrics): string {
+  getCoachTip(metrics: SkillMetrics | undefined): string {
     // 🛡️ Safety check
+    const safeMetrics: SkillMetrics = metrics || {
+      openings: 50,
+      endgames: 50,
+      tactics: 50,
+      middlegame: 50
+    };
+
     if (!metrics) {
       return 'Sigue practicando para recibir consejos personalizados. ¡Cada partida es una oportunidad de aprendizaje!';
     }
 
-    const skills = Object.entries(metrics) as [keyof SkillMetrics, number][];
+    const skills = Object.entries(safeMetrics) as [keyof SkillMetrics, number][];
     const lowestSkill = skills.reduce((min, [skill, score]) =>
       score < min.score ? { skill, score } : min,
       { skill: skills[0][0], score: skills[0][1] }
