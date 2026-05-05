@@ -106,7 +106,6 @@ function wrapInlineModuleScripts() {
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/', // Set to root for Vercel deployment
   plugins: [
     react(),
     tailwindcss(),
@@ -133,8 +132,11 @@ export default defineConfig({
   },
   server: {
     headers: {
-      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Embedder-Policy': 'credentialless',
       'Cross-Origin-Opener-Policy': 'same-origin',
     }
+  },
+  worker: {
+    format: 'es'
   }
 })

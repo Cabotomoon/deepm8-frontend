@@ -41,8 +41,8 @@ class StockfishEngine {
 
     return new Promise((resolve, reject) => {
       try {
-        // Use local stockfish.js (CORS-safe)
-        this.worker = new Worker('/stockfish/stockfish.js');
+        // Use local stockfish.js with Vite worker syntax
+        this.worker = new Worker('/stockfish/stockfish.js', { type: 'classic' });
 
         this.worker.onmessage = (event) => {
           const message = event.data;
