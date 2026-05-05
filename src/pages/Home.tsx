@@ -2837,14 +2837,14 @@ export default function ChessGame() {
             </div>
 
             {/* 📚 Study Recommendations Section */}
-            {chessGamePro.userProfile && (() => {
+            {chessGamePro.userProfile && userGameHistory && (() => {
               // Si hay datos, calculamos métricas reales; si no, usamos valores por defecto (50)
               const hasEnoughGames = userGameHistory.length >= 5;
 
               // Crear un perfil temporal con el historial actualizado para el cálculo
               const profileWithHistory = {
                 ...chessGamePro.userProfile,
-                gameHistory: userGameHistory
+                gameHistory: userGameHistory || []
               };
 
               const metrics = hasEnoughGames
