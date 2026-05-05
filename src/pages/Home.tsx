@@ -241,7 +241,6 @@ const canPieceMoveTo = (piece: ChessPiece, from: Position, to: Position, board: 
     case 'knight':
       // Knight moves in L-shape: 2+1 or 1+2
       const knightCanMove = (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
-      console.log(`  🐎 Knight check: from (${from.row},${from.col}) to (${to.row},${to.col}), rowDiff=${rowDiff}, colDiff=${colDiff}, canMove=${knightCanMove}, destOccupied=${!!destinationPiece}`);
       return knightCanMove;
 
     case 'bishop':
@@ -350,8 +349,6 @@ const toAlgebraicNotation = (from: Position, to: Position, piece: ChessPiece, ca
     // Check if there are other pieces of same type that can LEGALLY move to same square
     const ambiguousPieces: Position[] = [];
 
-    console.log(`🔍 Checking disambiguation for ${piece.color} ${piece.type} moving from (${from.row},${from.col}) to (${to.row},${to.col}) = ${toSquare}`);
-
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         // Skip the piece that's actually moving
@@ -362,16 +359,11 @@ const toAlgebraicNotation = (from: Position, to: Position, piece: ChessPiece, ca
             otherPiece.type === piece.type &&
             otherPiece.color === piece.color) {
 
-          console.log(`  📍 Found other ${piece.color} ${piece.type} at (${row},${col}), checking if it can move to (${to.row},${to.col})...`);
-
           // Check if THIS piece can also legally move to the destination
           const canMove = canPieceMoveTo(otherPiece, { row, col }, to, board);
 
           if (canMove) {
             ambiguousPieces.push({ row, col });
-            console.log(`    ✅ YES! This piece can also move there - disambiguation needed`);
-          } else {
-            console.log(`    ❌ NO - this piece cannot move there`);
           }
         }
       }
@@ -1554,10 +1546,7 @@ export default function ChessGame() {
     const hasLegalMoves = getAllLegalMoves(nextPlayer, newBoard).length > 0;
     const isCheckmate = isCheck && !hasLegalMoves;
 
-    console.log('🔍 After move - isCheck:', isCheck, 'hasLegalMoves:', hasLegalMoves, 'isCheckmate:', isCheckmate);
-
     const notation = toAlgebraicNotation(from, to, piece, capturedPiece, isCheck, isCheckmate, board);
-    console.log(`✅ Generated notation: ${notation} for ${piece.color} ${piece.type} from (${from.row},${from.col}) to (${to.row},${to.col})`);
     setMoveHistory(prev => [...prev, {
       from,
       to,
@@ -1710,31 +1699,18 @@ export default function ChessGame() {
                       gameStatus !== 'resigned' &&
                       !isAiThinking;
 
-    console.log('🔍 AI useEffect triggered:', {
-      gameMode,
-      currentPlayer,
-      gameStatus,
-      isAiThinking,
-      canAiPlay
-    });
-
     if (canAiPlay) {
-      console.log('🤖 AI turn detected, starting to think...');
       setIsAiThinking(true);
 
       // Execute AI move asynchronously with small delay to ensure state update
       const executeAiMove = async () => {
         try {
-          console.log('⏳ Waiting 300ms before AI calculation...');
           await new Promise(resolve => setTimeout(resolve, 300)); // Small delay for UX
 
-          console.log('🎯 Calling getAIMove()...');
           const aiMove = await getAIMove();
-          console.log('📥 getAIMove() returned:', aiMove);
 
           // Verify game is still valid for AI move (not ended during calculation)
           if (aiMove && currentPlayer === 'black' && gameStatus !== 'checkmate' && gameStatus !== 'stalemate' && gameStatus !== 'resigned') {
-            console.log('✅ AI executing move:', aiMove);
             movePiece(aiMove.from, aiMove.to);
           } else {
             console.warn('⚠️ AI move cancelled or invalid:', {
@@ -1747,7 +1723,6 @@ export default function ChessGame() {
         } catch (error) {
           console.error('❌ Error executing AI move:', error);
         } finally {
-          console.log('🏁 AI thinking finished, setting isAiThinking to false');
           setIsAiThinking(false);
         }
       };
@@ -3434,14 +3409,9 @@ export default function ChessGame() {
     );
   }
 
-  // Debug log before render
-  console.log('🔥 RENDER - activeTraining value:', activeTraining);
-  console.log('🔥 RENDER - activeTraining is truthy?', !!activeTraining);
-
   return (
     <>
       {/* 🎓 Training Session - Rendered as top-level overlay */}
-      {console.log('🔍 Checking activeTraining:', activeTraining)}
       {activeTraining && (
         <TrainingSession
           type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
