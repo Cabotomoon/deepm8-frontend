@@ -105,9 +105,7 @@ export function useChessGame() {
   useEffect(() => {
     const loadGameHistory = async () => {
       if (userProfile) {
-        console.log('📚 Loading game history for user:', userProfile.userId);
         const history = await getGameHistory(userProfile.userId, 50); // Load last 50 games
-        console.log(`✅ Loaded ${history.length} games`);
         setGameHistory(history);
       } else {
         setGameHistory([]);
@@ -115,11 +113,6 @@ export function useChessGame() {
     };
     loadGameHistory();
   }, [userProfile]);
-
-  // Log when showVictoryScreen changes
-  useEffect(() => {
-    console.log('🎯 showVictoryScreen changed to:', showVictoryScreen);
-  }, [showVictoryScreen]);
 
   // Game start timestamp
   const gameStartTime = useRef<number>(Date.now());

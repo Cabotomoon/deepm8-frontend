@@ -43,20 +43,9 @@ class StudyRecommendationService {
   calculateSkillMetrics(profile: PlayerProfile): SkillMetrics {
     const gameHistory = profile.gameHistory || [];
 
-    // 🛡️ Si no hay partidas, retornar valores neutrales
+    // 🛡️ Si no hay partidas, retornar valores neutrales SIN LOG
+    // El componente debe manejar esta lógica antes de llamar a este método
     if (gameHistory.length === 0) {
-      console.warn('⚠️ No hay historial de partidas, usando valores por defecto');
-      return {
-        openings: 50,
-        endgames: 50,
-        tactics: 50,
-        middlegame: 50
-      };
-    }
-
-    // 🛡️ Validar que gameHistory sea un array válido con objetos completos
-    if (!Array.isArray(gameHistory)) {
-      console.error('❌ gameHistory no es un array válido:', gameHistory);
       return {
         openings: 50,
         endgames: 50,
@@ -72,13 +61,13 @@ class StudyRecommendationService {
     console.log(`📊 Calculando métricas desde ${recentGames.length} partidas recientes (total: ${totalGames})`);
 
     // 1. Analizar WIN RATE
-    const wins = recentGames.filter(g => g && g.result === 'win').length;
+    const wins = recentGames.filter(g => g.result === 'win').length;
     const winRate = (wins / recentGames.length) * 100;
 
     // 2. Analizar duración de partidas (estimada por número de movimientos)
     // Partidas cortas (<15 movimientos) = problemas en apertura/táctica
-    const shortGames = recentGames.filter(g => g && typeof g.totalMoves === 'number' && g.totalMoves < 15).length;
-    const longGames = recentGames.filter(g => g && typeof g.totalMoves === 'number' && g.totalMoves > 40).length;
+    const shortGames = recentGames.filter(g => g.totalMoves < 15).length;
+    const longGames = recentGames.filter(g => g.totalMoves > 40).length;
 
     // 3. Calcular OPENING SCORE
     // Si muchas partidas cortas (perdidas rápidas) = problemas en apertura
@@ -86,12 +75,12 @@ class StudyRecommendationService {
 
     // 4. Calcular TACTICS SCORE
     // Basado en win rate y número de blunders
-    const avgBlunders = recentGames.reduce((sum, g) => sum + (g && typeof g.blunders === 'number' ? g.blunders : 0), 0) / recentGames.length;
+    const avgBlunders = recentGames.reduce((sum, g) => sum + g.blunders, 0) / recentGames.length;
     const tacticsScore = Math.max(40, Math.min(90, 70 + (winRate * 0.3) - (avgBlunders * 5)));
 
     // 5. Calcular ENDGAME SCORE
     // Partidas largas (>40 movimientos) con derrota = problemas en finales
-    const longLosses = recentGames.filter(g => g && typeof g.totalMoves === 'number' && g.totalMoves > 40 && g.result === 'loss').length;
+    const longLosses = longGames.filter(g => g.result === 'loss').length;
     const endgameScore = Math.max(35, Math.min(80, 70 - (longLosses * 10)));
 
     // 6. Calcular MIDDLEGAME SCORE
@@ -116,30 +105,27 @@ class StudyRecommendationService {
    */
   generateRecommendations(
     profile: PlayerProfile,
-    metrics: SkillMetrics | undefined
+    metrics: SkillMetrics
   ): StudyRecommendation[] {
     const gameHistory = profile.gameHistory || [];
     const recommendations: StudyRecommendation[] = [];
 
-    console.log('🎯 Generando recomendaciones con métricas:', metrics);
-
     // 🛡️ Safety check: Si metrics es undefined, usar valores por defecto
-    const safeMetrics: SkillMetrics = metrics || {
-      openings: 50,
-      endgames: 50,
-      tactics: 50,
-      middlegame: 50
-    };
-
     if (!metrics) {
       console.error('❌ Metrics is undefined! Using default values');
+      metrics = {
+        openings: 50,
+        endgames: 50,
+        tactics: 50,
+        middlegame: 50
+      };
     }
 
     // 1. Highest priority: Critical weaknesses (score < 50)
-    if (safeMetrics.endgames < 50) {
+    if (metrics.endgames < 50) {
       const recentGames = gameHistory.slice(-10);
-      const longGames = recentGames.filter(g => g && typeof g.totalMoves === 'number' && g.totalMoves > 40);
-      const endgameLosses = longGames.filter(g => g && g.result === 'loss').length;
+      const longGames = recentGames.filter(g => g.totalMoves > 40);
+      const endgameLosses = longGames.filter(g => g.result === 'loss').length;
 
       recommendations.push({
         id: 'endgame-basics',
@@ -147,7 +133,7 @@ class StudyRecommendationService {
         description: 'Domina los finales de peones para convertir ventajas mínimas en victorias',
         reason: endgameLosses > 0
           ? `Perdiste ${endgameLosses} partida${endgameLosses > 1 ? 's' : ''} larga${endgameLosses > 1 ? 's' : ''} en tus últimas 10 partidas`
-          : `Tu puntuación de finales (${safeMetrics.endgames}) indica necesidad de refuerzo`,
+          : `Tu puntuación de finales (${metrics.endgames}) indica necesidad de refuerzo`,
         priority: 'high',
         category: 'endgames',
         actionLabel: 'Empezar Ahora',
@@ -155,9 +141,9 @@ class StudyRecommendationService {
       });
     }
 
-    if (safeMetrics.tactics < 50) {
+    if (metrics.tactics < 50) {
       const recentGames = gameHistory.slice(-10);
-      const losses = recentGames.filter(g => g && g.result === 'loss').length;
+      const losses = recentGames.filter(g => g.result === 'loss').length;
 
       recommendations.push({
         id: 'tactical-basics',
@@ -171,10 +157,10 @@ class StudyRecommendationService {
       });
     }
 
-    if (safeMetrics.openings < 50) {
+    if (metrics.openings < 50) {
       const recentGames = gameHistory.slice(-10);
       const shortLosses = recentGames.filter(g =>
-        g && typeof g.totalMoves === 'number' && g.totalMoves < 15 && g.result === 'loss'
+        g.totalMoves < 15 && g.result === 'loss'
       ).length;
 
       recommendations.push({
@@ -183,7 +169,7 @@ class StudyRecommendationService {
         description: 'Domina los fundamentos: desarrollo, centro y seguridad del rey',
         reason: shortLosses > 0
           ? `${shortLosses} derrota${shortLosses > 1 ? 's' : ''} rápida${shortLosses > 1 ? 's' : ''} (<15 movimientos) en tus últimas partidas`
-          : `Tu puntuación de aperturas (${safeMetrics.openings}) necesita refuerzo`,
+          : `Tu puntuación de aperturas (${metrics.openings}) necesita refuerzo`,
         priority: 'high',
         category: 'openings',
         actionLabel: 'Empezar Ahora',
@@ -192,7 +178,7 @@ class StudyRecommendationService {
     }
 
     // 2. Medium priority: Areas that need work (50-70)
-    if (safeMetrics.tactics >= 50 && safeMetrics.tactics < 70 && recommendations.length < 3) {
+    if (metrics.tactics >= 50 && metrics.tactics < 70 && recommendations.length < 3) {
       recommendations.push({
         id: 'advanced-tactics',
         title: 'Táctica Avanzada: Clavadas y Enfiladas',
@@ -205,7 +191,7 @@ class StudyRecommendationService {
       });
     }
 
-    if (safeMetrics.middlegame >= 50 && safeMetrics.middlegame < 65 && recommendations.length < 3) {
+    if (metrics.middlegame >= 50 && metrics.middlegame < 65 && recommendations.length < 3) {
       recommendations.push({
         id: 'middlegame-plans',
         title: 'Planes en el Medio Juego',
@@ -218,7 +204,7 @@ class StudyRecommendationService {
       });
     }
 
-    if (safeMetrics.endgames >= 50 && safeMetrics.endgames < 65 && recommendations.length < 3) {
+    if (metrics.endgames >= 50 && metrics.endgames < 65 && recommendations.length < 3) {
       recommendations.push({
         id: 'rook-endgames',
         title: 'Finales de Torre',
@@ -276,8 +262,6 @@ class StudyRecommendationService {
     const priorityOrder = { high: 0, medium: 1, low: 2 };
     recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
-    console.log(`✅ Generadas ${recommendations.length} recomendaciones`);
-
     // Return top 3 recommendations
     return recommendations.slice(0, 3);
   }
@@ -286,19 +270,21 @@ class StudyRecommendationService {
    * Get weekly goal data
    * FIXED: Now works with PlayerProfile type
    */
-  getWeeklyGoal(profile: PlayerProfile, metrics: SkillMetrics | undefined): WeeklyGoal {
+  getWeeklyGoal(profile: PlayerProfile, metrics: SkillMetrics): WeeklyGoal {
     const gameHistory = profile.gameHistory || [];
 
     // 🛡️ Safety check
-    const safeMetrics: SkillMetrics = metrics || {
-      openings: 50,
-      endgames: 50,
-      tactics: 50,
-      middlegame: 50
-    };
+    if (!metrics) {
+      metrics = {
+        openings: 50,
+        endgames: 50,
+        tactics: 50,
+        middlegame: 50
+      };
+    }
 
     // Find lowest skill for improvement target
-    const skills = Object.entries(safeMetrics) as [keyof SkillMetrics, number][];
+    const skills = Object.entries(metrics) as [keyof SkillMetrics, number][];
     const lowestSkill = skills.reduce((min, [skill, score]) =>
       score < min.score ? { skill, score } : min,
       { skill: skills[0][0], score: skills[0][1] }
@@ -313,13 +299,13 @@ class StudyRecommendationService {
 
     // Calculate modules completed (based on games played this week)
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const gamesThisWeek = gameHistory.filter(g => g && g.timestamp && new Date(g.timestamp).getTime() >= oneWeekAgo).length;
+    const gamesThisWeek = gameHistory.filter(g => g.timestamp >= oneWeekAgo).length;
     const modulesCompleted = Math.min(3, Math.floor(gamesThisWeek / 2)); // 2 games = 1 module
 
     // Calculate days active this week
     const daysWithGames = new Set(
       gameHistory
-        .filter(g => g && g.timestamp && new Date(g.timestamp).getTime() >= oneWeekAgo)
+        .filter(g => g.timestamp >= oneWeekAgo)
         .map(g => new Date(g.timestamp).toDateString())
     ).size;
 
@@ -339,20 +325,13 @@ class StudyRecommendationService {
   /**
    * Get coach tip based on weakest area
    */
-  getCoachTip(metrics: SkillMetrics | undefined): string {
+  getCoachTip(metrics: SkillMetrics): string {
     // 🛡️ Safety check
-    const safeMetrics: SkillMetrics = metrics || {
-      openings: 50,
-      endgames: 50,
-      tactics: 50,
-      middlegame: 50
-    };
-
     if (!metrics) {
       return 'Sigue practicando para recibir consejos personalizados. ¡Cada partida es una oportunidad de aprendizaje!';
     }
 
-    const skills = Object.entries(safeMetrics) as [keyof SkillMetrics, number][];
+    const skills = Object.entries(metrics) as [keyof SkillMetrics, number][];
     const lowestSkill = skills.reduce((min, [skill, score]) =>
       score < min.score ? { skill, score } : min,
       { skill: skills[0][0], score: skills[0][1] }

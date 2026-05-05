@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, Fragment } from 'react';
+import React, { useState, useCallback, useEffect, useRef, Fragment, useMemo } from 'react';
 import { useChessGame, type StudyAnalysis } from '../hooks/useChessGame';
 import { getOpeningName } from '../services/openingBook';
 import { hasUsername, updateUsername, getUsername, clearAuth, loginWithProfile, createLocalGuestUser } from '../services/authService';
@@ -547,6 +547,37 @@ export default function ChessGame() {
     console.log('🎓 activeTraining type:', typeof activeTraining);
   }, [activeTraining]);
 
+  // ✅ Memoize study recommendations to avoid recalculation on every render
+  const studyRecommendationsData = useMemo(() => {
+    if (!chessGamePro.userProfile) return null;
+
+    const hasEnoughGames = userGameHistory.length >= 5;
+
+    // Solo calcular métricas si hay suficientes partidas
+    if (!hasEnoughGames) {
+      return {
+        hasEnoughGames: false,
+        metrics: null,
+        recommendations: []
+      };
+    }
+
+    const metrics = studyRecommendationService.calculateSkillMetrics(chessGamePro.userProfile);
+    const recommendations = studyRecommendationService.generateRecommendations(chessGamePro.userProfile, metrics);
+
+    console.log('📊 Study recommendations recalculated:', {
+      totalGames: userGameHistory.length,
+      metrics,
+      recommendationsCount: recommendations.length
+    });
+
+    return {
+      hasEnoughGames: true,
+      metrics,
+      recommendations
+    };
+  }, [chessGamePro.userProfile, userGameHistory.length]);
+
   // Timer state
   const [whiteTime, setWhiteTime] = useState(600); // 10 minutes in seconds
   const [blackTime, setBlackTime] = useState(600);
@@ -640,7 +671,6 @@ export default function ChessGame() {
   useEffect(() => {
     // Use game history from chessGamePro hook (already loaded with 18 games)
     if (chessGamePro.gameHistory && chessGamePro.gameHistory.length > 0) {
-      console.log(`📚 Historial disponible: ${chessGamePro.gameHistory.length} partidas`);
       setUserGameHistory(chessGamePro.gameHistory);
       setLoadingGameHistory(false);
     } else {
@@ -680,7 +710,6 @@ export default function ChessGame() {
       setLoadingStudyAnalysis(true);
       try {
         const analysis = await chessGamePro.getStudyRecommendations();
-        console.log('📚 Study analysis loaded:', analysis);
         setStudyAnalysis(analysis);
       } catch (error) {
         console.error('Error loading study recommendations:', error);
@@ -1229,7 +1258,6 @@ export default function ChessGame() {
 
     // Show victory/defeat screen
     setTimeout(() => {
-      console.log('🏆 Showing victory/defeat screen');
       chessGamePro.setShowVictoryScreen(true);
     }, 1000);
 
@@ -2265,17 +2293,6 @@ export default function ChessGame() {
     return isLight ? theme.light : theme.dark;
   };
 
-  // Log state changes only (not every render)
-  useEffect(() => {
-    console.log('🎮 Game State Changed:', {
-      gameMode,
-      gameStatus,
-      showVictoryScreen: chessGamePro.showVictoryScreen,
-      currentPlayer,
-      timerActive
-    });
-  }, [gameMode, gameStatus, chessGamePro.showVictoryScreen, currentPlayer, timerActive]);
-
   // Cleanup reconnection timers on unmount or game end
   useEffect(() => {
     return () => {
@@ -2748,26 +2765,6 @@ export default function ChessGame() {
     const isDefeat = gameResult === 'defeat';
     const isUnknown = !isVictory && !isDefeat;
 
-    console.log('🎊 Rendering Victory/Defeat Screen', {
-      gameMode,
-      showVictoryScreen: chessGamePro.showVictoryScreen,
-      userProfile: chessGamePro.userProfile,
-      gameResult,
-      isVictory,
-      isDefeat,
-      isUnknown,
-      lastGameInfo: chessGamePro.lastGameInfo
-    });
-
-    // 🔴 CRITICAL DEBUG: Log the exact state values
-    console.log('🔍 Victory Screen Debug:', {
-      'gameResult value': gameResult,
-      'gameResult type': typeof gameResult,
-      'isVictory calculation': gameResult === 'victory',
-      'isDefeat calculation': gameResult === 'defeat',
-      'will show': isVictory ? 'VICTORY' : isDefeat ? 'DEFEAT' : 'UNKNOWN'
-    });
-
     const eloChange = chessGamePro.lastGameInfo?.eloChange || 0;
     const newElo = chessGamePro.lastGameInfo?.newElo || chessGamePro.userProfile?.eloRating || 1200;
     const opponentName = chessGamePro.lastGameInfo?.opponentName || 'Oponente';
@@ -2883,28 +2880,16 @@ export default function ChessGame() {
             </div>
 
             {/* 📚 Study Recommendations Section */}
-            {chessGamePro.userProfile && (() => {
-              // Si hay datos, calculamos métricas reales; si no, usamos valores por defecto (50)
-              const hasEnoughGames = userGameHistory.length >= 5;
-              const metrics = hasEnoughGames
-                ? studyRecommendationService.calculateSkillMetrics(chessGamePro.userProfile)
-                : { openings: 50, tactics: 50, endgames: 50, middlegame: 50 };
+            {chessGamePro.userProfile && studyRecommendationsData && (() => {
+              const { hasEnoughGames, metrics, recommendations } = studyRecommendationsData;
 
-              // 🛡️ Safety check: Si metrics es undefined, usar valores por defecto
-              const safeMetrics = metrics || { openings: 50, tactics: 50, endgames: 50, middlegame: 50 };
-
-              const recommendations = hasEnoughGames
-                ? studyRecommendationService.generateRecommendations(chessGamePro.userProfile, safeMetrics)
-                : [];
-
-              // Debug: Log para verificar el estado
-              console.log('📊 Debug Recomendaciones:', {
-                hasEnoughGames,
-                totalGames: userGameHistory.length,
-                metrics: safeMetrics,
-                recommendationsCount: recommendations.length,
-                recommendations
-              });
+              // Valores por defecto para mostrar barras si no hay suficientes partidas
+              const displayMetrics = metrics || {
+                openings: 50,
+                tactics: 50,
+                endgames: 50,
+                middlegame: 50
+              };
 
               return (
                 <div className="mt-8 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl">
@@ -3013,10 +2998,10 @@ export default function ChessGame() {
                     </h4>
                     <div className="space-y-3">
                       {[
-                        { label: 'Aperturas', score: safeMetrics.openings, icon: '📖' },
-                        { label: 'Táctica', score: safeMetrics.tactics, icon: '⚔️' },
-                        { label: 'Finales', score: safeMetrics.endgames, icon: '♟️' },
-                        { label: 'Medio Juego', score: safeMetrics.middlegame, icon: '🎯' }
+                        { label: 'Aperturas', score: displayMetrics.openings, icon: '📖' },
+                        { label: 'Táctica', score: displayMetrics.tactics, icon: '⚔️' },
+                        { label: 'Finales', score: displayMetrics.endgames, icon: '♟️' },
+                        { label: 'Medio Juego', score: displayMetrics.middlegame, icon: '🎯' }
                       ].map((area, i) => (
                         <div key={i} className="flex items-center gap-3">
                           <span className="w-28 text-slate-300 font-medium text-sm">
