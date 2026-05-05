@@ -54,6 +54,17 @@ class StudyRecommendationService {
       };
     }
 
+    // 🛡️ Validar que gameHistory sea un array válido con objetos completos
+    if (!Array.isArray(gameHistory)) {
+      console.error('❌ gameHistory no es un array válido:', gameHistory);
+      return {
+        openings: 50,
+        endgames: 50,
+        tactics: 50,
+        middlegame: 50
+      };
+    }
+
     // Usar últimas 10 partidas para métricas
     const recentGames = gameHistory.slice(-10);
     const totalGames = gameHistory.length;
@@ -61,13 +72,13 @@ class StudyRecommendationService {
     console.log(`📊 Calculando métricas desde ${recentGames.length} partidas recientes (total: ${totalGames})`);
 
     // 1. Analizar WIN RATE
-    const wins = recentGames.filter(g => g.result === 'win').length;
+    const wins = recentGames.filter(g => g && g.result === 'win').length;
     const winRate = (wins / recentGames.length) * 100;
 
     // 2. Analizar duración de partidas (estimada por número de movimientos)
     // Partidas cortas (<15 movimientos) = problemas en apertura/táctica
-    const shortGames = recentGames.filter(g => g.totalMoves < 15).length;
-    const longGames = recentGames.filter(g => g.totalMoves > 40).length;
+    const shortGames = recentGames.filter(g => g && typeof g.totalMoves === 'number' && g.totalMoves < 15).length;
+    const longGames = recentGames.filter(g => g && typeof g.totalMoves === 'number' && g.totalMoves > 40).length;
 
     // 3. Calcular OPENING SCORE
     // Si muchas partidas cortas (perdidas rápidas) = problemas en apertura
@@ -75,12 +86,12 @@ class StudyRecommendationService {
 
     // 4. Calcular TACTICS SCORE
     // Basado en win rate y número de blunders
-    const avgBlunders = recentGames.reduce((sum, g) => sum + g.blunders, 0) / recentGames.length;
+    const avgBlunders = recentGames.reduce((sum, g) => sum + (g && typeof g.blunders === 'number' ? g.blunders : 0), 0) / recentGames.length;
     const tacticsScore = Math.max(40, Math.min(90, 70 + (winRate * 0.3) - (avgBlunders * 5)));
 
     // 5. Calcular ENDGAME SCORE
     // Partidas largas (>40 movimientos) con derrota = problemas en finales
-    const longLosses = longGames.filter(g => g.result === 'loss').length;
+    const longLosses = recentGames.filter(g => g && typeof g.totalMoves === 'number' && g.totalMoves > 40 && g.result === 'loss').length;
     const endgameScore = Math.max(35, Math.min(80, 70 - (longLosses * 10)));
 
     // 6. Calcular MIDDLEGAME SCORE
@@ -127,8 +138,8 @@ class StudyRecommendationService {
     // 1. Highest priority: Critical weaknesses (score < 50)
     if (safeMetrics.endgames < 50) {
       const recentGames = gameHistory.slice(-10);
-      const longGames = recentGames.filter(g => g.totalMoves > 40);
-      const endgameLosses = longGames.filter(g => g.result === 'loss').length;
+      const longGames = recentGames.filter(g => g && typeof g.totalMoves === 'number' && g.totalMoves > 40);
+      const endgameLosses = longGames.filter(g => g && g.result === 'loss').length;
 
       recommendations.push({
         id: 'endgame-basics',
@@ -146,7 +157,7 @@ class StudyRecommendationService {
 
     if (safeMetrics.tactics < 50) {
       const recentGames = gameHistory.slice(-10);
-      const losses = recentGames.filter(g => g.result === 'loss').length;
+      const losses = recentGames.filter(g => g && g.result === 'loss').length;
 
       recommendations.push({
         id: 'tactical-basics',
@@ -163,7 +174,7 @@ class StudyRecommendationService {
     if (safeMetrics.openings < 50) {
       const recentGames = gameHistory.slice(-10);
       const shortLosses = recentGames.filter(g =>
-        g.totalMoves < 15 && g.result === 'loss'
+        g && typeof g.totalMoves === 'number' && g.totalMoves < 15 && g.result === 'loss'
       ).length;
 
       recommendations.push({
@@ -302,13 +313,13 @@ class StudyRecommendationService {
 
     // Calculate modules completed (based on games played this week)
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const gamesThisWeek = gameHistory.filter(g => new Date(g.timestamp).getTime() >= oneWeekAgo).length;
+    const gamesThisWeek = gameHistory.filter(g => g && g.timestamp && new Date(g.timestamp).getTime() >= oneWeekAgo).length;
     const modulesCompleted = Math.min(3, Math.floor(gamesThisWeek / 2)); // 2 games = 1 module
 
     // Calculate days active this week
     const daysWithGames = new Set(
       gameHistory
-        .filter(g => new Date(g.timestamp).getTime() >= oneWeekAgo)
+        .filter(g => g && g.timestamp && new Date(g.timestamp).getTime() >= oneWeekAgo)
         .map(g => new Date(g.timestamp).toDateString())
     ).size;
 
