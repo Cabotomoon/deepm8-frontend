@@ -302,13 +302,13 @@ class StudyRecommendationService {
 
     // Calculate modules completed (based on games played this week)
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const gamesThisWeek = gameHistory.filter(g => g.timestamp >= oneWeekAgo).length;
+    const gamesThisWeek = gameHistory.filter(g => new Date(g.timestamp).getTime() >= oneWeekAgo).length;
     const modulesCompleted = Math.min(3, Math.floor(gamesThisWeek / 2)); // 2 games = 1 module
 
     // Calculate days active this week
     const daysWithGames = new Set(
       gameHistory
-        .filter(g => g.timestamp >= oneWeekAgo)
+        .filter(g => new Date(g.timestamp).getTime() >= oneWeekAgo)
         .map(g => new Date(g.timestamp).toDateString())
     ).size;
 
