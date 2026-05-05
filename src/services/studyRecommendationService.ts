@@ -67,7 +67,8 @@ class StudyRecommendationService {
     // 2. Analizar duración de partidas (estimada por número de movimientos)
     // Partidas cortas (<15 movimientos) = problemas en apertura/táctica
     const shortGames = recentGames.filter(g => g.totalMoves < 15).length;
-    const longGames = recentGames.filter(g => g.totalMoves > 40).length;
+    const longGamesArray = recentGames.filter(g => g.totalMoves > 40);
+    const longGames = longGamesArray.length;
 
     // 3. Calcular OPENING SCORE
     // Si muchas partidas cortas (perdidas rápidas) = problemas en apertura
@@ -80,7 +81,7 @@ class StudyRecommendationService {
 
     // 5. Calcular ENDGAME SCORE
     // Partidas largas (>40 movimientos) con derrota = problemas en finales
-    const longLosses = longGames.filter(g => g.result === 'loss').length;
+    const longLosses = longGamesArray.filter(g => g.result === 'loss').length;
     const endgameScore = Math.max(35, Math.min(80, 70 - (longLosses * 10)));
 
     // 6. Calcular MIDDLEGAME SCORE
