@@ -11,7 +11,7 @@ import { exportService } from '../services/exportService';
 import { achievementService, type UnlockedAchievement } from '../services/achievementService';
 import { socialShareService, type ShareableAchievement, type ShareableGame } from '../services/socialShareService';
 import { studyRecommendationService, type StudyRecommendation, type SkillMetrics, type WeeklyGoal } from '../services/studyRecommendationService';
-import { localDataService } from '../services/localDataService';
+import localDataService from '../services/localDataService';
 import ProgressChart from './ProgressChart';
 import AchievementBadge from './AchievementBadge';
 import AchievementNotification from './AchievementNotification';
