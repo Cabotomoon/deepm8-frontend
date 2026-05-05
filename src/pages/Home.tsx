@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, Fragment, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useRef, Fragment } from 'react';
 import { useChessGame, type StudyAnalysis } from '../hooks/useChessGame';
 import { getOpeningName } from '../services/openingBook';
 import { hasUsername, updateUsername, getUsername, clearAuth, loginWithProfile, createLocalGuestUser } from '../services/authService';
@@ -241,6 +241,7 @@ const canPieceMoveTo = (piece: ChessPiece, from: Position, to: Position, board: 
     case 'knight':
       // Knight moves in L-shape: 2+1 or 1+2
       const knightCanMove = (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
+      console.log(`  🐎 Knight check: from (${from.row},${from.col}) to (${to.row},${to.col}), rowDiff=${rowDiff}, colDiff=${colDiff}, canMove=${knightCanMove}, destOccupied=${!!destinationPiece}`);
       return knightCanMove;
 
     case 'bishop':
@@ -349,6 +350,8 @@ const toAlgebraicNotation = (from: Position, to: Position, piece: ChessPiece, ca
     // Check if there are other pieces of same type that can LEGALLY move to same square
     const ambiguousPieces: Position[] = [];
 
+    console.log(`🔍 Checking disambiguation for ${piece.color} ${piece.type} moving from (${from.row},${from.col}) to (${to.row},${to.col}) = ${toSquare}`);
+
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         // Skip the piece that's actually moving
@@ -359,11 +362,16 @@ const toAlgebraicNotation = (from: Position, to: Position, piece: ChessPiece, ca
             otherPiece.type === piece.type &&
             otherPiece.color === piece.color) {
 
+          console.log(`  📍 Found other ${piece.color} ${piece.type} at (${row},${col}), checking if it can move to (${to.row},${to.col})...`);
+
           // Check if THIS piece can also legally move to the destination
           const canMove = canPieceMoveTo(otherPiece, { row, col }, to, board);
 
           if (canMove) {
             ambiguousPieces.push({ row, col });
+            console.log(`    ✅ YES! This piece can also move there - disambiguation needed`);
+          } else {
+            console.log(`    ❌ NO - this piece cannot move there`);
           }
         }
       }
@@ -539,37 +547,6 @@ export default function ChessGame() {
     console.log('🎓 activeTraining type:', typeof activeTraining);
   }, [activeTraining]);
 
-  // ✅ Memoize study recommendations to avoid recalculation on every render
-  const studyRecommendationsData = useMemo(() => {
-    if (!chessGamePro.userProfile) return null;
-
-    const hasEnoughGames = userGameHistory.length >= 5;
-
-    // Solo calcular métricas si hay suficientes partidas
-    if (!hasEnoughGames) {
-      return {
-        hasEnoughGames: false,
-        metrics: null,
-        recommendations: []
-      };
-    }
-
-    const metrics = studyRecommendationService.calculateSkillMetrics(chessGamePro.userProfile);
-    const recommendations = studyRecommendationService.generateRecommendations(chessGamePro.userProfile, metrics);
-
-    console.log('📊 Study recommendations recalculated:', {
-      totalGames: userGameHistory.length,
-      metrics,
-      recommendationsCount: recommendations.length
-    });
-
-    return {
-      hasEnoughGames: true,
-      metrics,
-      recommendations
-    };
-  }, [chessGamePro.userProfile, userGameHistory.length]);
-
   // Timer state
   const [whiteTime, setWhiteTime] = useState(600); // 10 minutes in seconds
   const [blackTime, setBlackTime] = useState(600);
@@ -663,6 +640,7 @@ export default function ChessGame() {
   useEffect(() => {
     // Use game history from chessGamePro hook (already loaded with 18 games)
     if (chessGamePro.gameHistory && chessGamePro.gameHistory.length > 0) {
+      console.log(`📚 Historial disponible: ${chessGamePro.gameHistory.length} partidas`);
       setUserGameHistory(chessGamePro.gameHistory);
       setLoadingGameHistory(false);
     } else {
@@ -702,6 +680,7 @@ export default function ChessGame() {
       setLoadingStudyAnalysis(true);
       try {
         const analysis = await chessGamePro.getStudyRecommendations();
+        console.log('📚 Study analysis loaded:', analysis);
         setStudyAnalysis(analysis);
       } catch (error) {
         console.error('Error loading study recommendations:', error);
@@ -1250,6 +1229,7 @@ export default function ChessGame() {
 
     // Show victory/defeat screen
     setTimeout(() => {
+      console.log('🏆 Showing victory/defeat screen');
       chessGamePro.setShowVictoryScreen(true);
     }, 1000);
 
@@ -1546,7 +1526,10 @@ export default function ChessGame() {
     const hasLegalMoves = getAllLegalMoves(nextPlayer, newBoard).length > 0;
     const isCheckmate = isCheck && !hasLegalMoves;
 
+    console.log('🔍 After move - isCheck:', isCheck, 'hasLegalMoves:', hasLegalMoves, 'isCheckmate:', isCheckmate);
+
     const notation = toAlgebraicNotation(from, to, piece, capturedPiece, isCheck, isCheckmate, board);
+    console.log(`✅ Generated notation: ${notation} for ${piece.color} ${piece.type} from (${from.row},${from.col}) to (${to.row},${to.col})`);
     setMoveHistory(prev => [...prev, {
       from,
       to,
@@ -1699,18 +1682,31 @@ export default function ChessGame() {
                       gameStatus !== 'resigned' &&
                       !isAiThinking;
 
+    console.log('🔍 AI useEffect triggered:', {
+      gameMode,
+      currentPlayer,
+      gameStatus,
+      isAiThinking,
+      canAiPlay
+    });
+
     if (canAiPlay) {
+      console.log('🤖 AI turn detected, starting to think...');
       setIsAiThinking(true);
 
       // Execute AI move asynchronously with small delay to ensure state update
       const executeAiMove = async () => {
         try {
+          console.log('⏳ Waiting 300ms before AI calculation...');
           await new Promise(resolve => setTimeout(resolve, 300)); // Small delay for UX
 
+          console.log('🎯 Calling getAIMove()...');
           const aiMove = await getAIMove();
+          console.log('📥 getAIMove() returned:', aiMove);
 
           // Verify game is still valid for AI move (not ended during calculation)
           if (aiMove && currentPlayer === 'black' && gameStatus !== 'checkmate' && gameStatus !== 'stalemate' && gameStatus !== 'resigned') {
+            console.log('✅ AI executing move:', aiMove);
             movePiece(aiMove.from, aiMove.to);
           } else {
             console.warn('⚠️ AI move cancelled or invalid:', {
@@ -1723,6 +1719,7 @@ export default function ChessGame() {
         } catch (error) {
           console.error('❌ Error executing AI move:', error);
         } finally {
+          console.log('🏁 AI thinking finished, setting isAiThinking to false');
           setIsAiThinking(false);
         }
       };
@@ -2268,6 +2265,17 @@ export default function ChessGame() {
     return isLight ? theme.light : theme.dark;
   };
 
+  // Log state changes only (not every render)
+  useEffect(() => {
+    console.log('🎮 Game State Changed:', {
+      gameMode,
+      gameStatus,
+      showVictoryScreen: chessGamePro.showVictoryScreen,
+      currentPlayer,
+      timerActive
+    });
+  }, [gameMode, gameStatus, chessGamePro.showVictoryScreen, currentPlayer, timerActive]);
+
   // Cleanup reconnection timers on unmount or game end
   useEffect(() => {
     return () => {
@@ -2310,14 +2318,6 @@ export default function ChessGame() {
   if (gameMode === 'user-selection') {
     return (
       <>
-        {/* 🎓 Training Session Overlay - ALWAYS on top */}
-        {activeTraining && (
-          <TrainingSession
-            type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
-            onClose={() => setActiveTraining(null)}
-          />
-        )}
-
         <UserSelection
           onSelectUser={handleSelectExistingUser}
           onCreateNew={handleCreateNewUser}
@@ -2348,31 +2348,22 @@ export default function ChessGame() {
   // 🔐 Authentication Screen
   if (gameMode === 'auth') {
     return (
-      <>
-        {/* 🎓 Training Session Overlay - ALWAYS on top */}
-        {activeTraining && (
-          <TrainingSession
-            type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
-            onClose={() => setActiveTraining(null)}
-          />
-        )}
+      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 flex items-center justify-center`}>
+        <div className="max-w-md w-full text-center">
+          <div className="mb-8">
+            <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
+              Chess Clash
+            </h1>
+            <p className="text-slate-400 text-xl">Professional Edition</p>
+          </div>
 
-        <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 flex items-center justify-center`}>
-          <div className="max-w-md w-full text-center">
-            <div className="mb-8">
-              <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-                Chess Clash
-              </h1>
-              <p className="text-slate-400 text-xl">Professional Edition</p>
-            </div>
-
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8">
-              <div className="text-6xl mb-6">♔</div>
-              <h2 className="text-2xl font-bold mb-4">Autenticando...</h2>
-              <p className="text-slate-400 mb-6">
-                Conectando con SeaVerse para obtener tu perfil
-              </p>
-              <div className="w-16 h-16 mx-auto border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8">
+            <div className="text-6xl mb-6">♔</div>
+            <h2 className="text-2xl font-bold mb-4">Autenticando...</h2>
+            <p className="text-slate-400 mb-6">
+              Conectando con SeaVerse para obtener tu perfil
+            </p>
+            <div className="w-16 h-16 mx-auto border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
 
           {chessGamePro.authUser && (
@@ -2384,7 +2375,6 @@ export default function ChessGame() {
           )}
         </div>
       </div>
-      </>
     );
   }
 
@@ -2417,16 +2407,7 @@ export default function ChessGame() {
     };
 
     return (
-      <>
-        {/* 🎓 Training Session Overlay - ALWAYS on top */}
-        {activeTraining && (
-          <TrainingSession
-            type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
-            onClose={() => setActiveTraining(null)}
-          />
-        )}
-
-        <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 flex items-center justify-center`}>
+      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 flex items-center justify-center`}>
         <div className="max-w-2xl w-full">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -2480,23 +2461,13 @@ export default function ChessGame() {
           </div>
         </div>
       </div>
-      </>
     );
   }
 
   // 📊 Statistics Screen (with Deep M8 Coach Profile Integration)
   if (gameMode === 'stats') {
     return (
-      <>
-        {/* 🎓 Training Session Overlay - ALWAYS on top */}
-        {activeTraining && (
-          <TrainingSession
-            type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
-            onClose={() => setActiveTraining(null)}
-          />
-        )}
-
-        <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8`}>
+      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8`}>
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -2730,7 +2701,6 @@ export default function ChessGame() {
           </div>
         </div>
       </div>
-      </>
     );
   }
 
@@ -2739,6 +2709,26 @@ export default function ChessGame() {
     const isVictory = gameResult === 'victory';
     const isDefeat = gameResult === 'defeat';
     const isUnknown = !isVictory && !isDefeat;
+
+    console.log('🎊 Rendering Victory/Defeat Screen', {
+      gameMode,
+      showVictoryScreen: chessGamePro.showVictoryScreen,
+      userProfile: chessGamePro.userProfile,
+      gameResult,
+      isVictory,
+      isDefeat,
+      isUnknown,
+      lastGameInfo: chessGamePro.lastGameInfo
+    });
+
+    // 🔴 CRITICAL DEBUG: Log the exact state values
+    console.log('🔍 Victory Screen Debug:', {
+      'gameResult value': gameResult,
+      'gameResult type': typeof gameResult,
+      'isVictory calculation': gameResult === 'victory',
+      'isDefeat calculation': gameResult === 'defeat',
+      'will show': isVictory ? 'VICTORY' : isDefeat ? 'DEFEAT' : 'UNKNOWN'
+    });
 
     const eloChange = chessGamePro.lastGameInfo?.eloChange || 0;
     const newElo = chessGamePro.lastGameInfo?.newElo || chessGamePro.userProfile?.eloRating || 1200;
@@ -2760,14 +2750,6 @@ export default function ChessGame() {
     };
 
     return (
-      <>
-        {/* 🎓 Training Session Overlay - ALWAYS on top */}
-        {activeTraining && (
-          <TrainingSession
-            type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
-            onClose={() => setActiveTraining(null)}
-          />
-        )}
       <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 flex items-center justify-center`}>
         <div className="max-w-4xl w-full">
           {/* 🎯 Unified Container - Same style for Victory and Defeat */}
@@ -2855,16 +2837,24 @@ export default function ChessGame() {
             </div>
 
             {/* 📚 Study Recommendations Section */}
-            {chessGamePro.userProfile && studyRecommendationsData && (() => {
-              const { hasEnoughGames, metrics, recommendations } = studyRecommendationsData;
+            {chessGamePro.userProfile && (() => {
+              // Si hay datos, calculamos métricas reales; si no, usamos valores por defecto (50)
+              const hasEnoughGames = userGameHistory.length >= 5;
+              const metrics = hasEnoughGames
+                ? studyRecommendationService.calculateSkillMetrics(chessGamePro.userProfile)
+                : { openings: 50, tactics: 50, endgames: 50, middlegame: 50 };
+              const recommendations = hasEnoughGames
+                ? studyRecommendationService.generateRecommendations(chessGamePro.userProfile, metrics)
+                : [];
 
-              // Valores por defecto para mostrar barras si no hay suficientes partidas
-              const displayMetrics = metrics || {
-                openings: 50,
-                tactics: 50,
-                endgames: 50,
-                middlegame: 50
-              };
+              // Debug: Log para verificar el estado
+              console.log('📊 Debug Recomendaciones:', {
+                hasEnoughGames,
+                totalGames: userGameHistory.length,
+                metrics,
+                recommendationsCount: recommendations.length,
+                recommendations
+              });
 
               return (
                 <div className="mt-8 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl">
@@ -2973,10 +2963,10 @@ export default function ChessGame() {
                     </h4>
                     <div className="space-y-3">
                       {[
-                        { label: 'Aperturas', score: displayMetrics.openings, icon: '📖' },
-                        { label: 'Táctica', score: displayMetrics.tactics, icon: '⚔️' },
-                        { label: 'Finales', score: displayMetrics.endgames, icon: '♟️' },
-                        { label: 'Medio Juego', score: displayMetrics.middlegame, icon: '🎯' }
+                        { label: 'Aperturas', score: metrics.openings, icon: '📖' },
+                        { label: 'Táctica', score: metrics.tactics, icon: '⚔️' },
+                        { label: 'Finales', score: metrics.endgames, icon: '♟️' },
+                        { label: 'Medio Juego', score: metrics.middlegame, icon: '🎯' }
                       ].map((area, i) => (
                         <div key={i} className="flex items-center gap-3">
                           <span className="w-28 text-slate-300 font-medium text-sm">
@@ -3066,48 +3056,28 @@ export default function ChessGame() {
           />
         )}
       </div>
-      </>
     );
   }
 
   // 🌐 Online Matchmaking
   if (gameMode === 'online-lobby') {
     return (
-      <>
-        {/* 🎓 Training Session Overlay - ALWAYS on top */}
-        {activeTraining && (
-          <TrainingSession
-            type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
-            onClose={() => setActiveTraining(null)}
-          />
-        )}
-
-        <Matchmaking
-          playerName={getDisplayName()}
-          playerElo={chessGamePro.userProfile?.eloRating || 1200}
-          timeControl={timeControl}
-          onMatchFound={handleMatchFound}
-          onBack={() => {
-            socketService.disconnect();
-            setGameMode('menu');
-          }}
-        />
-      </>
+      <Matchmaking
+        playerName={getDisplayName()}
+        playerElo={chessGamePro.userProfile?.eloRating || 1200}
+        timeControl={timeControl}
+        onMatchFound={handleMatchFound}
+        onBack={() => {
+          socketService.disconnect();
+          setGameMode('menu');
+        }}
+      />
     );
   }
 
   if (gameMode === 'menu') {
     return (
-      <>
-        {/* 🎓 Training Session Overlay - ALWAYS on top */}
-        {activeTraining && (
-          <TrainingSession
-            type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
-            onClose={() => setActiveTraining(null)}
-          />
-        )}
-
-        <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8`}>
+      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8`}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -3391,30 +3361,21 @@ export default function ChessGame() {
             onClose={() => setSelectedGameForReplay(null)}
           />
         )}
-
-        {/* 🎓 Training Session Overlay */}
-        {(() => {
-          console.log('🔍 RENDER CHECK - activeTraining:', activeTraining);
-          console.log('🔍 RENDER CHECK - Boolean(activeTraining):', Boolean(activeTraining));
-          console.log('🔍 RENDER CHECK - typeof activeTraining:', typeof activeTraining);
-          return activeTraining ? (
-            <TrainingSession
-              type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
-              onClose={() => setActiveTraining(null)}
-            />
-          ) : null;
-        })()}
       </div>
-      </>
     );
   }
+
+  // Debug log before render
+  console.log('🔥 RENDER - activeTraining value:', activeTraining);
+  console.log('🔥 RENDER - activeTraining is truthy?', !!activeTraining);
 
   return (
     <>
       {/* 🎓 Training Session - Rendered as top-level overlay */}
+      {console.log('🔍 Checking activeTraining:', activeTraining)}
       {activeTraining && (
         <TrainingSession
-          type={activeTraining as 'openings' | 'tactics' | 'endgames' | 'middlegame'}
+          category={activeTraining}
           onClose={() => setActiveTraining(null)}
         />
       )}
@@ -3446,16 +3407,6 @@ export default function ChessGame() {
             Chess Clash
           </h1>
           <div className="flex gap-2">
-            {/* DEBUG: Direct training test button */}
-            <button
-              onClick={() => {
-                console.log('🧪 DEBUG: Force opening training mode');
-                setActiveTraining('tactics');
-              }}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-semibold transition-all"
-            >
-              🧪 TEST Training
-            </button>
             <button
               onClick={handleBackToMenuDuringOnlineGame}
               className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition-all"
@@ -3986,36 +3937,7 @@ export default function ChessGame() {
         />
       )}
 
-
-      {/* 🎓 Training Session Overlay */}
-      {activeTraining && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.98)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <TrainingSession
-            category={activeTraining as TrainingCategory}
-            onComplete={(score) => {
-              console.log(`✅ Training completed with score: ${score}`);
-              setActiveTraining(null);
-            }}
-            onExit={() => {
-              console.log('❌ Training exited');
-              setActiveTraining(null);
-            }}
-          />
-        </div>
-      )}
+      {/* 🔑 SeaCloud Token Setup */}
     </div>
     </>
   );
