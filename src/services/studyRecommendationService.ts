@@ -3,7 +3,7 @@
  * Generates smart study recommendations based on real game analysis
  */
 
-import type { UserProfile, GameHistory } from './dataService';
+import type { PlayerProfile, GameRecord } from './playerProfileService';
 
 export interface SkillMetrics {
   openings: number; // 0-100
@@ -37,11 +37,14 @@ export interface WeeklyGoal {
 
 class StudyRecommendationService {
   /**
-   * Calculate skill metrics from user profile and game history
+   * Calculate skill metrics from player profile
+   * FIXED: Now works with PlayerProfile type and uses gameHistory from profile
    */
-  calculateSkillMetrics(profile: UserProfile, gameHistory: GameHistory[]): SkillMetrics {
+  calculateSkillMetrics(profile: PlayerProfile): SkillMetrics {
+    const gameHistory = profile.gameHistory || [];
+
     // 🛡️ Si no hay partidas, retornar valores neutrales
-    if (!gameHistory || gameHistory.length === 0) {
+    if (gameHistory.length === 0) {
       console.warn('⚠️ No hay historial de partidas, usando valores por defecto');
       return {
         openings: 50,
@@ -57,38 +60,33 @@ class StudyRecommendationService {
 
     console.log(`📊 Calculando métricas desde ${recentGames.length} partidas recientes (total: ${totalGames})`);
 
-    // 1. Analizar WIN RATE para diferentes fases
-    const wins = recentGames.filter(g =>
-      (g.whitePlayerId === profile.userId && g.result === 'white') ||
-      (g.blackPlayerId === profile.userId && g.result === 'black')
-    ).length;
+    // 1. Analizar WIN RATE
+    const wins = recentGames.filter(g => g.result === 'win').length;
     const winRate = (wins / recentGames.length) * 100;
 
-    // 2. Analizar duración de partidas (partidas cortas = problemas en apertura/táctica)
-    const avgDuration = recentGames.reduce((sum, g) => sum + g.duration, 0) / recentGames.length;
-    const shortGames = recentGames.filter(g => g.duration < 300).length; // < 5 minutos
+    // 2. Analizar duración de partidas (estimada por número de movimientos)
+    // Partidas cortas (<15 movimientos) = problemas en apertura/táctica
+    const shortGames = recentGames.filter(g => g.totalMoves < 15).length;
+    const longGames = recentGames.filter(g => g.totalMoves > 40).length;
 
     // 3. Calcular OPENING SCORE
     // Si muchas partidas cortas (perdidas rápidas) = problemas en apertura
     const openingScore = Math.max(30, Math.min(85, 75 - (shortGames * 8)));
 
     // 4. Calcular TACTICS SCORE
-    // Basado en win rate (más victorias = mejor táctica)
-    const tacticsScore = Math.max(40, Math.min(90, 50 + winRate * 0.4));
+    // Basado en win rate y número de blunders
+    const avgBlunders = recentGames.reduce((sum, g) => sum + g.blunders, 0) / recentGames.length;
+    const tacticsScore = Math.max(40, Math.min(90, 70 + (winRate * 0.3) - (avgBlunders * 5)));
 
     // 5. Calcular ENDGAME SCORE
-    // Partidas largas (>20 min) con derrota = problemas en finales
-    const longGames = recentGames.filter(g => g.duration > 1200);
-    const longLosses = longGames.filter(g =>
-      (g.whitePlayerId === profile.userId && g.result !== 'white' && g.result !== 'draw') ||
-      (g.blackPlayerId === profile.userId && g.result !== 'black' && g.result !== 'draw')
-    ).length;
+    // Partidas largas (>40 movimientos) con derrota = problemas en finales
+    const longLosses = longGames.filter(g => g.result === 'loss').length;
     const endgameScore = Math.max(35, Math.min(80, 70 - (longLosses * 10)));
 
     // 6. Calcular MIDDLEGAME SCORE
-    // Basado en ELO trend y win rate general
-    const eloChange = profile.eloRating - profile.initialElo;
-    const middlegameScore = Math.max(45, Math.min(85, 60 + (eloChange * 0.1) + (winRate * 0.2)));
+    // Basado en accuracy promedio y win rate general
+    const avgAccuracy = profile.averageAccuracy || 50;
+    const middlegameScore = Math.max(45, Math.min(85, avgAccuracy * 0.6 + (winRate * 0.3)));
 
     const metrics = {
       openings: Math.round(openingScore),
@@ -103,24 +101,33 @@ class StudyRecommendationService {
 
   /**
    * Generate prioritized study recommendations
+   * FIXED: Now works with PlayerProfile type
    */
   generateRecommendations(
-    profile: UserProfile,
-    gameHistory: GameHistory[],
+    profile: PlayerProfile,
     metrics: SkillMetrics
   ): StudyRecommendation[] {
+    const gameHistory = profile.gameHistory || [];
     const recommendations: StudyRecommendation[] = [];
 
     console.log('🎯 Generando recomendaciones con métricas:', metrics);
 
+    // 🛡️ Safety check: Si metrics es undefined, usar valores por defecto
+    if (!metrics) {
+      console.error('❌ Metrics is undefined! Using default values');
+      metrics = {
+        openings: 50,
+        endgames: 50,
+        tactics: 50,
+        middlegame: 50
+      };
+    }
+
     // 1. Highest priority: Critical weaknesses (score < 50)
     if (metrics.endgames < 50) {
       const recentGames = gameHistory.slice(-10);
-      const longGames = recentGames.filter(g => g.duration > 1200);
-      const endgameLosses = longGames.filter(g =>
-        (g.whitePlayerId === profile.userId && g.result !== 'white' && g.result !== 'draw') ||
-        (g.blackPlayerId === profile.userId && g.result !== 'black' && g.result !== 'draw')
-      ).length;
+      const longGames = recentGames.filter(g => g.totalMoves > 40);
+      const endgameLosses = longGames.filter(g => g.result === 'loss').length;
 
       recommendations.push({
         id: 'endgame-basics',
@@ -138,10 +145,7 @@ class StudyRecommendationService {
 
     if (metrics.tactics < 50) {
       const recentGames = gameHistory.slice(-10);
-      const losses = recentGames.filter(g =>
-        (g.whitePlayerId === profile.userId && g.result !== 'white' && g.result !== 'draw') ||
-        (g.blackPlayerId === profile.userId && g.result !== 'black' && g.result !== 'draw')
-      ).length;
+      const losses = recentGames.filter(g => g.result === 'loss').length;
 
       recommendations.push({
         id: 'tactical-basics',
@@ -158,9 +162,7 @@ class StudyRecommendationService {
     if (metrics.openings < 50) {
       const recentGames = gameHistory.slice(-10);
       const shortLosses = recentGames.filter(g =>
-        g.duration < 300 &&
-        ((g.whitePlayerId === profile.userId && g.result !== 'white') ||
-         (g.blackPlayerId === profile.userId && g.result !== 'black'))
+        g.totalMoves < 15 && g.result === 'loss'
       ).length;
 
       recommendations.push({
@@ -168,7 +170,7 @@ class StudyRecommendationService {
         title: 'Principios de Apertura',
         description: 'Domina los fundamentos: desarrollo, centro y seguridad del rey',
         reason: shortLosses > 0
-          ? `${shortLosses} derrota${shortLosses > 1 ? 's' : ''} rápida${shortLosses > 1 ? 's' : ''} (<5 min) en tus últimas partidas`
+          ? `${shortLosses} derrota${shortLosses > 1 ? 's' : ''} rápida${shortLosses > 1 ? 's' : ''} (<15 movimientos) en tus últimas partidas`
           : `Tu puntuación de aperturas (${metrics.openings}) necesita refuerzo`,
         priority: 'high',
         category: 'openings',
@@ -270,8 +272,21 @@ class StudyRecommendationService {
 
   /**
    * Get weekly goal data
+   * FIXED: Now works with PlayerProfile type
    */
-  getWeeklyGoal(profile: UserProfile, gameHistory: GameHistory[], metrics: SkillMetrics): WeeklyGoal {
+  getWeeklyGoal(profile: PlayerProfile, metrics: SkillMetrics): WeeklyGoal {
+    const gameHistory = profile.gameHistory || [];
+
+    // 🛡️ Safety check
+    if (!metrics) {
+      metrics = {
+        openings: 50,
+        endgames: 50,
+        tactics: 50,
+        middlegame: 50
+      };
+    }
+
     // Find lowest skill for improvement target
     const skills = Object.entries(metrics) as [keyof SkillMetrics, number][];
     const lowestSkill = skills.reduce((min, [skill, score]) =>
@@ -288,13 +303,13 @@ class StudyRecommendationService {
 
     // Calculate modules completed (based on games played this week)
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const gamesThisWeek = gameHistory.filter(g => new Date(g.timestamp).getTime() >= oneWeekAgo).length;
+    const gamesThisWeek = gameHistory.filter(g => g.timestamp >= oneWeekAgo).length;
     const modulesCompleted = Math.min(3, Math.floor(gamesThisWeek / 2)); // 2 games = 1 module
 
     // Calculate days active this week
     const daysWithGames = new Set(
       gameHistory
-        .filter(g => new Date(g.timestamp).getTime() >= oneWeekAgo)
+        .filter(g => g.timestamp >= oneWeekAgo)
         .map(g => new Date(g.timestamp).toDateString())
     ).size;
 
@@ -315,6 +330,11 @@ class StudyRecommendationService {
    * Get coach tip based on weakest area
    */
   getCoachTip(metrics: SkillMetrics): string {
+    // 🛡️ Safety check
+    if (!metrics) {
+      return 'Sigue practicando para recibir consejos personalizados. ¡Cada partida es una oportunidad de aprendizaje!';
+    }
+
     const skills = Object.entries(metrics) as [keyof SkillMetrics, number][];
     const lowestSkill = skills.reduce((min, [skill, score]) =>
       score < min.score ? { skill, score } : min,

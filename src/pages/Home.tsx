@@ -2887,10 +2887,10 @@ export default function ChessGame() {
               // Si hay datos, calculamos métricas reales; si no, usamos valores por defecto (50)
               const hasEnoughGames = userGameHistory.length >= 5;
               const metrics = hasEnoughGames
-                ? studyRecommendationService.calculateSkillMetrics(chessGamePro.userProfile, userGameHistory)
+                ? studyRecommendationService.calculateSkillMetrics(chessGamePro.userProfile)
                 : { openings: 50, tactics: 50, endgames: 50, middlegame: 50 };
               const recommendations = hasEnoughGames
-                ? studyRecommendationService.generateRecommendations(chessGamePro.userProfile, userGameHistory, metrics)
+                ? studyRecommendationService.generateRecommendations(chessGamePro.userProfile, metrics)
                 : [];
 
               // Debug: Log para verificar el estado
