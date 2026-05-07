@@ -43,7 +43,8 @@ class LLMCoachService {
         max_tokens: 1500
       });
 
-      const rawFeedback = response.resources[0]?.content || '';
+      // 🔧 FIX: Correct response structure for llmChatCompletions
+      const rawFeedback = response.choices?.[0]?.message?.content || '';
 
       return this.parseFeedback(rawFeedback);
     } catch (error) {
