@@ -286,6 +286,22 @@ class StudyRecommendationService {
 
     // Find lowest skill for improvement target
     const skills = Object.entries(metrics) as [keyof SkillMetrics, number][];
+
+    // 🛡️ Safety check: If skills array is empty, use default
+    if (skills.length === 0) {
+      return {
+        modulesCompleted: 0,
+        modulesTotal: 3,
+        skillImprovement: {
+          target: 60,
+          current: 50,
+          skill: 'táctica'
+        },
+        daysActive: 0,
+        daysTotal: 7
+      };
+    }
+
     const lowestSkill = skills.reduce((min, [skill, score]) =>
       score < min.score ? { skill, score } : min,
       { skill: skills[0][0], score: skills[0][1] }
