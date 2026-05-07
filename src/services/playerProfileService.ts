@@ -304,7 +304,7 @@ class PlayerProfileService {
       strengths.push('Racha ganadora consistente');
     }
 
-    const avgBlunders = profile.gameHistory.reduce((sum, g) => sum + g.blunders, 0) / profile.gameHistory.length;
+    const avgBlunders = profile.gameHistory.reduce((sum, g) => sum + (g.blunders || 0), 0) / profile.gameHistory.length;
     if (avgBlunders < 1) {
       strengths.push('Excelente control de errores');
     }

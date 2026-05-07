@@ -76,7 +76,7 @@ class StudyRecommendationService {
 
     // 4. Calcular TACTICS SCORE
     // Basado en win rate y número de blunders
-    const avgBlunders = recentGames.reduce((sum, g) => sum + g.blunders, 0) / recentGames.length;
+    const avgBlunders = recentGames.reduce((sum, g) => sum + (g.blunders || 0), 0) / recentGames.length;
     const tacticsScore = Math.max(40, Math.min(90, 70 + (winRate * 0.3) - (avgBlunders * 5)));
 
     // 5. Calcular ENDGAME SCORE
