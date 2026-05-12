@@ -1,0 +1,25 @@
+{
+  "name": "DeepM8 - Chess AI Platform",
+  "short_name": "DeepM8",
+  "description": "Plataforma premium de ajedrez con IA avanzada, análisis inteligente y entrenamiento personalizado",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1120",
+  "theme_color": "#7C3AED",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/branding/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/branding/logo-m8.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "education", "entertainment"],
+  "lang": "es-ES"
+}
