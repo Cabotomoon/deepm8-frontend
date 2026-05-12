@@ -65,7 +65,6 @@ interface Theme {
   selected: string;
   valid: string;
   lastMove: string;
-  background: string;
 }
 
 type Board = (ChessPiece | null)[][];
@@ -78,8 +77,7 @@ const THEMES: Record<string, Theme> = {
     dark: 'bg-purple-700',
     selected: 'bg-blue-500',
     valid: 'bg-green-400',
-    lastMove: 'bg-purple-300',
-    background: 'from-[#0B1120] via-[#1E293B] to-[#111827]'
+    lastMove: 'bg-purple-300'
   },
   classic: {
     name: 'Clásico',
@@ -87,8 +85,7 @@ const THEMES: Record<string, Theme> = {
     dark: 'bg-amber-600',
     selected: 'bg-blue-400',
     valid: 'bg-green-400',
-    lastMove: 'bg-yellow-300',
-    background: 'from-slate-900 via-slate-800 to-slate-900'
+    lastMove: 'bg-yellow-300'
   },
   ocean: {
     name: 'Océano',
@@ -96,8 +93,7 @@ const THEMES: Record<string, Theme> = {
     dark: 'bg-cyan-700',
     selected: 'bg-blue-500',
     valid: 'bg-teal-400',
-    lastMove: 'bg-sky-300',
-    background: 'from-blue-950 via-cyan-950 to-blue-900'
+    lastMove: 'bg-sky-300'
   },
   forest: {
     name: 'Bosque',
@@ -105,8 +101,7 @@ const THEMES: Record<string, Theme> = {
     dark: 'bg-emerald-700',
     selected: 'bg-lime-400',
     valid: 'bg-green-500',
-    lastMove: 'bg-yellow-200',
-    background: 'from-green-950 via-emerald-900 to-green-950'
+    lastMove: 'bg-yellow-200'
   },
   sunset: {
     name: 'Atardecer',
@@ -114,8 +109,7 @@ const THEMES: Record<string, Theme> = {
     dark: 'bg-red-600',
     selected: 'bg-pink-400',
     valid: 'bg-orange-400',
-    lastMove: 'bg-yellow-400',
-    background: 'from-red-950 via-orange-950 to-purple-950'
+    lastMove: 'bg-yellow-400'
   },
   midnight: {
     name: 'Medianoche',
@@ -123,8 +117,7 @@ const THEMES: Record<string, Theme> = {
     dark: 'bg-slate-900',
     selected: 'bg-purple-500',
     valid: 'bg-indigo-500',
-    lastMove: 'bg-violet-400',
-    background: 'from-black via-slate-950 to-black'
+    lastMove: 'bg-violet-400'
   },
   neon: {
     name: 'Neón',
@@ -132,8 +125,7 @@ const THEMES: Record<string, Theme> = {
     dark: 'bg-purple-900',
     selected: 'bg-pink-500',
     valid: 'bg-cyan-500',
-    lastMove: 'bg-yellow-400',
-    background: 'from-purple-950 via-fuchsia-950 to-purple-900'
+    lastMove: 'bg-yellow-400'
   },
   wooden: {
     name: 'Madera',
@@ -141,8 +133,7 @@ const THEMES: Record<string, Theme> = {
     dark: 'bg-[#a0724a]',
     selected: 'bg-[#f0d9b5]',
     valid: 'bg-green-400',
-    lastMove: 'bg-[#cdb88a]',
-    background: 'from-[#312e2b] via-[#4a4541] to-[#312e2b]'
+    lastMove: 'bg-[#cdb88a]'
   }
 };
 
@@ -2357,7 +2348,7 @@ export default function ChessGame() {
   // 🔐 Authentication Screen
   if (gameMode === 'auth') {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 flex items-center justify-center`}>
+      <div className="min-h-screen bg-gradient-to-br from-[#0B1120] via-[#1E293B] to-[#111827] text-white p-4 md:p-8 flex items-center justify-center">
         <div className="max-w-md w-full text-center">
           <div className="mb-8">
             <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -2416,7 +2407,7 @@ export default function ChessGame() {
     };
 
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 flex items-center justify-center`}>
+      <div className="min-h-screen bg-gradient-to-br from-[#0B1120] via-[#1E293B] to-[#111827] text-white p-4 md:p-8 flex items-center justify-center">
         <div className="max-w-2xl w-full">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -2476,7 +2467,7 @@ export default function ChessGame() {
   // 📊 Statistics Screen (with Deep M8 Coach Profile Integration)
   if (gameMode === 'stats') {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8`}>
+      <div className="min-h-screen bg-gradient-to-br from-[#0B1120] via-[#1E293B] to-[#111827] text-white p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -2759,7 +2750,7 @@ export default function ChessGame() {
     };
 
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 flex items-center justify-center`}>
+      <div className="min-h-screen bg-gradient-to-br from-[#0B1120] via-[#1E293B] to-[#111827] text-white p-4 md:p-8 flex items-center justify-center">
         <div className="max-w-4xl w-full">
           {/* 🎯 Unified Container - Same style for Victory and Defeat */}
           <div className={`bg-slate-800/50 backdrop-blur border-4 ${isVictory ? 'border-amber-500 shadow-amber-500/50' : 'border-red-500 shadow-red-500/50'} shadow-2xl rounded-3xl p-8 md:p-12`}>
@@ -3094,7 +3085,7 @@ export default function ChessGame() {
 
   if (gameMode === 'menu') {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8`}>
+      <div className="min-h-screen bg-gradient-to-br from-[#0B1120] via-[#1E293B] to-[#111827] text-white p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
@@ -3397,7 +3388,7 @@ export default function ChessGame() {
         />
       )}
 
-      <div className={`min-h-screen bg-gradient-to-br ${THEMES[currentTheme].background} text-white p-4 md:p-8 relative overflow-hidden`}>
+      <div className="min-h-screen bg-gradient-to-br from-[#0B1120] via-[#1E293B] to-[#111827] text-white p-4 md:p-8 relative overflow-hidden">
       {/* Particle overlay */}
       <div className="fixed inset-0 pointer-events-none z-50">
         {particles.map(p => (
