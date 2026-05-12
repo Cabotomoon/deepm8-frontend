@@ -302,21 +302,21 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 rounded-2xl border-2 border-slate-700 max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div className="bg-[#12121A] rounded-2xl border border-white/6 max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-[0_16px_48px_rgba(0,0,0,0.8)]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 p-6 border-b border-white/10">
+        <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 p-6 border-b border-white/8">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <img
                 src="/branding/logo-knight.png"
                 alt="DeepM8 Coach"
-                className="h-12 w-12 object-contain"
+                className="h-12 w-12 object-contain drop-shadow-[0_0_16px_rgba(124,58,237,0.5)]"
               />
               <div>
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white">DeepM8 Coach Engine</h2>
-                  <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-white backdrop-blur-sm">V1</span>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">DeepM8 Coach Engine</h2>
+                  <span className="px-3 py-1 bg-white/15 rounded-full text-xs font-bold text-white backdrop-blur-sm border border-white/20">V1</span>
                 </div>
                 <p className="text-purple-100 mt-1 text-sm">Análisis inteligente con IA</p>
               </div>
