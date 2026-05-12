@@ -72,6 +72,15 @@ type Board = (ChessPiece | null)[][];
 
 // Chess themes
 const THEMES: Record<string, Theme> = {
+  deepm8: {
+    name: 'DeepM8',
+    light: 'bg-purple-100',
+    dark: 'bg-purple-700',
+    selected: 'bg-blue-500',
+    valid: 'bg-green-400',
+    lastMove: 'bg-purple-300',
+    background: 'from-[#0B1120] via-[#1E293B] to-[#111827]'
+  },
   classic: {
     name: 'Clásico',
     light: 'bg-amber-100',
@@ -513,7 +522,7 @@ export default function ChessGame() {
 
   // UI state
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [currentTheme, setCurrentTheme] = useState<string>('wooden');
+  const [currentTheme, setCurrentTheme] = useState<string>('deepm8');
   const [particles, setParticles] = useState<Particle[]>([]);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
@@ -3409,15 +3418,25 @@ export default function ChessGame() {
       </div>
 
       <div className="max-w-[1800px] mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-4 md:mb-6">
-          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-            Chess Clash
-          </h1>
+        {/* Header - DeepM8 Branding */}
+        <div className="flex justify-between items-center mb-4 md:mb-6 glass-effect px-6 py-4 rounded-2xl border border-white/10">
+          <div className="flex items-center gap-4">
+            <img
+              src="/branding/logo-m8.png"
+              alt="DeepM8"
+              className="h-10 md:h-12 object-contain"
+            />
+            <div className="hidden md:block">
+              <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                DeepM8
+              </h1>
+              <p className="text-xs text-slate-400 font-medium">PIENSA. ENTRENA. EVOLUCIONA.</p>
+            </div>
+          </div>
           <div className="flex gap-2">
             <button
               onClick={handleBackToMenuDuringOnlineGame}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition-all"
+              className="px-4 py-2 glass-effect hover:bg-white/10 border border-white/10 rounded-xl font-semibold transition-all hover:border-primary/50 text-white"
             >
               📋 Menú
             </button>
