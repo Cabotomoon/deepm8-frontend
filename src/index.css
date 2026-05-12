@@ -3,7 +3,7 @@
 @source './';
 
 :root {
-  /* 🎨 DeepM8 Brand Colors - Premium Dark Theme */
+  /* 🎨 DeepM8 Brand Colors - Cinematic Black Premium Theme */
 
   /* Primary Brand */
   --primary: #7C3AED;
@@ -23,29 +23,32 @@
   --warning: #F59E0B;
   --error: #EF4444;
 
-  /* Backgrounds */
-  --bg-primary: #0B1120;
-  --bg-secondary: #111827;
-  --bg-tertiary: #1E293B;
-  --bg-card: #1E293B;
+  /* Cinematic Black Backgrounds */
+  --bg-primary: #07070A;
+  --bg-secondary: #0F0F17;
+  --bg-surface: #12121A;
+  --bg-card: #181825;
   --bg-white: #F8FAFC;
 
   /* Text */
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --text-muted: #64748B;
-  --text-blank: #0B1120;
+  --text-blank: #07070A;
 
   /* Borders */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.16);
-  --border-light: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.12);
+  --border-light: rgba(255, 255, 255, 0.03);
 
-  /* Effects */
-  --glow-primary: rgba(124, 58, 237, 0.4);
-  --glow-secondary: rgba(37, 99, 235, 0.3);
-  --glass-bg: rgba(30, 41, 59, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  /* Premium Effects */
+  --glow-primary: rgba(124, 58, 237, 0.3);
+  --glow-secondary: rgba(37, 99, 235, 0.25);
+  --glow-intense: rgba(124, 58, 237, 0.5);
+  --glass-bg: rgba(24, 24, 37, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-intense: 0 16px 48px rgba(0, 0, 0, 0.8);
 
   /* Layout */
   --sidebar-width: 60px;
@@ -58,7 +61,7 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(135deg, #0B1120 0%, #1E293B 100%);
+  background: linear-gradient(135deg, #07070A 0%, #0F0F17 50%, #07070A 100%);
   color: var(--text-primary);
   margin: 0;
   min-height: 100vh;
@@ -109,21 +112,26 @@ body {
   animation: scale-in 0.3s ease-out;
 }
 
-/* 🌟 DeepM8 Premium Effects */
+/* 🌟 DeepM8 Cinematic Premium Effects */
 
 .glass-effect {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-premium);
 }
 
 .glow-primary {
-  box-shadow: 0 0 20px var(--glow-primary), 0 0 40px var(--glow-primary);
+  box-shadow: 0 0 16px var(--glow-primary), 0 0 32px var(--glow-primary);
 }
 
 .glow-secondary {
-  box-shadow: 0 0 20px var(--glow-secondary), 0 0 40px var(--glow-secondary);
+  box-shadow: 0 0 16px var(--glow-secondary), 0 0 32px var(--glow-secondary);
+}
+
+.glow-intense {
+  box-shadow: 0 0 24px var(--glow-intense), 0 0 48px var(--glow-intense);
 }
 
 .hover-lift {
@@ -132,7 +140,7 @@ body {
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-premium);
 }
 
 .gradient-border {
@@ -168,10 +176,10 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.08),
     transparent
   );
-  animation: shimmer 2s infinite;
+  animation: shimmer 2.5s infinite;
 }
 
 @keyframes shimmer {
@@ -183,38 +191,71 @@ body {
   }
 }
 
+/* Cinematic Card Styles */
+.card-premium {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-premium);
+}
+
+.card-premium:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-intense);
+  transform: translateY(-2px);
+}
+
 /* Premium Button Styles */
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition);
-  box-shadow: 0 4px 12px var(--glow-primary);
+  box-shadow: 0 4px 16px var(--glow-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--primary-light), var(--secondary-hover));
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.btn-primary:hover::before {
+  opacity: 1;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--glow-primary);
+  box-shadow: 0 6px 24px var(--glow-intense);
 }
 
 .btn-secondary {
-  background: var(--bg-tertiary);
+  background: var(--bg-card);
   color: var(--text-primary);
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition);
+  box-shadow: var(--shadow-premium);
 }
 
 .btn-secondary:hover {
   border-color: var(--primary);
-  background: var(--bg-card);
+  background: var(--bg-surface);
   transform: translateY(-1px);
+  box-shadow: 0 0 16px var(--glow-primary);
 }
 
