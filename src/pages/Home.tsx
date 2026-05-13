@@ -2354,7 +2354,7 @@ export default function ChessGame() {
             <img
               src="/branding/logo-lateral.png"
               alt="DeepM8"
-              className="h-16 md:h-20 object-contain mb-4"
+              className="h-24 md:h-32 object-contain mb-4"
             />
           </div>
 
@@ -3092,7 +3092,7 @@ export default function ChessGame() {
             <img
               src="/branding/logo-lateral.png"
               alt="DeepM8"
-              className="h-16 md:h-20 object-contain"
+              className="h-24 md:h-32 object-contain"
             />
           </div>
 
