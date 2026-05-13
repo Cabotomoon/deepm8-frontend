@@ -3174,21 +3174,6 @@ export default function ChessGame() {
               </div>
             </div>
 
-            {/* Tutorial */}
-            <button
-              onClick={() => { setGameMode('tutorial'); setTutorialStep(0); resetGame(); }}
-              className="group relative bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300 hover:scale-[1.02]"
-            >
-              <div className="flex items-center gap-6">
-                <div className="text-6xl">📚</div>
-                <div className="text-left flex-1">
-                  <h3 className="text-2xl font-bold mb-2">Tutorial Interactivo</h3>
-                  <p className="text-slate-400">Aprende las mecánicas paso a paso</p>
-                </div>
-                <div className="text-3xl text-slate-600 group-hover:text-amber-500 transition-colors">→</div>
-              </div>
-            </button>
-
             {/* Statistics - NEW */}
             {chessGamePro.userProfile && (
               <>
