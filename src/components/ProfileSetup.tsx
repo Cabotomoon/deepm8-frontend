@@ -65,7 +65,7 @@ export default function ProfileSetup({ onComplete, defaultName = '', currentUser
     <div className="profile-setup-overlay">
       <div className="profile-setup-modal">
         <div className="profile-setup-header">
-          <h2>👋 ¡Bienvenido a Chess Clash!</h2>
+          <h2>👋 ¡Bienvenido a DeepM8 - Piensa - Entrena - Evoluciona!</h2>
           <p>Paso 1 de 2: Elige tu nombre de usuario único</p>
         </div>
 
