@@ -76,7 +76,7 @@ export default function UserSelection({ onSelectUser, onCreateNew }: UserSelecti
             <img
               src="/branding/logo-m8.png"
               alt="DeepM8"
-              className="h-28 md:h-36 object-contain"
+              className="h-36 md:h-48 object-contain"
             />
           </div>
           <p className="text-xl text-slate-300">
