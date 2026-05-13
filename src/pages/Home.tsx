@@ -2411,6 +2411,13 @@ export default function ChessGame() {
       <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-4 md:p-8 flex items-center justify-center">
         <div className="max-w-2xl w-full">
           <div className="text-center mb-12">
+            <div className="flex justify-center mb-6">
+              <img
+                src="/branding/logo-m8.png"
+                alt="DeepM8"
+                className="h-36 md:h-48 object-contain"
+              />
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
               Bienvenido, {getDisplayName()}
             </h1>
