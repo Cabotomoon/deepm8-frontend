@@ -2350,11 +2350,12 @@ export default function ChessGame() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-4 md:p-8 flex items-center justify-center">
         <div className="max-w-md w-full text-center">
-          <div className="mb-8">
-            <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-              Chess Clash
-            </h1>
-            <p className="text-slate-400 text-xl">Professional Edition</p>
+          <div className="mb-8 flex justify-center">
+            <img
+              src="/branding/logo-lateral.png"
+              alt="DeepM8"
+              className="h-16 md:h-20 object-contain mb-4"
+            />
           </div>
 
           <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8">
@@ -3087,11 +3088,12 @@ export default function ChessGame() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-              Chess Clash
-            </h1>
-            <p className="text-slate-400 text-lg">Maestría estratégica reinventada</p>
+          <div className="text-center mb-12 flex justify-center">
+            <img
+              src="/branding/logo-lateral.png"
+              alt="DeepM8"
+              className="h-16 md:h-20 object-contain"
+            />
           </div>
 
           {/* Time Control Selector */}
