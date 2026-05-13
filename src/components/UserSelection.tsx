@@ -68,20 +68,24 @@ export default function UserSelection({ onSelectUser, onCreateNew }: UserSelecti
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-3 drop-shadow-lg">
-            ♔ Chess Clash ♛
-          </h1>
+          <div className="flex justify-center mb-6">
+            <img
+              src="/branding/logo-m8.png"
+              alt="DeepM8"
+              className="h-20 md:h-24 object-contain"
+            />
+          </div>
           <p className="text-xl text-slate-300">
             Selecciona tu perfil o crea uno nuevo
           </p>
         </div>
 
         {/* User List */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700 shadow-2xl mb-4">
+        <div className="bg-[#181825] backdrop-blur-sm rounded-xl p-6 border border-white/6 shadow-[0_8px_32px_rgba(0,0,0,0.6)] mb-4">
           {users.length > 0 ? (
             <>
               <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
@@ -95,8 +99,8 @@ export default function UserSelection({ onSelectUser, onCreateNew }: UserSelecti
                     onClick={() => handleSelectUser(user.userId)}
                     className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
                       selectedUserId === user.userId
-                        ? 'bg-blue-600/30 border-blue-500 shadow-lg shadow-blue-500/50'
-                        : 'bg-slate-700/50 border-slate-600 hover:bg-slate-700 hover:border-slate-500'
+                        ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/50'
+                        : 'bg-[#12121A] border-white/6 hover:bg-[#1E1E2E] hover:border-white/12'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -174,10 +178,10 @@ export default function UserSelection({ onSelectUser, onCreateNew }: UserSelecti
             <button
               onClick={handleContinue}
               disabled={!selectedUserId}
-              className={`w-full py-4 rounded-lg font-bold text-lg transition-all duration-200 ${
+              className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 ${
                 selectedUserId
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-500/70'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-500/70'
+                  : 'bg-[#12121A] border border-white/6 text-slate-500 cursor-not-allowed'
               }`}
             >
               {selectedUserId ? '✓ Continuar con este usuario' : 'Selecciona un usuario'}
@@ -185,14 +189,14 @@ export default function UserSelection({ onSelectUser, onCreateNew }: UserSelecti
           )}
           <button
             onClick={onCreateNew}
-            className="w-full py-4 rounded-lg font-bold text-lg bg-green-600 hover:bg-green-700 text-white transition-all duration-200 shadow-lg shadow-green-500/50 hover:shadow-xl hover:shadow-green-500/70"
+            className="w-full py-4 rounded-xl font-bold text-lg bg-green-600 hover:bg-green-700 text-white transition-all duration-200 shadow-lg shadow-green-500/50 hover:shadow-xl hover:shadow-green-500/70"
           >
             ➕ Crear Nuevo Usuario
           </button>
           {users.length > 0 && (
             <button
               onClick={handleClearAllData}
-              className="w-full py-3 rounded-lg font-medium text-sm bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 hover:border-red-500 text-red-400 transition-all duration-200"
+              className="w-full py-3 rounded-xl font-medium text-sm bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 hover:border-red-500 text-red-400 transition-all duration-200"
             >
               🗑️ Limpiar Todos los Datos (Debug)
             </button>
