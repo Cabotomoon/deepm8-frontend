@@ -659,7 +659,7 @@ export default function GameReplay({ game, onClose }: GameReplayProps) {
                 {game.whitePlayerName} vs {game.blackPlayerName} • {formatDuration(game.duration)}
               </p>
             </div>
-            <button onClick={onClose} className="text-slate-800 hover:bg-black/10 rounded-lg px-4 py-2 transition-all font-semibold">
+            <button onClick={onClose} className="text-white hover:bg-white/20 rounded-lg px-4 py-2 transition-all font-semibold">
               ✕ Cerrar
             </button>
           </div>
