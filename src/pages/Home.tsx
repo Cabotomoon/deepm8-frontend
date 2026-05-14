@@ -2494,23 +2494,33 @@ export default function ChessGame() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
+          {/* Header with Logo and Back Button */}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
-              Mi Perfil - Deep M8 Coach
-            </h1>
+            <div className="flex items-center gap-4">
+              <img
+                src="/branding/logo-lateral.png"
+                alt="DeepM8"
+                className="h-24 md:h-32 object-contain"
+              />
+            </div>
             <button
               onClick={() => setGameMode('menu')}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg font-semibold transition-all"
+              className="px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-semibold transition-all"
             >
               ← Volver
             </button>
           </div>
 
+          {/* Title */}
+          <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-blue-200 via-blue-400 to-blue-600 bg-clip-text text-transparent mb-8">
+            Mi Perfil
+          </h1>
+
           {/* ELO & Basic Stats */}
           {chessGamePro.userProfile && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6">
-                <div className="text-amber-400 text-4xl font-bold mb-2">
+                <div className="text-purple-400 text-4xl font-bold mb-2">
                   {chessGamePro.userProfile.eloRating}
                 </div>
                 <div className="text-slate-400">ELO Rating</div>
@@ -2680,7 +2690,7 @@ export default function ChessGame() {
               <div className="mt-8 flex gap-4 justify-center">
                 <button
                   onClick={() => setGameMode('menu')}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                  className="px-6 py-3 bg-white hover:bg-gray-100 text-blue-500 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
                 >
                   🎯 Jugar Ahora
                 </button>
@@ -2690,7 +2700,7 @@ export default function ChessGame() {
 
           {/* Piece Stats (Original) */}
           <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6">
-            <h2 className="text-2xl font-bold mb-6 text-amber-400">Estadísticas por Pieza</h2>
+            <h2 className="text-2xl font-bold mb-6 text-white">Estadísticas por Pieza</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {chessGamePro.pieceStats.map((stat) => (
                 <div key={stat.pieceType} className="bg-slate-900/50 rounded-xl p-4">
