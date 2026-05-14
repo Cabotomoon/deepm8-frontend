@@ -2663,12 +2663,12 @@ export default function ChessGame() {
                   </div>
                   <div className="text-slate-400">Movimientos Totales</div>
                   <div className="text-sm text-slate-500 mt-2">
-                    Analizados por Stockfish
+                    Analizados por DeepM8 Coach
                   </div>
                 </div>
 
                 <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6">
-                  <div className="text-amber-400 text-4xl font-bold mb-2">
+                  <div className="text-green-400 text-4xl font-bold mb-2">
                     {(coachProfile.achievements || []).length}
                   </div>
                   <div className="text-slate-400">Logros Desbloqueados</div>
