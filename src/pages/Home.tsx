@@ -3163,9 +3163,9 @@ export default function ChessGame() {
                   <button
                     key={key}
                     onClick={() => startGame('ai', key as Difficulty)}
-                    className="bg-slate-900/50 hover:bg-slate-900/80 border border-slate-600 hover:border-amber-500 rounded-xl p-4 transition-all duration-200 hover:scale-[1.02]"
+                    className="bg-slate-900/50 hover:bg-slate-900/80 border border-slate-600 hover:border-purple-500 rounded-xl p-4 transition-all duration-200 hover:scale-[1.02]"
                   >
-                    <div className="font-semibold text-amber-400">{value.label}</div>
+                    <div className="font-semibold bg-gradient-to-r from-blue-200 via-blue-400 to-blue-600 bg-clip-text text-transparent">{value.label}</div>
                     <div className="text-xs text-slate-400 mt-1">
                       Depth: {value.depth} • Skill: {value.skillLevel}
                     </div>
