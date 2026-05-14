@@ -99,7 +99,7 @@ export default function GameHistoryComponent({ userId, onClose, onReplayGame }: 
             </div>
             <button
               onClick={onClose}
-              className="text-slate-800 hover:bg-black/10 rounded-lg px-4 py-2 transition-all font-semibold"
+              className="text-white hover:bg-white/20 rounded-lg px-4 py-2 transition-all font-semibold"
             >
               ✕ Cerrar
             </button>
