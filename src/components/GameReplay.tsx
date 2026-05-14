@@ -651,11 +651,11 @@ export default function GameReplay({ game, onClose }: GameReplayProps) {
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-slate-900 rounded-2xl border-2 border-slate-700 max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-white via-blue-400 to-blue-600 p-4">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-purple-600 mb-1">🎬 Replay de Partida</h2>
-              <p className="text-purple-700 text-sm">
+              <h2 className="text-2xl font-bold text-white mb-1">🎬 Replay de Partida</h2>
+              <p className="text-white text-sm">
                 {game.whitePlayerName} vs {game.blackPlayerName} • {formatDuration(game.duration)}
               </p>
             </div>
@@ -666,14 +666,14 @@ export default function GameReplay({ game, onClose }: GameReplayProps) {
 
           {/* Analysis Progress Bar */}
           {analyzing && (
-            <div className="mt-4 bg-blue-900/30 rounded-lg p-3 backdrop-blur border border-blue-700/40">
+            <div className="mt-4 bg-white/10 rounded-lg p-3 backdrop-blur">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-blue-900 font-semibold">🤔 Analizando con DeepM8 Coach...</span>
-                <span className="text-blue-800 text-sm">{analysisProgress}%</span>
+                <span className="text-white font-semibold">🤔 Analizando con DeepM8 Coach...</span>
+                <span className="text-purple-100 text-sm">{analysisProgress}%</span>
               </div>
-              <div className="w-full bg-blue-900/30 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-blue-700 h-full transition-all duration-300"
+                  className="bg-white h-full transition-all duration-300"
                   style={{ width: `${analysisProgress}%` }}
                 />
               </div>
