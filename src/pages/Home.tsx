@@ -539,6 +539,7 @@ export default function ChessGame() {
 
   // 🎓 Training session state
   const [activeTraining, setActiveTraining] = useState<'openings' | 'tactics' | 'endgames' | 'middlegame' | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Debug: Log when activeTraining changes
   useEffect(() => {
@@ -546,6 +547,22 @@ export default function ChessGame() {
     console.log('🎓 activeTraining is truthy?', !!activeTraining);
     console.log('🎓 activeTraining type:', typeof activeTraining);
   }, [activeTraining]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      // Check if click is outside menu area
+      if (!target.closest('.hamburger-menu-container')) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
 
   // Timer state
   const [whiteTime, setWhiteTime] = useState(600); // 10 minutes in seconds
@@ -3174,148 +3191,169 @@ export default function ChessGame() {
               </div>
             </div>
 
-            {/* Statistics - NEW */}
+            {/* Hamburger Menu & Game History Section */}
             {chessGamePro.userProfile && (
-              <>
-                <button
-                  onClick={() => {
-                    chessGamePro.loadStats();
-                    setGameMode('stats');
-                  }}
-                  className="group relative bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur border-2 border-purple-400/30 rounded-2xl p-8 hover:border-purple-400/60 transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-purple-500/20"
-                >
-                  <div className="flex items-center gap-6">
-                    <div className="text-6xl">👤</div>
-                    <div className="text-left flex-1">
-                      <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">Mi Perfil</h3>
-                      <p className="text-slate-300 font-medium">
-                        ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas jugadas
-                      </p>
-                      <p className="text-xs text-slate-400 mt-1">
-                        Progreso completo de todas tus partidas
-                      </p>
+              <div className="flex gap-4 items-start">
+                {/* Hamburger Menu Button */}
+                <div className="relative hamburger-menu-container">
+                  <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="group relative bg-[#181825] backdrop-blur border border-white/6 rounded-2xl p-6 hover:border-purple-400/40 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-purple-500/20"
+                    aria-label="Menú"
+                  >
+                    <div className="flex flex-col gap-1.5">
+                      <div className={`w-8 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
+                      <div className={`w-8 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></div>
+                      <div className={`w-8 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
                     </div>
-                    <div className="text-3xl text-slate-600 group-hover:text-purple-400 transition-colors">→</div>
-                  </div>
-                </button>
+                  </button>
 
-                {/* Game History - NEW */}
+                  {/* Dropdown Menu */}
+                  {isMenuOpen && (
+                    <div className="absolute top-full mt-3 left-0 min-w-[420px] bg-[#181825] backdrop-blur-xl border border-white/8 rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-in z-50">
+                      {/* Mi Perfil Button */}
+                      <button
+                        onClick={() => {
+                          chessGamePro.loadStats();
+                          setGameMode('stats');
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full group relative bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-b border-white/6 p-6 hover:from-purple-500/20 hover:to-blue-500/20 transition-all duration-300"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="text-4xl">👤</div>
+                          <div className="text-left flex-1">
+                            <h3 className="text-lg font-bold mb-1 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">Mi Perfil</h3>
+                            <p className="text-slate-300 text-sm font-medium">
+                              ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas
+                            </p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              Progreso completo de todas tus partidas
+                            </p>
+                          </div>
+                          <div className="text-2xl text-slate-600 group-hover:text-purple-400 transition-colors">→</div>
+                        </div>
+                      </button>
+
+                      {/* User Session Section */}
+                      <div className="bg-gradient-to-r from-green-500/10 to-green-600/10 border-b border-white/6 p-6">
+                        <div className="flex items-center gap-4">
+                          <div className="text-3xl">✅</div>
+                          <div className="flex-1">
+                            <h3 className="text-base font-semibold text-green-400 mb-1">
+                              {chessGamePro.userProfile.name}
+                            </h3>
+                            <p className="text-sm text-slate-300">
+                              ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas jugadas
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (confirm('¿Cerrar sesión? Tus datos se guardarán y podrás volver más tarde.')) {
+                                clearAuth();
+                                chessGamePro.setGameMode('user-selection');
+                                setIsMenuOpen(false);
+                              }
+                            }}
+                            className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-500 rounded-lg font-semibold transition-all duration-200 text-sm"
+                          >
+                            🚪 Cerrar Sesión
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Configuración Section */}
+                      <div className="p-6">
+                        <h3 className="text-base font-semibold mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">⚙️ Configuración</h3>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2 text-slate-300">Tema del tablero</label>
+                            <div className="grid grid-cols-6 gap-2">
+                              {Object.entries(THEMES).map(([key, theme]) => (
+                                <button
+                                  key={key}
+                                  onClick={() => setCurrentTheme(key)}
+                                  className={`p-3 rounded-lg border-2 transition-all ${
+                                    currentTheme === key
+                                      ? 'border-purple-500 scale-110 shadow-lg shadow-purple-500/30'
+                                      : 'border-slate-600 hover:border-slate-500'
+                                  }`}
+                                  title={theme.name}
+                                >
+                                  <div className="flex gap-1">
+                                    <div className={`w-3 h-3 ${theme.light} rounded`}></div>
+                                    <div className={`w-3 h-3 ${theme.dark} rounded`}></div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-slate-300">Efectos de sonido</label>
+                            <button
+                              onClick={() => setSoundEnabled(!soundEnabled)}
+                              className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm ${
+                                soundEnabled
+                                  ? 'bg-blue-500 hover:bg-blue-600'
+                                  : 'bg-slate-600 hover:bg-slate-700'
+                              }`}
+                            >
+                              {soundEnabled ? '🔊 Activado' : '🔇 Desactivado'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Game History Button - Always visible */}
                 <button
                   onClick={() => setShowGameHistory(true)}
-                  className="group relative bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300 hover:scale-[1.02]"
+                  className="group relative flex-1 bg-[#181825] backdrop-blur border border-white/6 rounded-2xl p-8 hover:border-purple-400/40 transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-purple-500/20"
                 >
                   <div className="flex items-center gap-6">
                     <div className="text-6xl">📜</div>
                     <div className="text-left flex-1">
-                      <h3 className="text-2xl font-bold mb-2">Historial de Partidas</h3>
+                      <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-blue-200 via-blue-400 to-blue-600 bg-clip-text text-transparent">Historial de Partidas</h3>
                       <p className="text-slate-400">Revive tus partidas movimiento por movimiento</p>
                     </div>
-                    <div className="text-3xl text-slate-600 group-hover:text-amber-500 transition-colors">→</div>
+                    <div className="text-3xl text-slate-600 group-hover:text-purple-400 transition-colors">→</div>
                   </div>
                 </button>
-              </>
+              </div>
             )}
-          </div>
 
-          {/* Settings */}
-          <div className="mt-12 max-w-2xl mx-auto">
-            {/* Login/Profile Section */}
+            {/* Guest Mode - Login Prompt (only when no profile) */}
             {!chessGamePro.userProfile && (
-              <div className="mb-6 bg-gradient-to-r from-amber-500/20 to-amber-600/20 backdrop-blur border border-amber-500/30 rounded-2xl p-6">
-                <div className="flex items-center gap-4">
-                  <div className="text-4xl">👤</div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-amber-400 mb-1">
-                      Modo Invitado
-                    </h3>
-                    <p className="text-sm text-slate-300">
-                      Crea un perfil para guardar tus estadísticas y ranking ELO
-                    </p>
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 backdrop-blur border border-amber-500/30 rounded-2xl p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl">👤</div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-amber-400 mb-1">
+                        Modo Invitado
+                      </h3>
+                      <p className="text-sm text-slate-300">
+                        Crea un perfil para guardar tus estadísticas y ranking ELO
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        console.log('🔐 Crear Perfil clicked');
+                        console.log('authUser:', chessGamePro.authUser);
+                        setShowProfileSetup(true);
+                      }}
+                      className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg whitespace-nowrap"
+                    >
+                      🔐 Crear Perfil
+                    </button>
                   </div>
-                  <button
-                    onClick={() => {
-                      console.log('🔐 Crear Perfil clicked');
-                      console.log('authUser:', chessGamePro.authUser);
-                      // Show username setup directly
-                      setShowProfileSetup(true);
-                    }}
-                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg whitespace-nowrap"
-                  >
-                    🔐 Crear Perfil
-                  </button>
                 </div>
               </div>
             )}
-
-            {chessGamePro.userProfile && (
-              <div className="mb-6 bg-gradient-to-r from-green-500/20 to-green-600/20 backdrop-blur border border-green-500/30 rounded-2xl p-6">
-                <div className="flex items-center gap-4">
-                  <div className="text-4xl">✅</div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-green-400 mb-1">
-                      {chessGamePro.userProfile.name}
-                    </h3>
-                    <p className="text-sm text-slate-300">
-                      ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas jugadas
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (confirm('¿Cerrar sesión? Tus datos se guardarán y podrás volver más tarde.')) {
-                        clearAuth();
-                        chessGamePro.setGameMode('user-selection');
-                      }
-                    }}
-                    className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-500 rounded-lg font-semibold transition-all duration-200"
-                  >
-                    🚪 Cerrar Sesión
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-4 text-amber-400">⚙️ Configuración</h3>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Tema del tablero</label>
-                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                    {Object.entries(THEMES).map(([key, theme]) => (
-                      <button
-                        key={key}
-                        onClick={() => setCurrentTheme(key)}
-                        className={`p-3 rounded-lg border-2 transition-all ${
-                          currentTheme === key
-                            ? 'border-amber-500 scale-110'
-                            : 'border-slate-600 hover:border-slate-500'
-                        }`}
-                        title={theme.name}
-                      >
-                        <div className="flex gap-1">
-                          <div className={`w-4 h-4 ${theme.light} rounded`}></div>
-                          <div className={`w-4 h-4 ${theme.dark} rounded`}></div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Efectos de sonido</label>
-                  <button
-                    onClick={() => setSoundEnabled(!soundEnabled)}
-                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                      soundEnabled
-                        ? 'bg-blue-500 hover:bg-blue-600'
-                        : 'bg-slate-600 hover:bg-slate-700'
-                    }`}
-                  >
-                    {soundEnabled ? '🔊 Activado' : '🔇 Desactivado'}
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
