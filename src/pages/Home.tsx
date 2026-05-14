@@ -2418,7 +2418,7 @@ export default function ChessGame() {
                 className="h-36 md:h-48 object-contain"
               />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">
               Bienvenido, {getDisplayName()}
             </h1>
             <p className="text-slate-400 text-lg">Paso 2 de 2: Selecciona tu nivel inicial de ELO</p>
@@ -2439,7 +2439,7 @@ export default function ChessGame() {
                 key={elo}
                 onClick={() => handleEloSelection(elo)}
                 disabled={isCreatingProfile}
-                className={`group bg-slate-800/50 backdrop-blur border-2 border-slate-700 hover:border-amber-500 rounded-2xl p-6 transition-all duration-300 hover:scale-105 ${
+                className={`group bg-slate-800/50 backdrop-blur border-2 border-slate-700 hover:border-purple-500 rounded-2xl p-6 transition-all duration-300 hover:scale-105 ${
                   isCreatingProfile ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
@@ -2449,7 +2449,7 @@ export default function ChessGame() {
                   {elo === 1200 && '🏆'}
                   {elo === 1600 && '👑'}
                 </div>
-                <div className="text-3xl font-bold text-amber-400 mb-2">{elo}</div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent mb-2">{elo}</div>
                 <div className="text-sm text-slate-400">
                   {elo === 400 && 'Principiante'}
                   {elo === 800 && 'Aficionado'}
