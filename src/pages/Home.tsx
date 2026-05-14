@@ -2690,7 +2690,7 @@ export default function ChessGame() {
               <div className="mt-8 flex gap-4 justify-center">
                 <button
                   onClick={() => setGameMode('menu')}
-                  className="px-6 py-3 bg-white hover:bg-gray-100 text-blue-500 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                  className="px-6 py-3 bg-white hover:bg-gray-100 text-purple-500 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
                 >
                   🎯 Jugar Ahora
                 </button>
@@ -2700,7 +2700,7 @@ export default function ChessGame() {
 
           {/* Piece Stats (Original) */}
           <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6">
-            <h2 className="text-2xl font-bold mb-6 text-white">Estadísticas por Pieza</h2>
+            <h2 className="text-2xl font-bold mb-6 text-purple-400">Estadísticas por Pieza</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {chessGamePro.pieceStats.map((stat) => (
                 <div key={stat.pieceType} className="bg-slate-900/50 rounded-xl p-4">
