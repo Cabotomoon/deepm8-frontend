@@ -2512,7 +2512,7 @@ export default function ChessGame() {
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-blue-200 via-blue-400 to-blue-600 bg-clip-text text-transparent mb-8">
+          <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-blue-300 via-blue-500 to-blue-700 bg-clip-text text-transparent mb-8">
             Mi Perfil
           </h1>
 
@@ -2690,7 +2690,7 @@ export default function ChessGame() {
               <div className="mt-8 flex gap-4 justify-center">
                 <button
                   onClick={() => setGameMode('menu')}
-                  className="px-6 py-3 bg-white hover:bg-gray-100 text-purple-500 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                  className="px-6 py-3 bg-white hover:bg-gray-100 text-purple-500 rounded-xl font-bold transition-all duration-200 hover:scale-105 shadow-lg"
                 >
                   🎯 Jugar Ahora
                 </button>
