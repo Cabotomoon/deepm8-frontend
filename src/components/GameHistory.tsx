@@ -91,11 +91,11 @@ export default function GameHistoryComponent({ userId, onClose, onReplayGame }: 
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-slate-900 rounded-2xl border-2 border-slate-700 max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-white via-blue-400 to-blue-600 p-6">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-3xl font-bold text-purple-600 mb-2">📜 Historial de Partidas</h2>
-              <p className="text-blue-900">{stats.total} partidas jugadas</p>
+              <h2 className="text-3xl font-bold text-white mb-2">📜 Historial de Partidas</h2>
+              <p className="text-white">{stats.total} partidas jugadas</p>
             </div>
             <button
               onClick={onClose}
@@ -107,21 +107,21 @@ export default function GameHistoryComponent({ userId, onClose, onReplayGame }: 
 
           {/* Stats Summary */}
           <div className="grid grid-cols-4 gap-4 mt-6">
-            <div className="bg-blue-900/40 rounded-lg p-3 text-center backdrop-blur border border-blue-700/50">
-              <div className="text-2xl font-bold text-blue-900">{stats.total}</div>
-              <div className="text-xs text-blue-800">Total</div>
+            <div className="bg-white/10 rounded-lg p-3 text-center backdrop-blur">
+              <div className="text-2xl font-bold text-white">{stats.total}</div>
+              <div className="text-xs text-blue-100">Total</div>
             </div>
-            <div className="bg-green-500/30 rounded-lg p-3 text-center backdrop-blur border border-green-600/50">
-              <div className="text-2xl font-bold text-green-700">{stats.won}</div>
-              <div className="text-xs text-green-800">Victorias</div>
+            <div className="bg-green-500/20 rounded-lg p-3 text-center backdrop-blur border border-green-500/30">
+              <div className="text-2xl font-bold text-green-400">{stats.won}</div>
+              <div className="text-xs text-green-100">Victorias</div>
             </div>
-            <div className="bg-red-500/30 rounded-lg p-3 text-center backdrop-blur border border-red-600/50">
-              <div className="text-2xl font-bold text-red-700">{stats.lost}</div>
-              <div className="text-xs text-red-800">Derrotas</div>
+            <div className="bg-red-500/20 rounded-lg p-3 text-center backdrop-blur border border-red-500/30">
+              <div className="text-2xl font-bold text-red-400">{stats.lost}</div>
+              <div className="text-xs text-red-100">Derrotas</div>
             </div>
-            <div className="bg-yellow-500/30 rounded-lg p-3 text-center backdrop-blur border border-yellow-600/50">
-              <div className="text-2xl font-bold text-yellow-700">{stats.draw}</div>
-              <div className="text-xs text-yellow-800">Tablas</div>
+            <div className="bg-yellow-500/20 rounded-lg p-3 text-center backdrop-blur border border-yellow-500/30">
+              <div className="text-2xl font-bold text-yellow-400">{stats.draw}</div>
+              <div className="text-xs text-yellow-100">Tablas</div>
             </div>
           </div>
         </div>
