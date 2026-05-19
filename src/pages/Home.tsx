@@ -3500,13 +3500,13 @@ export default function ChessGame() {
               <img
                 src="/branding/logo-m8.png"
                 alt="DeepM8"
-                className="h-12 md:h-14 object-contain"
+                className="h-24 md:h-32 object-contain"
               />
               <div>
-                <h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
                   DEEP M8
                 </h1>
-                <p className="text-[10px] md:text-xs text-slate-400 font-medium tracking-wider">
+                <p className="text-xs md:text-sm text-slate-400 font-medium tracking-wider">
                   PIENSA. ENTRENA. EVOLUCIONA.
                 </p>
               </div>
