@@ -3889,13 +3889,13 @@ export default function ChessGame() {
             <div className="flex flex-wrap gap-3 justify-center">
               <button
                 onClick={resetGame}
-                className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 🔄 Nueva Partida
               </button>
               <button
                 onClick={handleResign}
-                className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
                 disabled={gameStatus === 'checkmate' || gameStatus === 'stalemate' || gameStatus === 'resigned'}
               >
                 🏳️ Rendirse
@@ -3904,7 +3904,7 @@ export default function ChessGame() {
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg ${
                   soundEnabled
-                    ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
                     : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800'
                 }`}
               >
@@ -3912,7 +3912,7 @@ export default function ChessGame() {
               </button>
               <button
                 onClick={handleBackToMenuDuringOnlineGame}
-                className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-6 py-3 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 ☰ Menú
               </button>
