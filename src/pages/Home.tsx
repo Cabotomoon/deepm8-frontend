@@ -3912,7 +3912,7 @@ export default function ChessGame() {
               </button>
               <button
                 onClick={handleBackToMenuDuringOnlineGame}
-                className="px-6 py-3 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 ☰ Menú
               </button>
@@ -3947,6 +3947,24 @@ export default function ChessGame() {
                     {PIECE_SYMBOLS[piece.color][piece.type]}
                   </span>
                 ))}
+              </div>
+            </div>
+
+            {/* Move history */}
+            <div className="mt-4 bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto">
+              <h3 className="text-sm font-semibold mb-3 text-slate-400 sticky top-0 bg-slate-800/90 backdrop-blur -m-4 p-4">
+                📋 Historial de Jugadas
+              </h3>
+              <div className="space-y-1 mt-4">
+                {moveHistory.map((move, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm hover:bg-slate-700/50 p-1 rounded">
+                    <span className="text-slate-500 font-mono w-8">{Math.floor(i / 2) + 1}.</span>
+                    <span className={i % 2 === 0 ? 'text-white font-semibold' : 'text-slate-300'}>
+                      {move.notation}
+                    </span>
+                  </div>
+                ))}
+                <div ref={historyEndRef} />
               </div>
             </div>
 
