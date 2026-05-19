@@ -3475,12 +3475,12 @@ export default function ChessGame() {
           </div>
         )}
 
-        {/* Header - Logo, Tipo de partida y Menú */}
-        <div className="mb-6 flex flex-col items-center gap-3">
-          <div className="flex items-center justify-center gap-4">
-            {/* Menú Hamburguesa */}
+        {/* Header - Logo y Menú alineados con el tablero */}
+        <div className="mb-6 max-w-[672px] mx-auto">
+          <div className="flex items-center justify-between mb-3">
+            {/* Menú Hamburguesa - Alineado a la izquierda */}
             {chessGamePro.userProfile && (
-              <div className="relative">
+              <div className="relative hamburger-menu-container">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="group relative bg-[#181825] backdrop-blur border border-white/6 rounded-xl p-3 hover:border-purple-400/40 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-purple-500/20"
@@ -3492,46 +3492,145 @@ export default function ChessGame() {
                     <div className={`w-6 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
                   </div>
                 </button>
+
+                {/* Dropdown Menu */}
+                {isMenuOpen && (
+                  <div className="absolute top-full mt-3 left-0 min-w-[420px] bg-[#181825] backdrop-blur-xl border border-white/8 rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-in z-50">
+                    {/* Mi Perfil Button */}
+                    <button
+                      onClick={() => {
+                        chessGamePro.loadStats();
+                        setGameMode('stats');
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full group relative bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-b border-white/6 p-6 hover:from-purple-500/20 hover:to-blue-500/20 transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="text-4xl">👤</div>
+                        <div className="text-left flex-1">
+                          <h3 className="text-lg font-bold mb-1 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">Mi Perfil</h3>
+                          <p className="text-slate-300 text-sm font-medium">
+                            ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            Progreso completo de todas tus partidas
+                          </p>
+                        </div>
+                        <div className="text-2xl text-slate-600 group-hover:text-purple-400 transition-colors">→</div>
+                      </div>
+                    </button>
+
+                    {/* User Session Section */}
+                    <div className="bg-gradient-to-r from-green-500/10 to-green-600/10 border-b border-white/6 p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="text-3xl">✅</div>
+                        <div className="flex-1">
+                          <h3 className="text-base font-semibold text-green-400 mb-1">
+                            {chessGamePro.userProfile.name}
+                          </h3>
+                          <p className="text-sm text-slate-300">
+                            ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas jugadas
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (confirm('¿Cerrar sesión? Tus datos se guardarán y podrás volver más tarde.')) {
+                              clearAuth();
+                              chessGamePro.setGameMode('user-selection');
+                              setIsMenuOpen(false);
+                            }
+                          }}
+                          className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-500 rounded-lg font-semibold transition-all duration-200 text-sm"
+                        >
+                          🚪 Cerrar Sesión
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Configuración Section */}
+                    <div className="p-6">
+                      <h3 className="text-base font-semibold mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">⚙️ Configuración</h3>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-2 text-slate-300">Tema del tablero</label>
+                          <div className="grid grid-cols-6 gap-2">
+                            {Object.entries(THEMES).map(([key, theme]) => (
+                              <button
+                                key={key}
+                                onClick={() => setCurrentTheme(key)}
+                                className={`p-3 rounded-lg border-2 transition-all ${
+                                  currentTheme === key
+                                    ? 'border-purple-500 scale-110 shadow-lg shadow-purple-500/30'
+                                    : 'border-slate-600 hover:border-slate-500'
+                                }`}
+                                title={theme.name}
+                              >
+                                <div className="flex gap-1">
+                                  <div className={`w-3 h-3 ${theme.light} rounded`}></div>
+                                  <div className={`w-3 h-3 ${theme.dark} rounded`}></div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-medium text-slate-300">Efectos de sonido</label>
+                          <button
+                            onClick={() => setSoundEnabled(!soundEnabled)}
+                            className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm ${
+                              soundEnabled
+                                ? 'bg-blue-500 hover:bg-blue-600'
+                                : 'bg-slate-600 hover:bg-slate-700'
+                            }`}
+                          >
+                            {soundEnabled ? '🔊 Activado' : '🔇 Desactivado'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Logo DeepM8 - Igual al menú principal */}
-            <div className="flex items-center gap-3">
+            {/* Logo DeepM8 Lateral - Centro */}
+            <div className={`${chessGamePro.userProfile ? '' : 'mx-auto'}`}>
               <img
-                src="/branding/logo-m8.png"
+                src="/branding/logo-lateral.png"
                 alt="DeepM8"
                 className="h-24 md:h-32 object-contain"
               />
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
-                  DEEP M8
-                </h1>
-                <p className="text-xs md:text-sm text-slate-400 font-medium tracking-wider">
-                  PIENSA. ENTRENA. EVOLUCIONA.
-                </p>
-              </div>
             </div>
+
+            {/* Placeholder para balance visual */}
+            {chessGamePro.userProfile && <div className="w-[52px]"></div>}
           </div>
 
           {/* Tipo de partida */}
-          <div className={`px-4 py-2 rounded-lg bg-gradient-to-r ${TIME_CONTROLS[timeControl].color} text-white font-semibold text-sm shadow-lg`}>
-            {TIME_CONTROLS[timeControl].icon} {TIME_CONTROLS[timeControl].name}
-            {incrementPerMove > 0 && ` +${incrementPerMove}s`}
+          <div className="flex justify-center">
+            <div className={`px-4 py-2 rounded-lg bg-gradient-to-r ${TIME_CONTROLS[timeControl].color} text-white font-semibold text-sm shadow-lg`}>
+              {TIME_CONTROLS[timeControl].icon} {TIME_CONTROLS[timeControl].name}
+              {incrementPerMove > 0 && ` +${incrementPerMove}s`}
+            </div>
           </div>
 
           {/* Estado del juego (si no está jugando) */}
           {gameStatus !== 'playing' && (
-            <div className={`px-6 py-3 rounded-xl font-bold text-lg ${
-              gameStatus === 'checkmate' ? (gameEndReason === 'timeout' ? 'bg-purple-600' : 'bg-red-500') :
-              gameStatus === 'stalemate' ? 'bg-yellow-500 text-black' :
-              gameStatus === 'resigned' ? 'bg-red-600' :
-              'bg-orange-500'
-            }`}>
-              {gameStatus === 'checkmate' ?
-                (gameEndReason === 'timeout' ? '⏰ ¡TIEMPO AGOTADO!' : '¡JAQUE MATE!') :
-               gameStatus === 'stalemate' ? 'TABLAS' :
-               gameStatus === 'resigned' ? '¡RENDICIÓN!' :
-               '¡JAQUE!'}
+            <div className="flex justify-center mt-3">
+              <div className={`px-6 py-3 rounded-xl font-bold text-lg ${
+                gameStatus === 'checkmate' ? (gameEndReason === 'timeout' ? 'bg-purple-600' : 'bg-red-500') :
+                gameStatus === 'stalemate' ? 'bg-yellow-500 text-black' :
+                gameStatus === 'resigned' ? 'bg-red-600' :
+                'bg-orange-500'
+              }`}>
+                {gameStatus === 'checkmate' ?
+                  (gameEndReason === 'timeout' ? '⏰ ¡TIEMPO AGOTADO!' : '¡JAQUE MATE!') :
+                 gameStatus === 'stalemate' ? 'TABLAS' :
+                 gameStatus === 'resigned' ? '¡RENDICIÓN!' :
+                 '¡JAQUE!'}
+              </div>
             </div>
           )}
         </div>
