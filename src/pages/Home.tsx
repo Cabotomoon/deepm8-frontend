@@ -3729,26 +3729,27 @@ export default function ChessGame() {
                   </div>
                 </div>
               </div>
+
+              {/* Indicador de Turno en el centro - Solo si es turno de negras */}
+              {currentPlayer === 'black' && (
+                <div className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/50">
+                  <div className="text-sm font-semibold">
+                    <span className="text-slate-300">Turno:</span>{' '}
+                    <span className="text-white">Negras ♚</span>
+                    {gameMode === 'ai' && isAiThinking && (
+                      <span className="ml-2 text-blue-400 animate-pulse text-xs">
+                        (IA pensando...)
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Reloj del jugador negro */}
               <div className={`px-4 py-2 rounded-lg font-mono text-xl font-bold ${
                 currentPlayer === 'black' ? 'bg-amber-500 text-black' : 'bg-slate-700 text-white'
               } ${blackTime <= 10 ? 'animate-pulse' : ''}`}>
                 {formatTime(blackTime)}
-              </div>
-            </div>
-
-            {/* Indicador de Turno Superior */}
-            <div className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30">
-              <div className="text-sm font-semibold">
-                <span className="text-slate-300">Turno:</span>{' '}
-                <span className={`${currentPlayer === 'white' ? 'text-white' : 'text-slate-400'}`}>
-                  {currentPlayer === 'white' ? 'Blancas ♔' : 'Negras ♚'}
-                </span>
-                {gameMode === 'ai' && currentPlayer === 'black' && isAiThinking && (
-                  <span className="ml-2 text-blue-400 animate-pulse">
-                    (IA pensando...)
-                  </span>
-                )}
               </div>
             </div>
 
@@ -3847,16 +3848,6 @@ export default function ChessGame() {
               </div>
             </div>
 
-            {/* Indicador de Turno Inferior */}
-            <div className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30">
-              <div className="text-sm font-semibold">
-                <span className="text-slate-300">Turno:</span>{' '}
-                <span className={`${currentPlayer === 'white' ? 'text-white' : 'text-slate-400'}`}>
-                  {currentPlayer === 'white' ? 'Blancas ♔' : 'Negras ♚'}
-                </span>
-              </div>
-            </div>
-
             {/* Información Jugador Blanco (abajo del tablero) */}
             <div className="w-full max-w-[672px] flex items-center justify-between bg-slate-800/50 backdrop-blur rounded-xl p-3 border border-slate-700">
               {/* Nombre y ELO del jugador blanco */}
@@ -3877,6 +3868,17 @@ export default function ChessGame() {
                   </div>
                 </div>
               </div>
+
+              {/* Indicador de Turno en el centro - Solo si es turno de blancas */}
+              {currentPlayer === 'white' && (
+                <div className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/50">
+                  <div className="text-sm font-semibold">
+                    <span className="text-slate-300">Turno:</span>{' '}
+                    <span className="text-white">Blancas ♔</span>
+                  </div>
+                </div>
+              )}
+
               {/* Reloj del jugador blanco */}
               <div className={`px-4 py-2 rounded-lg font-mono text-xl font-bold ${
                 currentPlayer === 'white' ? 'bg-amber-500 text-black' : 'bg-slate-700 text-white'
