@@ -3752,7 +3752,7 @@ export default function ChessGame() {
                   <div className="font-bold text-white">
                     {gameMode === 'ai' ? 'IA DeepM8' :
                      gameMode === 'online' && myColor === 'white' ? opponentName :
-                     gameMode === 'online' && myColor === 'black' ? getUserDisplayName() :
+                     gameMode === 'online' && myColor === 'black' ? getDisplayName() :
                      'Jugador 2'}
                   </div>
                   <div className="text-sm text-slate-400">
@@ -3898,8 +3898,8 @@ export default function ChessGame() {
                 <div className="text-3xl">♔</div>
                 <div>
                   <div className="font-bold text-white">
-                    {gameMode === 'ai' ? getUserDisplayName() :
-                     gameMode === 'online' && myColor === 'white' ? getUserDisplayName() :
+                    {gameMode === 'ai' ? getDisplayName() :
+                     gameMode === 'online' && myColor === 'white' ? getDisplayName() :
                      gameMode === 'online' && myColor === 'black' ? opponentName :
                      'Jugador 1'}
                   </div>
