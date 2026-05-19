@@ -3495,12 +3495,21 @@ export default function ChessGame() {
               </div>
             )}
 
-            {/* Logo DeepM8 */}
-            <div className="text-center">
-              <div className="text-5xl mb-1">♔</div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                DeepM8
-              </h1>
+            {/* Logo DeepM8 - Igual al menú principal */}
+            <div className="flex items-center gap-3">
+              <img
+                src="/branding/logo-m8.png"
+                alt="DeepM8"
+                className="h-12 md:h-14 object-contain"
+              />
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+                  DEEP M8
+                </h1>
+                <p className="text-[10px] md:text-xs text-slate-400 font-medium tracking-wider">
+                  PIENSA. ENTRENA. EVOLUCIONA.
+                </p>
+              </div>
             </div>
           </div>
 
