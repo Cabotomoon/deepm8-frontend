@@ -6,9 +6,6 @@
 import { Chess } from 'chess.js';
 import type { GameRecord } from './playerProfileService';
 
-// Dynamic imports para FFmpeg
-type FFmpeg = any;
-
 interface ReplayOptions {
   includeHighlights?: boolean;
   speed?: 'slow' | 'normal' | 'fast'; // 2s, 1s, 0.5s per move
@@ -29,8 +26,6 @@ class VideoReplayService {
   private videoWidth = 1280;
   private videoHeight = 720;
   private maxFramesInMemory = 100;
-  private ffmpeg: FFmpeg | null = null;
-  private ffmpegLoaded = false;
 
   constructor() {
     this.canvas = document.createElement('canvas');
@@ -40,78 +35,6 @@ class VideoReplayService {
       willReadFrequently: true,
       alpha: false
     })!;
-  }
-
-  /**
-   * Load FFmpeg for MP4 conversion with improved CDN fallback
-   */
-  private async loadFFmpeg(): Promise<void> {
-    if (this.ffmpegLoaded) return;
-
-    try {
-      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
-      const { toBlobURL, fetchFile } = await import('@ffmpeg/util');
-
-      this.ffmpeg = new FFmpeg();
-
-      // Enable logging
-      this.ffmpeg.on('log', ({ message }) => {
-        console.log('FFmpeg:', message);
-      });
-
-      // Try multiple CDN providers with different versions
-      const cdnConfigs = [
-        // UNPKG is usually the most reliable
-        {
-          name: 'unpkg',
-          coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
-          wasmURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm'
-        },
-        {
-          name: 'unpkg-esm',
-          coreURL: 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm/ffmpeg-core.js',
-          wasmURL: 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm/ffmpeg-core.wasm'
-        },
-        {
-          name: 'jsdelivr',
-          coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
-          wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm'
-        }
-      ];
-
-      let loaded = false;
-      for (const config of cdnConfigs) {
-        try {
-          console.log(`🔄 Attempting to load FFmpeg from ${config.name}...`);
-
-          // Convert URLs to blob URLs (required by FFmpeg)
-          const coreURL = await toBlobURL(config.coreURL, 'text/javascript');
-          const wasmURL = await toBlobURL(config.wasmURL, 'application/wasm');
-
-          await this.ffmpeg.load({
-            coreURL,
-            wasmURL,
-          });
-
-          loaded = true;
-          console.log(`✅ FFmpeg loaded successfully from ${config.name}!`);
-          break;
-        } catch (err) {
-          console.warn(`❌ Failed to load from ${config.name}:`, err);
-          // Continue to next CDN
-        }
-      }
-
-      if (!loaded) {
-        throw new Error('❌ No se pudo cargar FFmpeg desde ningún CDN');
-      }
-
-      this.ffmpegLoaded = true;
-    } catch (error) {
-      console.warn('⚠️ FFmpeg no disponible, se usará formato WebM:', error);
-      this.ffmpegLoaded = false;
-      this.ffmpeg = null;
-    }
   }
 
   /**
@@ -560,64 +483,26 @@ class VideoReplayService {
   }
 
   /**
-   * Convert frames to MP4 video blob using FFmpeg (with WebM fallback)
+   * Convert frames to video blob (WebM format optimized for web)
+   * Note: MP4 requires SharedArrayBuffer and specific HTTP headers (COOP/COEP)
+   * WebM is the reliable choice for browser-based video generation
    */
   async framesToVideoBlob(frames: string[], fps: number = 30): Promise<Blob> {
     console.log('🎬 Iniciando generación de video...');
-
-    // Generar WebM primero (siempre funciona como base)
-    const webmBlob = await this.generateWebMBlob(frames, fps);
-    console.log('✅ WebM base generado correctamente');
+    console.log('ℹ️ Formato: WebM (VP9) - Compatible con todos los navegadores modernos');
 
     try {
-      // Intentar cargar FFmpeg para conversión a MP4
-      console.log('🔄 Cargando FFmpeg para conversión a MP4...');
-      await this.loadFFmpeg();
+      // Generate WebM directly (reliable and efficient)
+      const videoBlob = await this.generateWebMBlob(frames, fps);
 
-      if (!this.ffmpeg || !this.ffmpegLoaded) {
-        console.log('ℹ️ FFmpeg no disponible - usando WebM (compatible con todos los navegadores)');
-        return webmBlob;
-      }
+      const sizeMB = (videoBlob.size / 1024 / 1024).toFixed(2);
+      console.log(`✅ Video generado exitosamente!`);
+      console.log(`📊 Tamaño: ${sizeMB} MB | Formato: WebM (VP9) | Resolución: ${this.videoWidth}x${this.videoHeight}@${fps}fps`);
 
-      const { fetchFile } = await import('@ffmpeg/util');
-
-      console.log('🎞️ Convirtiendo WebM → MP4 (esto puede tardar unos segundos)...');
-
-      // Write input file
-      await this.ffmpeg.writeFile('input.webm', await fetchFile(webmBlob));
-
-      // Convert with optimized settings for web playback
-      await this.ffmpeg.exec([
-        '-i', 'input.webm',
-        '-c:v', 'libx264',      // H.264 codec
-        '-preset', 'fast',       // Fast encoding
-        '-crf', '23',            // Quality level (18-28, lower = better)
-        '-pix_fmt', 'yuv420p',   // Pixel format for compatibility
-        '-movflags', '+faststart', // Enable fast start for web
-        '-max_muxing_queue_size', '1024', // Prevent queue overflow
-        'output.mp4'
-      ]);
-
-      // Read output file
-      const data = await this.ffmpeg.readFile('output.mp4');
-      const mp4Blob = new Blob([data], { type: 'video/mp4' });
-
-      // Cleanup
-      try {
-        await this.ffmpeg.deleteFile('input.webm');
-        await this.ffmpeg.deleteFile('output.mp4');
-      } catch (cleanupError) {
-        console.warn('⚠️ Error limpiando archivos temporales:', cleanupError);
-      }
-
-      console.log('✅ Conversión a MP4 completada exitosamente!');
-      console.log(`📊 Tamaño final: ${(mp4Blob.size / 1024 / 1024).toFixed(2)} MB`);
-      return mp4Blob;
-
+      return videoBlob;
     } catch (error) {
-      console.error('❌ Error durante la conversión a MP4:', error);
-      console.log('ℹ️ Usando WebM como formato final (compatible con todos los navegadores modernos)');
-      return webmBlob;
+      console.error('❌ Error durante la generación de video:', error);
+      throw error;
     }
   }
 
