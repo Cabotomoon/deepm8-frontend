@@ -2896,7 +2896,7 @@ export default function ChessGame() {
                 : [];
 
               // Debug: Log para verificar el estado
-              console.log('📊 Debug Recomendaciones:', {
+              console.log('📊 Debug Recomendaciones (VERSIÓN ACTUALIZADA V3):', {
                 hasEnoughGames,
                 totalGames: userGameHistory.length,
                 profileGameHistory: profileWithHistory.gameHistory?.length || 0,
@@ -2910,7 +2910,7 @@ export default function ChessGame() {
                   {/* Header */}
                   <div className="text-center mb-8">
                     <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">
-                      📚 Recomendaciones de Estudio Personalizadas por Deep M8 Personal Trainer
+                      📚 Recomendaciones de Estudio Personalizadas
                     </h3>
                     <p className="text-slate-300 text-sm">
                       {hasEnoughGames
