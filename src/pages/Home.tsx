@@ -2892,23 +2892,6 @@ export default function ChessGame() {
                 </p>
               </div>
 
-              {/* Analyze Button */}
-              <div className="flex justify-center">
-                <button
-                  onClick={() => {
-                    console.log('🧠 Botón Analizar clickeado');
-                    console.log('showGameHistory actual:', showGameHistory);
-                    setShowGameHistory(true);
-                    console.log('showGameHistory después de set:', true);
-                  }}
-                  className="group relative bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center gap-3"
-                >
-                  <span className="text-2xl">🧠</span>
-                  <span className="text-xl">Analizar Partida</span>
-                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl blur-xl"></div>
-                </button>
-              </div>
-
               {/* Info Cards */}
               <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
@@ -3219,19 +3202,6 @@ export default function ChessGame() {
                     <p className="text-slate-400">Revive tus partidas movimiento por movimiento</p>
                   </div>
                   <div className="text-3xl text-slate-600 group-hover:text-purple-400 transition-colors">→</div>
-                </div>
-              </button>
-            )}
-
-            {/* Analyze Game Button - Duplicate */}
-            {chessGamePro.userProfile && (
-              <button
-                onClick={() => setShowGameHistory(true)}
-                className="group relative bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-6 px-10 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-green-500/30 w-full"
-              >
-                <div className="flex items-center justify-center gap-4">
-                  <span className="text-3xl">🧠</span>
-                  <span className="text-2xl">Analizar Partida</span>
                 </div>
               </button>
             )}
