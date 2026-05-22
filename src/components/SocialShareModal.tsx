@@ -436,8 +436,8 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
                     />
                     <div className="text-xs text-slate-500 mt-2 text-center">
                       {generatedVideo.type === 'video/mp4'
-                        ? 'Video generado en formato MP4 (1280x720px HD, 30fps)'
-                        : 'Video generado en formato WebM (1280x720px HD, 30fps)'}
+                        ? '✅ Formato MP4 (1280x720px HD, 30fps) - Compatible con todas las plataformas'
+                        : '✅ Formato WebM (1280x720px HD, 30fps) - Compatible con Chrome, Firefox, Edge, Safari'}
                     </div>
                   </div>
 
@@ -488,8 +488,11 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
                 <div className="bg-slate-900/50 rounded-lg p-8 text-center border-2 border-dashed border-slate-700">
                   <div className="text-4xl mb-2">🎬</div>
                   <div className="text-slate-400 text-sm">Haz clic en "Generar" para crear un replay animado de la partida</div>
-                  <div className="text-xs text-slate-600 mt-2">
-                    Incluye intro, análisis de jugadas y highlights
+                  <div className="text-xs text-slate-500 mt-2">
+                    📹 Incluye intro, análisis de jugadas y highlights
+                  </div>
+                  <div className="text-xs text-slate-600 mt-1">
+                    🎞️ Formato: WebM (compatible con todos los navegadores modernos)
                   </div>
                 </div>
               )}
