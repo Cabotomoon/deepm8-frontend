@@ -2877,7 +2877,7 @@ export default function ChessGame() {
               )}
             </div>
 
-            {/* 📚 Study Recommendations Section */}
+            {/* 📚 Study Recommendations Section - Updated Format */}
             {chessGamePro.userProfile && userGameHistory && (() => {
               // Si hay datos, calculamos métricas reales; si no, usamos valores por defecto (50)
               const hasEnoughGames = userGameHistory.length >= 5;
@@ -2924,84 +2924,76 @@ export default function ChessGame() {
                   {hasEnoughGames && (
                     <div className="space-y-4 mb-8">
                       {recommendations.map((rec) => {
-                      const priorityConfig = {
-                        high: {
-                          border: 'border-red-500/60',
-                          bg: 'bg-gradient-to-br from-red-600/20 to-orange-600/20',
-                          badge: 'bg-red-500/30 text-red-200',
-                          badgeText: '🔴 ALTA',
-                          dot: 'bg-red-500 animate-pulse'
-                        },
-                        medium: {
-                          border: 'border-blue-500/60',
-                          bg: 'bg-gradient-to-br from-blue-600/20 to-purple-600/20',
-                          badge: 'bg-blue-500/30 text-blue-200',
-                          badgeText: '🔵 MEDIA',
-                          dot: 'bg-blue-500'
-                        },
-                        low: {
-                          border: 'border-slate-500/40',
-                          bg: 'bg-gradient-to-br from-slate-700/20 to-slate-600/20',
-                          badge: 'bg-slate-600/50 text-slate-300',
-                          badgeText: '⚪ BAJA',
-                          dot: 'bg-slate-500'
-                        }
-                      };
+                        const priorityConfig = {
+                          high: {
+                            bgGradient: 'from-red-600/20 to-orange-600/20',
+                            border: 'border-2 border-red-500/50',
+                            textColor: 'text-red-200',
+                            badge: 'bg-red-500/30 text-red-200',
+                            badgeText: 'PRIORIDAD ALTA',
+                            icon: '⚠️',
+                            primaryButton: 'bg-red-500 hover:bg-red-600'
+                          },
+                          medium: {
+                            bgGradient: 'from-blue-600/20 to-purple-600/20',
+                            border: 'border border-blue-500/50',
+                            textColor: 'text-blue-200',
+                            badge: 'bg-blue-500/30 text-blue-200',
+                            badgeText: 'RECOMENDADO',
+                            icon: '🎯',
+                            primaryButton: 'bg-blue-500 hover:bg-blue-600'
+                          },
+                          low: {
+                            bgGradient: 'from-slate-800/50 to-slate-800/50',
+                            border: 'border border-slate-700',
+                            textColor: 'text-slate-400',
+                            badge: 'bg-slate-600/50 text-slate-300',
+                            badgeText: 'OPCIONAL',
+                            icon: '📖',
+                            primaryButton: 'bg-purple-500 hover:bg-purple-600'
+                          }
+                        };
 
-                      const config = priorityConfig[rec.priority];
+                        const config = priorityConfig[rec.priority];
 
-                      return (
-                        <div
-                          key={rec.id}
-                          className={`${config.bg} border-2 ${config.border} rounded-xl p-5 hover:scale-[1.02] transition-all duration-200 hover:shadow-lg`}
-                        >
-                          <div className="flex items-start gap-4">
-                            {/* Content */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-3 mb-2">
-                                <h4 className="text-lg font-bold text-white">
-                                  {rec.title}
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                  <span className={`text-xs px-3 py-1 ${config.badge} rounded-full whitespace-nowrap font-bold`}>
+                        return (
+                          <div key={rec.id} className={`bg-gradient-to-br ${config.bgGradient} rounded-xl p-6 ${config.border}`}>
+                            <div className="flex items-start gap-4">
+                              <div className="text-4xl">{config.icon}</div>
+                              <div className="flex-1">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div>
+                                    <h4 className="text-xl font-bold text-white mb-1">{rec.title}</h4>
+                                    <p className={`${config.textColor} text-sm`}>
+                                      <span className="font-semibold">Por qué:</span> {rec.reason}
+                                    </p>
+                                  </div>
+                                  <span className={`px-3 py-1 ${config.badge} rounded-full text-xs font-bold whitespace-nowrap`}>
                                     {config.badgeText}
                                   </span>
-                                  <div className={`w-3 h-3 rounded-full ${config.dot}`} />
+                                </div>
+                                <p className="text-slate-200 mb-4">
+                                  {rec.description}
+                                </p>
+                                <div className="flex gap-3">
+                                  <button
+                                    onClick={() => {
+                                      console.log('🎯 Button clicked! Category:', rec.category);
+                                      setActiveTraining(rec.category);
+                                    }}
+                                    className={`flex-1 ${config.primaryButton} text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2`}
+                                  >
+                                    <span>👉</span> {rec.actionLabel}
+                                  </button>
+                                  <button className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg transition-all">
+                                    {rec.secondaryActionLabel}
+                                  </button>
                                 </div>
                               </div>
-                              <p className="text-slate-300 text-sm mb-2 leading-relaxed">
-                                {rec.description}
-                              </p>
-                              <p className="text-slate-400 text-xs italic mb-4">
-                                💡 {rec.reason}
-                              </p>
-
-                              {/* Botón Empezar a Entrenar */}
-                              <button
-                                onClick={() => {
-                                  console.log('🎯 Button clicked! Category:', rec.category);
-                                  console.log('🎯 Current activeTraining:', activeTraining);
-                                  setActiveTraining(rec.category);
-                                  console.log('🎯 setActiveTraining called with:', rec.category);
-                                }}
-                                className={`
-                                  px-6 py-2.5 rounded-lg font-bold text-sm
-                                  transition-all duration-200 hover:scale-105 shadow-md
-                                  ${rec.priority === 'high'
-                                    ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white'
-                                    : rec.priority === 'medium'
-                                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white'
-                                    : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white'
-                                  }
-                                `}
-                              >
-                                🎓 Empezar a Entrenar
-                              </button>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -3010,39 +3002,46 @@ export default function ChessGame() {
                     <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                       <span>📊</span> Tu Progreso por Área
                     </h4>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {[
-                        { label: 'Aperturas', score: metrics.openings, icon: '📖' },
-                        { label: 'Táctica', score: metrics.tactics, icon: '⚔️' },
-                        { label: 'Finales', score: metrics.endgames, icon: '♟️' },
-                        { label: 'Medio Juego', score: metrics.middlegame, icon: '🎯' }
+                        { label: 'Aperturas', score: metrics.openings },
+                        { label: 'Finales', score: metrics.endgames },
+                        { label: 'Táctica', score: metrics.tactics },
+                        { label: 'Medio Juego', score: metrics.middlegame }
                       ].map((area, i) => (
-                        <div key={i} className="flex items-center gap-3">
-                          <span className="w-28 text-slate-300 font-medium text-sm">
-                            {area.icon} {area.label}
-                          </span>
-                          <div className="flex-1 bg-slate-700/50 rounded-full h-3 overflow-hidden border border-slate-600/30">
-                            <div
-                              className={`h-full rounded-full transition-all duration-700 ${
-                                !hasEnoughGames ? 'bg-gradient-to-r from-orange-500 to-amber-500' :
-                                area.score >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                                area.score >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
-                                'bg-gradient-to-r from-orange-500 to-red-500'
-                              }`}
-                              style={{ width: `${area.score}%` }}
-                            />
+                        <div key={i}>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-slate-200 font-medium">{area.label}</span>
+                            <div className="flex items-center gap-3">
+                              <span className={`font-bold ${
+                                !hasEnoughGames ? 'text-orange-400' :
+                                area.score >= 70 ? 'text-green-400' :
+                                area.score >= 50 ? 'text-blue-400' :
+                                'text-orange-400'
+                              }`}>
+                                {Math.round(area.score)}
+                              </span>
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                !hasEnoughGames ? 'text-orange-400 bg-orange-500/20' :
+                                area.score >= 70 ? 'text-green-400 bg-green-500/20' :
+                                area.score >= 50 ? 'text-blue-400 bg-blue-500/20' :
+                                'text-orange-400 bg-orange-500/20'
+                              }`}>
+                                {!hasEnoughGames ? 'Insuficiente' :
+                                 area.score >= 70 ? 'Fuerte' :
+                                 area.score >= 50 ? 'Mejorando' :
+                                 'Necesitas trabajar'}
+                              </span>
+                            </div>
                           </div>
-                          <span className="w-16 text-right font-bold">
-                            <span className={
-                              !hasEnoughGames ? 'text-orange-400' :
-                              area.score >= 70 ? 'text-green-400' :
-                              area.score >= 50 ? 'text-blue-400' :
-                              'text-orange-400'
-                            }>
-                              {Math.round(area.score)}
-                            </span>
-                            <span className="text-slate-500 text-xs">/100</span>
-                          </span>
+                          <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                            <div className={`h-full transition-all duration-500 ${
+                              !hasEnoughGames ? 'bg-gradient-to-r from-orange-500 to-amber-500' :
+                              area.score >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                              area.score >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
+                              'bg-gradient-to-r from-orange-500 to-red-500'
+                            }`} style={{ width: `${area.score}%` }} />
+                          </div>
                         </div>
                       ))}
                     </div>
