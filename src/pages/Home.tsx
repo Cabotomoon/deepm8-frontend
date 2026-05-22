@@ -2906,23 +2906,120 @@ export default function ChessGame() {
               });
 
               return (
-                <div className="mt-8 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl">
-                  {/* Header */}
-                  <div className="text-center mb-8">
-                    <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">
-                      📚 Recomendaciones de Estudio Personalizadas
-                    </h3>
-                    <p className="text-slate-300 text-sm">
-                      {hasEnoughGames
-                        ? `Personalizado según tus últimas partidas`
-                        : `🎯 Juega ${5 - userGameHistory.length} partidas más para recibir recomendaciones personalizadas`
-                      }
-                    </p>
+                <div className="mt-8 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl space-y-6">
+                  {/* Tu Progreso por Área - PRIMERO como en GameAnalysis */}
+                  <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                    <h3 className="text-xl font-bold text-white mb-4">Tu Progreso por Área</h3>
+                    <div className="space-y-4">
+                      {/* Aperturas */}
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-slate-200 font-medium">Aperturas</span>
+                          <div className="flex items-center gap-3">
+                            <span className={`font-bold ${metrics.openings >= 70 ? 'text-green-400' : metrics.openings >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
+                              {metrics.openings}
+                            </span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              metrics.openings >= 70 ? 'text-green-400 bg-green-500/20' :
+                              metrics.openings >= 50 ? 'text-blue-400 bg-blue-500/20' :
+                              'text-orange-400 bg-orange-500/20'
+                            }`}>
+                              {metrics.openings >= 70 ? 'Fuerte' : metrics.openings >= 50 ? 'Mejorando' : 'Necesita trabajo'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                          <div className={`h-full transition-all duration-500 ${
+                            metrics.openings >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                            metrics.openings >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
+                            'bg-gradient-to-r from-orange-500 to-red-500'
+                          }`} style={{ width: `${metrics.openings}%` }} />
+                        </div>
+                      </div>
+
+                      {/* Finales */}
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-slate-200 font-medium">Finales</span>
+                          <div className="flex items-center gap-3">
+                            <span className={`font-bold ${metrics.endgames >= 70 ? 'text-green-400' : metrics.endgames >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
+                              {metrics.endgames}
+                            </span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              metrics.endgames >= 70 ? 'text-green-400 bg-green-500/20' :
+                              metrics.endgames >= 50 ? 'text-blue-400 bg-blue-500/20' :
+                              'text-orange-400 bg-orange-500/20'
+                            }`}>
+                              {metrics.endgames >= 70 ? 'Fuerte' : metrics.endgames >= 50 ? 'Mejorando' : 'Necesita trabajo'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                          <div className={`h-full transition-all duration-500 ${
+                            metrics.endgames >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                            metrics.endgames >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
+                            'bg-gradient-to-r from-orange-500 to-red-500'
+                          }`} style={{ width: `${metrics.endgames}%` }} />
+                        </div>
+                      </div>
+
+                      {/* Táctica */}
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-slate-200 font-medium">Táctica</span>
+                          <div className="flex items-center gap-3">
+                            <span className={`font-bold ${metrics.tactics >= 70 ? 'text-green-400' : metrics.tactics >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
+                              {metrics.tactics}
+                            </span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              metrics.tactics >= 70 ? 'text-green-400 bg-green-500/20' :
+                              metrics.tactics >= 50 ? 'text-blue-400 bg-blue-500/20' :
+                              'text-orange-400 bg-orange-500/20'
+                            }`}>
+                              {metrics.tactics >= 70 ? 'Fuerte' : metrics.tactics >= 50 ? 'Mejorando' : 'Necesita trabajo'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                          <div className={`h-full transition-all duration-500 ${
+                            metrics.tactics >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                            metrics.tactics >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
+                            'bg-gradient-to-r from-orange-500 to-red-500'
+                          }`} style={{ width: `${metrics.tactics}%` }} />
+                        </div>
+                      </div>
+
+                      {/* Medio Juego */}
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-slate-200 font-medium">Medio Juego</span>
+                          <div className="flex items-center gap-3">
+                            <span className={`font-bold ${metrics.middlegame >= 70 ? 'text-green-400' : metrics.middlegame >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
+                              {metrics.middlegame}
+                            </span>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              metrics.middlegame >= 70 ? 'text-green-400 bg-green-500/20' :
+                              metrics.middlegame >= 50 ? 'text-blue-400 bg-blue-500/20' :
+                              'text-orange-400 bg-orange-500/20'
+                            }`}>
+                              {metrics.middlegame >= 70 ? 'Fuerte' : metrics.middlegame >= 50 ? 'Mejorando' : 'Necesita trabajo'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                          <div className={`h-full transition-all duration-500 ${
+                            metrics.middlegame >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                            metrics.middlegame >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
+                            'bg-gradient-to-r from-orange-500 to-red-500'
+                          }`} style={{ width: `${metrics.middlegame}%` }} />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Recommendations Grid - Solo si hay suficientes partidas */}
-                  {hasEnoughGames && (
-                    <div className="space-y-4 mb-8">
+                  {/* Recomendaciones - SEGUNDO como en GameAnalysis */}
+                  {hasEnoughGames && recommendations.length > 0 && (
+                    <div className="space-y-4">
                       {recommendations.map((rec) => {
                         const priorityConfig = {
                           high: {
@@ -2996,56 +3093,6 @@ export default function ChessGame() {
                       })}
                     </div>
                   )}
-
-                  {/* Score Bars with Real Data */}
-                  <div className="pt-6 border-t border-slate-600/50">
-                    <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                      <span>📊</span> Tu Progreso por Área
-                    </h4>
-                    <div className="space-y-4">
-                      {[
-                        { label: 'Aperturas', score: metrics.openings },
-                        { label: 'Finales', score: metrics.endgames },
-                        { label: 'Táctica', score: metrics.tactics },
-                        { label: 'Medio Juego', score: metrics.middlegame }
-                      ].map((area, i) => (
-                        <div key={i}>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-slate-200 font-medium">{area.label}</span>
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${
-                                !hasEnoughGames ? 'text-orange-400' :
-                                area.score >= 70 ? 'text-green-400' :
-                                area.score >= 50 ? 'text-blue-400' :
-                                'text-orange-400'
-                              }`}>
-                                {Math.round(area.score)}
-                              </span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                !hasEnoughGames ? 'text-orange-400 bg-orange-500/20' :
-                                area.score >= 70 ? 'text-green-400 bg-green-500/20' :
-                                area.score >= 50 ? 'text-blue-400 bg-blue-500/20' :
-                                'text-orange-400 bg-orange-500/20'
-                              }`}>
-                                {!hasEnoughGames ? 'Insuficiente' :
-                                 area.score >= 70 ? 'Fuerte' :
-                                 area.score >= 50 ? 'Mejorando' :
-                                 'Necesitas trabajar'}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                            <div className={`h-full transition-all duration-500 ${
-                              !hasEnoughGames ? 'bg-gradient-to-r from-orange-500 to-amber-500' :
-                              area.score >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                              area.score >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
-                              'bg-gradient-to-r from-orange-500 to-red-500'
-                            }`} style={{ width: `${area.score}%` }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               );
             })()}
