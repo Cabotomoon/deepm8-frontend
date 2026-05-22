@@ -598,7 +598,8 @@ export default function ChessGame() {
   const myReconnectionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const particleIdRef = useRef(0);
-  const historyEndRef = useRef<HTMLDivElement>(null);
+  const leftHistoryRef = useRef<HTMLDivElement>(null);
+  const rightHistoryRef = useRef<HTMLDivElement>(null);
 
   // Helper function to get display name
   const getDisplayName = () => {
@@ -797,9 +798,14 @@ export default function ChessGame() {
     return () => cancelAnimationFrame(animationFrame);
   }, [particles]);
 
-  // Auto-scroll history
+  // Auto-scroll history containers without affecting page scroll
   useEffect(() => {
-    historyEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (leftHistoryRef.current) {
+      leftHistoryRef.current.scrollTop = leftHistoryRef.current.scrollHeight;
+    }
+    if (rightHistoryRef.current) {
+      rightHistoryRef.current.scrollTop = rightHistoryRef.current.scrollHeight;
+    }
   }, [moveHistory]);
 
   // Create particles effect
@@ -3639,7 +3645,11 @@ export default function ChessGame() {
           {/* Left panel - Move history */}
           <div className="order-1 lg:order-1">
             {/* Move history */}
-            <div className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto">
+            <div
+              ref={leftHistoryRef}
+              className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto"
+              style={{ scrollBehavior: 'auto' }}
+            >
               <h3 className="text-sm font-semibold mb-3 text-slate-400 sticky top-0 bg-slate-800/90 backdrop-blur -m-4 p-4">
                 📋 Historial de Jugadas
               </h3>
@@ -3652,7 +3662,6 @@ export default function ChessGame() {
                     </span>
                   </div>
                 ))}
-                <div ref={historyEndRef} />
               </div>
             </div>
           </div>
@@ -3930,7 +3939,11 @@ export default function ChessGame() {
           {/* Right panel - Move history and Chat */}
           <div className="order-3 lg:order-3">
             {/* Move history */}
-            <div className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto">
+            <div
+              ref={rightHistoryRef}
+              className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto"
+              style={{ scrollBehavior: 'auto' }}
+            >
               <h3 className="text-sm font-semibold mb-3 text-slate-400 sticky top-0 bg-slate-800/90 backdrop-blur -m-4 p-4">
                 📋 Historial de Jugadas
               </h3>
@@ -3943,7 +3956,6 @@ export default function ChessGame() {
                     </span>
                   </div>
                 ))}
-                <div ref={historyEndRef} />
               </div>
             </div>
 
