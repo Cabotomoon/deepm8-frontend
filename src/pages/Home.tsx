@@ -3138,14 +3138,14 @@ export default function ChessGame() {
             })()}
 
             {/* Buttons - Unified Style */}
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 justify-center relative z-50">
               <button
                 onClick={() => {
                   chessGamePro.setShowVictoryScreen(false);
                   setGameResult(null);
                   setGameMode('menu');
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg pointer-events-auto"
               >
                 🏠 Menú Principal
               </button>
@@ -3156,7 +3156,7 @@ export default function ChessGame() {
                   setGameResult(null);
                   resetGame();
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg pointer-events-auto"
               >
                 🔄 Nueva Partida
               </button>
@@ -3166,7 +3166,7 @@ export default function ChessGame() {
                   chessGamePro.loadStats();
                   setGameMode('stats');
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg pointer-events-auto"
               >
                 📊 Ver Estadísticas
               </button>
@@ -3182,7 +3182,7 @@ export default function ChessGame() {
                   });
                   setShowGameAnalysis(true);
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg pointer-events-auto"
               >
                 🔍 Analizar Partida
               </button>
