@@ -58,6 +58,13 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
   const [skillMetrics, setSkillMetrics] = useState<SkillMetrics | null>(null);
   const [recommendations, setRecommendations] = useState<StudyRecommendation[]>([]);
   const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(null);
+  const [authStatus, setAuthStatus] = useState<'checking' | 'authenticated' | 'unauthenticated'>('checking');
+
+  // Check auth status on mount
+  useEffect(() => {
+    const token = localStorage.getItem('seaverse_token');
+    setAuthStatus(token ? 'authenticated' : 'unauthenticated');
+  }, []);
 
   useEffect(() => {
     analyzeGame();
@@ -258,9 +265,30 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
     setProgress(80);
 
-    // Generate LLM feedback
-    const feedback = await llmCoachService.generateFeedback(newGameRecord, updatedProfile, results);
-    setCoachFeedback(feedback);
+    // Generate LLM feedback - now throws error if auth fails
+    try {
+      const feedback = await llmCoachService.generateFeedback(newGameRecord, updatedProfile, results);
+      setCoachFeedback(feedback);
+    } catch (error: any) {
+      console.error('❌ Error al generar feedback del coach:', error);
+
+      // Create error feedback with clear instructions
+      setCoachFeedback({
+        summary: '⚠️ No se pudo generar feedback personalizado con IA',
+        keyInsights: [
+          'Necesitas estar autenticado en SeaVerse para usar el coach con IA',
+          'El análisis técnico con Stockfish sigue disponible en la pestaña "Análisis Detallado"',
+          'Las recomendaciones de estudio están disponibles en la pestaña "Recomendaciones"'
+        ],
+        trainingPlan: [
+          '🔑 Solución: Asegúrate de estar autenticado en SeaVerse',
+          '💳 Verifica que tengas créditos disponibles',
+          '🔄 Recarga la página después de autenticarte'
+        ],
+        motivationalMessage: 'El análisis técnico de tu partida está completo. Para feedback personalizado con IA, asegúrate de estar autenticado.',
+        detailedAnalysis: `Error de autenticación: ${error.message || 'Error desconocido'}\n\nPara usar el feedback con IA necesitas:\n1. Estar autenticado en SeaVerse\n2. Tener créditos disponibles\n3. Conexión a internet activa\n\nEl resto del análisis (Stockfish, estadísticas, recomendaciones) funciona sin autenticación.`
+      });
+    }
 
     setProgress(100);
     setPhase('complete');
@@ -317,8 +345,22 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                 <div className="flex items-center gap-3">
                   <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">DeepM8 Coach Engine</h2>
                   <span className="px-3 py-1 bg-white/15 rounded-full text-xs font-bold text-white backdrop-blur-sm border border-white/20">V1</span>
+                  {authStatus === 'authenticated' && (
+                    <span className="px-3 py-1 bg-green-500/30 rounded-full text-xs font-bold text-green-200 backdrop-blur-sm border border-green-500/50 flex items-center gap-1">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                      IA Activa
+                    </span>
+                  )}
+                  {authStatus === 'unauthenticated' && (
+                    <span className="px-3 py-1 bg-orange-500/30 rounded-full text-xs font-bold text-orange-200 backdrop-blur-sm border border-orange-500/50 flex items-center gap-1">
+                      <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
+                      IA Desactivada
+                    </span>
+                  )}
                 </div>
-                <p className="text-purple-100 mt-1 text-sm">Análisis inteligente con IA</p>
+                <p className="text-purple-100 mt-1 text-sm">
+                  {authStatus === 'authenticated' ? 'Análisis inteligente con IA' : 'Análisis técnico con Stockfish'}
+                </p>
               </div>
             </div>
 
@@ -685,18 +727,26 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                 )}
 
                 {/* AI Feedback Tab */}
-                {activeTab === 'feedback' && coachFeedback && (
+                {activeTab === 'feedback' && (
                   <div className="space-y-6">
-                    {/* Summary Card */}
-                    <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-6 border border-purple-500/50">
-                      <div className="flex items-start gap-4">
-                        <div className="text-4xl">🎯</div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-2">Resumen del Coach</h3>
-                          <p className="text-slate-200 leading-relaxed">{coachFeedback.summary}</p>
+                    {coachFeedback ? (
+                      <>
+                        {/* Summary Card */}
+                        <div className={`rounded-xl p-6 border ${
+                          coachFeedback.summary.includes('⚠️')
+                            ? 'bg-gradient-to-br from-orange-600/20 to-red-600/20 border-orange-500/50'
+                            : 'bg-gradient-to-br from-purple-600/20 to-blue-600/20 border-purple-500/50'
+                        }`}>
+                          <div className="flex items-start gap-4">
+                            <div className="text-4xl">{coachFeedback.summary.includes('⚠️') ? '⚠️' : '🎯'}</div>
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-white mb-2">
+                                {coachFeedback.summary.includes('⚠️') ? 'Autenticación Requerida' : 'Resumen del Coach'}
+                              </h3>
+                              <p className="text-slate-200 leading-relaxed">{coachFeedback.summary}</p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
 
                     {/* Key Insights */}
                     <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
@@ -745,6 +795,14 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                         "{coachFeedback.motivationalMessage}"
                       </p>
                     </div>
+                      </>
+                    ) : (
+                      <div className="bg-slate-800/50 rounded-xl p-8 border border-slate-700 text-center">
+                        <div className="text-6xl mb-4">🤖</div>
+                        <h3 className="text-xl font-bold text-white mb-2">Cargando feedback del coach...</h3>
+                        <p className="text-slate-400">Analizando tu partida con IA</p>
+                      </div>
+                    )}
                   </div>
                 )}
 
