@@ -3642,8 +3642,8 @@ export default function ChessGame() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_300px] gap-4 items-start">
-          {/* Left panel - Move history */}
-          <div className="order-1 lg:order-1">
+          {/* Left panel - Move history (hidden on mobile) */}
+          <div className="order-1 lg:order-1 hidden lg:block">
             {/* Move history */}
             <div
               ref={leftHistoryRef}
