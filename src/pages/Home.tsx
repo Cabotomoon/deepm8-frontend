@@ -12,6 +12,7 @@ import GameReplay from '../components/GameReplay';
 import ProgressChart from '../components/ProgressChart';
 import AchievementsGrid from '../components/AchievementsGrid';
 import TrainingSession from '../components/TrainingSession';
+import AuthManager from '../components/AuthManager';
 import { socketService } from '../services/socketService';
 import { studyRecommendationService } from '../services/studyRecommendationService';
 import { playerProfileService } from '../services/playerProfileService';
@@ -3191,13 +3192,9 @@ export default function ChessGame() {
         </div>
 
         {/* Game Analysis Modal */}
-        {showGameAnalysis && chessGamePro.lastGameInfo && chessGamePro.lastGameInfo.moves && chessGamePro.lastGameInfo.moves.length > 0 && (
+        {showGameAnalysis && moveHistory.length > 0 && (
           <GameAnalysis
-            moves={chessGamePro.lastGameInfo.moves.map((notation, index) => ({
-              notation,
-              from: { row: 0, col: 0 },
-              to: { row: 0, col: 0 }
-            }))}
+            moves={moveHistory}
             playerColor={myColor || 'white'}
             gameResult={gameStatus === 'stalemate' ? 'draw' : gameResult}
             onClose={() => setShowGameAnalysis(false)}
@@ -4202,6 +4199,7 @@ export default function ChessGame() {
       )}
 
       {/* 🔑 SeaCloud Token Setup */}
+      <AuthManager />
     </div>
     </>
   );
