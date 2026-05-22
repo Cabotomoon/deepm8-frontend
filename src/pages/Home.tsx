@@ -2878,28 +2878,23 @@ export default function ChessGame() {
             </div>
 
             {/* 📚 Study Recommendations Section - Updated Format */}
-            {chessGamePro.userProfile && userGameHistory && (() => {
-              // Si hay datos, calculamos métricas reales; si no, usamos valores por defecto (50)
-              const hasEnoughGames = userGameHistory.length >= 5;
+            {chessGamePro.userProfile && (() => {
+              // Cargar el perfil ACTUAL desde playerProfileService (igual que GameAnalysis)
+              const currentProfile = playerProfileService.getProfile();
 
-              // Crear un perfil temporal con el historial actualizado para el cálculo
-              const profileWithHistory = {
-                ...chessGamePro.userProfile,
-                gameHistory: userGameHistory || []
-              };
+              if (!currentProfile) {
+                return null;
+              }
 
-              const metrics = hasEnoughGames
-                ? studyRecommendationService.calculateSkillMetrics(profileWithHistory)
-                : { openings: 50, tactics: 50, endgames: 50, middlegame: 50 };
-              const recommendations = hasEnoughGames
-                ? studyRecommendationService.generateRecommendations(profileWithHistory, metrics)
-                : [];
+              // Calcular métricas con el perfil ACTUAL (igual que GameAnalysis)
+              const metrics = studyRecommendationService.calculateSkillMetrics(currentProfile);
+
+              // Generar recomendaciones con el perfil ACTUAL (igual que GameAnalysis)
+              const recommendations = studyRecommendationService.generateRecommendations(currentProfile, metrics);
 
               // Debug: Log para verificar el estado
-              console.log('📊 Debug Recomendaciones (VERSIÓN ACTUALIZADA V3):', {
-                hasEnoughGames,
-                totalGames: userGameHistory.length,
-                profileGameHistory: profileWithHistory.gameHistory?.length || 0,
+              console.log('📊 Debug Recomendaciones (VERSIÓN ACTUALIZADA V4 - PERFIL ACTUAL):', {
+                totalGames: currentProfile.gameHistory?.length || 0,
                 metrics,
                 recommendationsCount: recommendations.length,
                 recommendations
@@ -3018,7 +3013,7 @@ export default function ChessGame() {
                   </div>
 
                   {/* Recomendaciones - SEGUNDO como en GameAnalysis */}
-                  {hasEnoughGames && recommendations.length > 0 && (
+                  {recommendations.length > 0 && (
                     <div className="space-y-4">
                       {recommendations.map((rec) => {
                         const priorityConfig = {
