@@ -605,20 +605,49 @@ export default function ChessGame() {
   // State for fresh profile data on victory screen
   const [victoryScreenProfile, setVictoryScreenProfile] = useState<any>(null);
 
-  // Force reload profile when victory screen shows
+  // Register game in playerProfileService and get updated profile when victory screen shows
   useEffect(() => {
-    if (chessGamePro.showVictoryScreen) {
-      console.log('🔄 Victory screen shown - loading fresh profile');
-      // Wait for profile to be saved, then load from playerProfileService
-      setTimeout(() => {
-        const freshProfile = playerProfileService.getProfile();
-        console.log('✅ Fresh profile loaded:', freshProfile);
-        setVictoryScreenProfile(freshProfile);
-      }, 800); // Increased delay to ensure save completes
+    if (chessGamePro.showVictoryScreen && chessGamePro.lastGameInfo) {
+      console.log('🔄 Victory screen shown - registering game in playerProfileService');
+
+      const registerGameAndLoadProfile = async () => {
+        try {
+          // Create GameRecord from lastGameInfo (same format as GameAnalysis)
+          const gameRecord = {
+            id: crypto.randomUUID(),
+            timestamp: Date.now(),
+            accuracy: 75, // Default, will be calculated properly in full analysis
+            totalMoves: chessGamePro.lastGameInfo.moves?.length || 0,
+            excellentMoves: 0,
+            goodMoves: 0,
+            inaccuracies: 0,
+            mistakes: 0,
+            blunders: 0,
+            playerColor: (myColor || 'white') as 'white' | 'black',
+            result: (gameResult === 'victory' ? 'win' : gameResult === 'defeat' ? 'loss' : 'draw') as 'win' | 'loss' | 'draw',
+            moves: chessGamePro.lastGameInfo.moves?.join(' ') || ''
+          };
+
+          console.log('📊 Registering game record:', gameRecord);
+
+          // Update playerProfileService with the new game (same as GameAnalysis)
+          const { profile: updatedProfile } = await playerProfileService.updateWithGame(gameRecord);
+
+          console.log('✅ Profile updated in playerProfileService:', updatedProfile);
+          setVictoryScreenProfile(updatedProfile);
+        } catch (error) {
+          console.error('❌ Error registering game:', error);
+          // Fallback to current profile if available
+          const fallbackProfile = playerProfileService.getProfile();
+          setVictoryScreenProfile(fallbackProfile);
+        }
+      };
+
+      registerGameAndLoadProfile();
     } else {
       setVictoryScreenProfile(null);
     }
-  }, [chessGamePro.showVictoryScreen]);
+  }, [chessGamePro.showVictoryScreen, chessGamePro.lastGameInfo, gameResult, myColor]);
 
   // Helper function to get display name
   const getDisplayName = () => {
