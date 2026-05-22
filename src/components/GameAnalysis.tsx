@@ -258,7 +258,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
     setProgress(80);
 
-    // Generate LLM feedback (always try, fallback silently on error)
+    // Generate LLM feedback
     const feedback = await llmCoachService.generateFeedback(newGameRecord, updatedProfile, results);
     setCoachFeedback(feedback);
 
@@ -302,26 +302,17 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-[#12121A] rounded-2xl border border-white/6 max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-[0_16px_48px_rgba(0,0,0,0.8)]">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-900 rounded-2xl border-2 border-slate-700 max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 p-6 border-b border-white/8">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <img
-                src="/branding/logo-knight.png"
-                alt="DeepM8 Coach"
-                className="h-12 w-12 object-contain drop-shadow-[0_0_16px_rgba(124,58,237,0.5)]"
-              />
-              <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">DeepM8 Coach Engine</h2>
-                  <span className="px-3 py-1 bg-white/15 rounded-full text-xs font-bold text-white backdrop-blur-sm border border-white/20">V1</span>
-                </div>
-                <p className="text-purple-100 mt-1 text-sm">
-                  Análisis inteligente con IA
-                </p>
+            <div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-3xl font-bold text-white">🧠 Deep M8 Coach Engine</h2>
+                <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-white">V1</span>
               </div>
+              <p className="text-purple-100 mt-1">Análisis inteligente con IA</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -389,70 +380,64 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
         <div className="flex-1 overflow-y-auto">
           {phase !== 'complete' ? (
             <div className="text-center py-12 px-6">
-              <div className="mb-8 flex justify-center">
-                <img
-                  src="/branding/logo-knight.png"
-                  alt="DeepM8 Coach"
-                  className="h-24 w-24 object-contain animate-pulse"
-                />
+              <div className="text-6xl mb-6 animate-bounce">
+                {phase === 'analyzing' ? '🤔' : '🧠'}
               </div>
-              <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 mb-2">
+              <h3 className="text-2xl font-bold text-white mb-2">
                 {phase === 'analyzing' ? 'Analizando partida con Stockfish...' : 'Generando feedback con IA...'}
               </h3>
-              <p className="text-slate-400 mb-8">
+              <p className="text-slate-400 mb-6">
                 {phase === 'analyzing' ? 'Evaluando cada movimiento' : 'Creando plan de entrenamiento personalizado'}
               </p>
-              <div className="w-full max-w-md mx-auto bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+              <div className="w-full max-w-md mx-auto bg-slate-800 rounded-full h-4 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 h-full transition-all duration-300 relative"
+                  className="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
-                </div>
+                />
               </div>
-              <p className="text-slate-400 mt-4 font-medium">{progress}% completado</p>
+              <p className="text-slate-400 mt-4">{progress}% completado</p>
             </div>
           ) : (
             <>
               {/* Tabs */}
-              <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
-                <div className="flex gap-2 p-4 overflow-x-auto">
+              <div className="border-b border-slate-700 bg-slate-800/50">
+                <div className="flex gap-1 p-4 overflow-x-auto">
                   <button
                     onClick={() => setActiveTab('feedback')}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'feedback'
-                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/50'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-700'
+                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
                     }`}
                   >
                     💡 Feedback IA
                   </button>
                   <button
                     onClick={() => setActiveTab('recommendations')}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'recommendations'
-                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/50'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-700'
+                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
                     }`}
                   >
                     📚 Recomendaciones
                   </button>
                   <button
                     onClick={() => setActiveTab('analysis')}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'analysis'
-                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/50'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-700'
+                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
                     }`}
                   >
                     📊 Análisis Detallado
                   </button>
                   <button
                     onClick={() => setActiveTab('profile')}
-                    className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
                       activeTab === 'profile'
-                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/50'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-700'
+                        ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
                     }`}
                   >
                     👤 Mi Perfil
@@ -687,20 +672,18 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                 )}
 
                 {/* AI Feedback Tab */}
-                {activeTab === 'feedback' && (
+                {activeTab === 'feedback' && coachFeedback && (
                   <div className="space-y-6">
-                    {coachFeedback ? (
-                      <>
-                        {/* Summary Card */}
-                        <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-6 border border-purple-500/50">
-                          <div className="flex items-start gap-4">
-                            <div className="text-4xl">🎯</div>
-                            <div className="flex-1">
-                              <h3 className="text-xl font-bold text-white mb-2">Resumen del Coach</h3>
-                              <p className="text-slate-200 leading-relaxed">{coachFeedback.summary}</p>
-                            </div>
-                          </div>
+                    {/* Summary Card */}
+                    <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-6 border border-purple-500/50">
+                      <div className="flex items-start gap-4">
+                        <div className="text-4xl">🎯</div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-white mb-2">Resumen del Coach</h3>
+                          <p className="text-slate-200 leading-relaxed">{coachFeedback.summary}</p>
                         </div>
+                      </div>
+                    </div>
 
                     {/* Key Insights */}
                     <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
@@ -749,14 +732,6 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                         "{coachFeedback.motivationalMessage}"
                       </p>
                     </div>
-                      </>
-                    ) : (
-                      <div className="bg-slate-800/50 rounded-xl p-8 border border-slate-700 text-center">
-                        <div className="text-6xl mb-4">🤖</div>
-                        <h3 className="text-xl font-bold text-white mb-2">Cargando feedback del coach...</h3>
-                        <p className="text-slate-400">Analizando tu partida con IA</p>
-                      </div>
-                    )}
                   </div>
                 )}
 
