@@ -309,7 +309,8 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
           <div className="flex justify-between items-center">
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-3xl font-bold text-white">🧠 Deep M8 Coach Engine</h2>
+                <img src="/branding/logo-knight.png" alt="Deep M8" className="w-8 h-8" />
+                <h2 className="text-3xl font-bold text-white">DeepM8 Coach Engine</h2>
                 <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-white">V1</span>
               </div>
               <p className="text-purple-100 mt-1">Análisis inteligente con IA</p>
@@ -380,8 +381,12 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
         <div className="flex-1 overflow-y-auto">
           {phase !== 'complete' ? (
             <div className="text-center py-12 px-6">
-              <div className="text-6xl mb-6 animate-bounce">
-                {phase === 'analyzing' ? '🤔' : '🧠'}
+              <div className="mb-6 flex justify-center">
+                <img
+                  src="/branding/logo-knight.png"
+                  alt="Deep M8 Logo"
+                  className="w-24 h-24 animate-pulse"
+                />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">
                 {phase === 'analyzing' ? 'Analizando partida con Stockfish...' : 'Generando feedback con IA...'}
