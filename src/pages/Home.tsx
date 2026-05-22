@@ -14,6 +14,7 @@ import AchievementsGrid from '../components/AchievementsGrid';
 import TrainingSession from '../components/TrainingSession';
 import { socketService } from '../services/socketService';
 import { studyRecommendationService } from '../services/studyRecommendationService';
+import { playerProfileService } from '../services/playerProfileService';
 import type { Room, ChatMessage } from '../types/socket.types';
 import type { GameHistory } from '../services/localDataService';
 
