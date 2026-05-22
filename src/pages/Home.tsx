@@ -2878,7 +2878,7 @@ export default function ChessGame() {
             </div>
 
             {/* DeepM8 Coach Engine Analysis Section */}
-            <div className="mt-8 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl">
+            <div className="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-xl border-2 border-purple-500/40 rounded-2xl p-8 shadow-2xl">
               {/* Header */}
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center gap-3 mb-4">
