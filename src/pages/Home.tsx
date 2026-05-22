@@ -3172,7 +3172,16 @@ export default function ChessGame() {
               </button>
 
               <button
-                onClick={() => setShowGameAnalysis(true)}
+                onClick={() => {
+                  console.log('🔍 Analizar Partida clicked', {
+                    moveHistoryLength: moveHistory.length,
+                    myColor,
+                    gameResult,
+                    gameStatus,
+                    lastGameInfo: chessGamePro.lastGameInfo
+                  });
+                  setShowGameAnalysis(true);
+                }}
                 className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 🔍 Analizar Partida
