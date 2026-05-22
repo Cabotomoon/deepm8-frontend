@@ -2878,11 +2878,11 @@ export default function ChessGame() {
             </div>
 
             {/* DeepM8 Coach Engine Analysis Section */}
-            <div className="mt-8 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl">
+            <div className="mt-8 bg-black border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl">
               {/* Header */}
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center gap-3 mb-4">
-                  <div className="text-6xl">♞</div>
+                  <img src="./branding/logo-knight.png" alt="Knight Logo" className="w-16 h-16 object-contain" />
                   <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                     Recomendaciones de Estudio<br />por DeepM8 Coach Engine
                   </h3>
