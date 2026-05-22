@@ -2895,7 +2895,12 @@ export default function ChessGame() {
               {/* Analyze Button */}
               <div className="flex justify-center">
                 <button
-                  onClick={() => setShowGameHistory(true)}
+                  onClick={() => {
+                    console.log('🧠 Botón Analizar clickeado');
+                    console.log('showGameHistory actual:', showGameHistory);
+                    setShowGameHistory(true);
+                    console.log('showGameHistory después de set:', true);
+                  }}
                   className="group relative bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center gap-3"
                 >
                   <span className="text-2xl">🧠</span>
@@ -3218,6 +3223,19 @@ export default function ChessGame() {
               </button>
             )}
 
+            {/* Analyze Game Button - Duplicate */}
+            {chessGamePro.userProfile && (
+              <button
+                onClick={() => setShowGameHistory(true)}
+                className="group relative bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-6 px-10 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-green-500/30 w-full"
+              >
+                <div className="flex items-center justify-center gap-4">
+                  <span className="text-3xl">🧠</span>
+                  <span className="text-2xl">Analizar Partida</span>
+                </div>
+              </button>
+            )}
+
             {/* Guest Mode - Login Prompt (only when no profile) */}
             {!chessGamePro.userProfile && (
               <div className="max-w-2xl mx-auto">
@@ -3275,6 +3293,13 @@ export default function ChessGame() {
         )}
 
         {/* 📜 Game History Modal */}
+        {(() => {
+          console.log('📜 Game History Modal Check:');
+          console.log('  - showGameHistory:', showGameHistory);
+          console.log('  - userProfile exists:', !!chessGamePro.userProfile);
+          console.log('  - userProfile:', chessGamePro.userProfile);
+          return null;
+        })()}
         {showGameHistory && chessGamePro.userProfile && (
           <GameHistoryComponent
             userId={chessGamePro.userProfile.userId}
