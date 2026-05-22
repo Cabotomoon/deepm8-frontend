@@ -602,11 +602,21 @@ export default function ChessGame() {
   const leftHistoryRef = useRef<HTMLDivElement>(null);
   const rightHistoryRef = useRef<HTMLDivElement>(null);
 
+  // State for fresh profile data on victory screen
+  const [victoryScreenProfile, setVictoryScreenProfile] = useState<any>(null);
+
   // Force reload profile when victory screen shows
   useEffect(() => {
     if (chessGamePro.showVictoryScreen) {
-      console.log('🔄 Victory screen shown - forcing profile reload');
-      chessGamePro.loadStats();
+      console.log('🔄 Victory screen shown - loading fresh profile');
+      // Wait for profile to be saved, then load from playerProfileService
+      setTimeout(() => {
+        const freshProfile = playerProfileService.getProfile();
+        console.log('✅ Fresh profile loaded:', freshProfile);
+        setVictoryScreenProfile(freshProfile);
+      }, 800); // Increased delay to ensure save completes
+    } else {
+      setVictoryScreenProfile(null);
     }
   }, [chessGamePro.showVictoryScreen]);
 
@@ -2887,9 +2897,9 @@ export default function ChessGame() {
             </div>
 
             {/* 📚 Study Recommendations Section - Updated Format */}
-            {chessGamePro.userProfile && (() => {
-              // Usar el perfil del hook que ya está actualizado
-              const currentProfile = chessGamePro.userProfile;
+            {victoryScreenProfile && (() => {
+              // Usar el perfil FRESCO de playerProfileService
+              const currentProfile = victoryScreenProfile;
 
               // Calcular métricas con el perfil ACTUALIZADO (igual que GameAnalysis)
               const metrics = studyRecommendationService.calculateSkillMetrics(currentProfile);
@@ -2898,7 +2908,7 @@ export default function ChessGame() {
               const recommendations = studyRecommendationService.generateRecommendations(currentProfile, metrics);
 
               // Debug: Log para verificar el estado
-              console.log('📊 Debug Recomendaciones (V5 - HOOK PROFILE):', {
+              console.log('📊 Debug Recomendaciones (V6 - FRESH PROFILE):', {
                 totalGames: currentProfile.gameHistory?.length || 0,
                 lastGame: currentProfile.gameHistory?.[currentProfile.gameHistory.length - 1],
                 metrics,
