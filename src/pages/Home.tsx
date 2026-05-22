@@ -2877,178 +2877,49 @@ export default function ChessGame() {
               )}
             </div>
 
-            {/* 📚 Study Recommendations Section - Updated Format */}
-            {chessGamePro.userProfile && userGameHistory && (() => {
-              // Si hay datos, calculamos métricas reales; si no, usamos valores por defecto (50)
-              const hasEnoughGames = userGameHistory.length >= 5;
-
-              // Crear un perfil temporal con el historial actualizado para el cálculo
-              const profileWithHistory = {
-                ...chessGamePro.userProfile,
-                gameHistory: userGameHistory || []
-              };
-
-              const metrics = hasEnoughGames
-                ? studyRecommendationService.calculateSkillMetrics(profileWithHistory)
-                : { openings: 50, tactics: 50, endgames: 50, middlegame: 50 };
-              const recommendations = hasEnoughGames
-                ? studyRecommendationService.generateRecommendations(profileWithHistory, metrics)
-                : [];
-
-              // Debug: Log para verificar el estado
-              console.log('📊 Debug Recomendaciones (VERSIÓN ACTUALIZADA V3):', {
-                hasEnoughGames,
-                totalGames: userGameHistory.length,
-                profileGameHistory: profileWithHistory.gameHistory?.length || 0,
-                metrics,
-                recommendationsCount: recommendations.length,
-                recommendations
-              });
-
-              return (
-                <div className="mt-8 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl">
-                  {/* Header */}
-                  <div className="text-center mb-8">
-                    <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">
-                      📚 Recomendaciones de Estudio Personalizadas
-                    </h3>
-                    <p className="text-slate-300 text-sm">
-                      {hasEnoughGames
-                        ? `Personalizado según tus últimas partidas`
-                        : `🎯 Juega ${5 - userGameHistory.length} partidas más para recibir recomendaciones personalizadas`
-                      }
-                    </p>
-                  </div>
-
-                  {/* Recommendations Grid - Solo si hay suficientes partidas */}
-                  {hasEnoughGames && (
-                    <div className="space-y-4 mb-8">
-                      {recommendations.map((rec) => {
-                        const priorityConfig = {
-                          high: {
-                            bgGradient: 'from-red-600/20 to-orange-600/20',
-                            border: 'border-2 border-red-500/50',
-                            textColor: 'text-red-200',
-                            badge: 'bg-red-500/30 text-red-200',
-                            badgeText: 'PRIORIDAD ALTA',
-                            icon: '⚠️',
-                            primaryButton: 'bg-red-500 hover:bg-red-600'
-                          },
-                          medium: {
-                            bgGradient: 'from-blue-600/20 to-purple-600/20',
-                            border: 'border border-blue-500/50',
-                            textColor: 'text-blue-200',
-                            badge: 'bg-blue-500/30 text-blue-200',
-                            badgeText: 'RECOMENDADO',
-                            icon: '🎯',
-                            primaryButton: 'bg-blue-500 hover:bg-blue-600'
-                          },
-                          low: {
-                            bgGradient: 'from-slate-800/50 to-slate-800/50',
-                            border: 'border border-slate-700',
-                            textColor: 'text-slate-400',
-                            badge: 'bg-slate-600/50 text-slate-300',
-                            badgeText: 'OPCIONAL',
-                            icon: '📖',
-                            primaryButton: 'bg-purple-500 hover:bg-purple-600'
-                          }
-                        };
-
-                        const config = priorityConfig[rec.priority];
-
-                        return (
-                          <div key={rec.id} className={`bg-gradient-to-br ${config.bgGradient} rounded-xl p-6 ${config.border}`}>
-                            <div className="flex items-start gap-4">
-                              <div className="text-4xl">{config.icon}</div>
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between mb-3">
-                                  <div>
-                                    <h4 className="text-xl font-bold text-white mb-1">{rec.title}</h4>
-                                    <p className={`${config.textColor} text-sm`}>
-                                      <span className="font-semibold">Por qué:</span> {rec.reason}
-                                    </p>
-                                  </div>
-                                  <span className={`px-3 py-1 ${config.badge} rounded-full text-xs font-bold whitespace-nowrap`}>
-                                    {config.badgeText}
-                                  </span>
-                                </div>
-                                <p className="text-slate-200 mb-4">
-                                  {rec.description}
-                                </p>
-                                <div className="flex gap-3">
-                                  <button
-                                    onClick={() => {
-                                      console.log('🎯 Button clicked! Category:', rec.category);
-                                      setActiveTraining(rec.category);
-                                    }}
-                                    className={`flex-1 ${config.primaryButton} text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2`}
-                                  >
-                                    <span>👉</span> {rec.actionLabel}
-                                  </button>
-                                  <button className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg transition-all">
-                                    {rec.secondaryActionLabel}
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Score Bars with Real Data */}
-                  <div className="pt-6 border-t border-slate-600/50">
-                    <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                      <span>📊</span> Tu Progreso por Área
-                    </h4>
-                    <div className="space-y-4">
-                      {[
-                        { label: 'Aperturas', score: metrics.openings },
-                        { label: 'Finales', score: metrics.endgames },
-                        { label: 'Táctica', score: metrics.tactics },
-                        { label: 'Medio Juego', score: metrics.middlegame }
-                      ].map((area, i) => (
-                        <div key={i}>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-slate-200 font-medium">{area.label}</span>
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${
-                                !hasEnoughGames ? 'text-orange-400' :
-                                area.score >= 70 ? 'text-green-400' :
-                                area.score >= 50 ? 'text-blue-400' :
-                                'text-orange-400'
-                              }`}>
-                                {Math.round(area.score)}
-                              </span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                !hasEnoughGames ? 'text-orange-400 bg-orange-500/20' :
-                                area.score >= 70 ? 'text-green-400 bg-green-500/20' :
-                                area.score >= 50 ? 'text-blue-400 bg-blue-500/20' :
-                                'text-orange-400 bg-orange-500/20'
-                              }`}>
-                                {!hasEnoughGames ? 'Insuficiente' :
-                                 area.score >= 70 ? 'Fuerte' :
-                                 area.score >= 50 ? 'Mejorando' :
-                                 'Necesitas trabajar'}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                            <div className={`h-full transition-all duration-500 ${
-                              !hasEnoughGames ? 'bg-gradient-to-r from-orange-500 to-amber-500' :
-                              area.score >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                              area.score >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
-                              'bg-gradient-to-r from-orange-500 to-red-500'
-                            }`} style={{ width: `${area.score}%` }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+            {/* DeepM8 Coach Engine Analysis Section */}
+            <div className="mt-8 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-8 shadow-2xl">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="text-6xl">♞</div>
+                  <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                    Recomendaciones de Estudio<br />por DeepM8 Coach Engine
+                  </h3>
                 </div>
-              );
-            })()}
+                <p className="text-slate-300 text-sm">
+                  Analiza tus partidas con IA avanzada para recibir recomendaciones personalizadas
+                </p>
+              </div>
+
+              {/* Analyze Button */}
+              <div className="flex justify-center">
+                <button
+                  onClick={() => setActiveView('game-history')}
+                  className="group relative bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center gap-3"
+                >
+                  <span className="text-2xl">🧠</span>
+                  <span className="text-xl">Analizar Partida</span>
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl blur-xl"></div>
+                </button>
+              </div>
+
+              {/* Info Cards */}
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
+                  <div className="text-3xl mb-2">🎯</div>
+                  <div className="text-sm text-slate-300">Análisis detallado de jugadas</div>
+                </div>
+                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
+                  <div className="text-3xl mb-2">📊</div>
+                  <div className="text-sm text-slate-300">Estadísticas avanzadas</div>
+                </div>
+                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
+                  <div className="text-3xl mb-2">💡</div>
+                  <div className="text-sm text-slate-300">Recomendaciones inteligentes</div>
+                </div>
+              </div>
+            </div>
 
             {/* Buttons - Unified Style */}
             <div className="flex flex-wrap gap-4 justify-center">
