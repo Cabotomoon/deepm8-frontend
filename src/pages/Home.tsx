@@ -2920,7 +2920,7 @@ export default function ChessGame() {
             </div>
 
             {/* Buttons - Unified Style */}
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 justify-center mt-6">
               <button
                 onClick={() => {
                   chessGamePro.setShowVictoryScreen(false);
@@ -2955,7 +2955,7 @@ export default function ChessGame() {
 
               <button
                 onClick={() => setShowGameAnalysis(true)}
-                className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg invisible"
               >
                 🔍 Analizar Partida
               </button>
