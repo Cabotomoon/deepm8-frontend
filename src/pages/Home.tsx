@@ -3191,9 +3191,13 @@ export default function ChessGame() {
         </div>
 
         {/* Game Analysis Modal */}
-        {showGameAnalysis && moveHistory.length > 0 && (
+        {showGameAnalysis && chessGamePro.lastGameInfo && chessGamePro.lastGameInfo.moves && chessGamePro.lastGameInfo.moves.length > 0 && (
           <GameAnalysis
-            moves={moveHistory}
+            moves={chessGamePro.lastGameInfo.moves.map((notation, index) => ({
+              notation,
+              from: { row: 0, col: 0 },
+              to: { row: 0, col: 0 }
+            }))}
             playerColor={myColor || 'white'}
             gameResult={gameStatus === 'stalemate' ? 'draw' : gameResult}
             onClose={() => setShowGameAnalysis(false)}
