@@ -2892,6 +2892,16 @@ export default function ChessGame() {
                 </p>
               </div>
 
+              {/* Analyze Button */}
+              <div className="flex justify-center mb-6">
+                <button
+                  onClick={() => setShowGameAnalysis(true)}
+                  className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                >
+                  🔍 Analizar Partida
+                </button>
+              </div>
+
               {/* Info Cards */}
               <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
