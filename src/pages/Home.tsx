@@ -4106,3 +4106,4 @@ export default function ChessGame() {
     </>
   );
 }
+console.log('🔥 HOME.TSX LOADED - VERSION 2024-UPDATED');
