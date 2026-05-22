@@ -305,7 +305,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] rounded-2xl border-2 border-slate-700 max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] border-b border-slate-700 p-6">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
           <div className="flex justify-between items-center">
             <div>
               <div className="flex items-center gap-3">
@@ -313,7 +313,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                 <h2 className="text-3xl font-bold text-white">DeepM8 Coach Engine</h2>
                 <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-white">V1</span>
               </div>
-              <p className="text-slate-400 mt-1">Análisis inteligente con IA</p>
+              <p className="text-purple-100 mt-1">Análisis inteligente con IA</p>
             </div>
 
             <div className="flex items-center gap-3">
