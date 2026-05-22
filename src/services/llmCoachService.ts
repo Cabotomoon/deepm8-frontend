@@ -24,33 +24,28 @@ class LLMCoachService {
     profile: PlayerProfile,
     moveAnalysis: Array<{ moveNumber: number; classification: string; notation: string; comment: string; fen?: string }>
   ): Promise<CoachFeedback> {
-    try {
-      const prompt = this.buildPrompt(gameRecord, profile, moveAnalysis);
+    const prompt = this.buildPrompt(gameRecord, profile, moveAnalysis);
 
-      const response = await llmChatCompletions({
-        model: 'gemini-2.0-flash-001',
-        messages: [
-          {
-            role: 'system',
-            content: 'Eres un entrenador experto de ajedrez con años de experiencia. Tu tarea es analizar partidas y proporcionar feedback constructivo, personalizado y motivador a jugadores para ayudarles a mejorar. Sé específico, claro y siempre positivo.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1500
-      });
+    const response = await llmChatCompletions({
+      model: 'gemini-2.0-flash-001',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un entrenador experto de ajedrez con años de experiencia. Tu tarea es analizar partidas y proporcionar feedback constructivo, personalizado y motivador a jugadores para ayudarles a mejorar. Sé específico, claro y siempre positivo.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 1500
+    });
 
-      // 🔧 FIX: Correct response structure for llmChatCompletions
-      const rawFeedback = response.choices?.[0]?.message?.content || '';
+    // 🔧 FIX: Correct response structure for llmChatCompletions
+    const rawFeedback = response.choices?.[0]?.message?.content || '';
 
-      return this.parseFeedback(rawFeedback);
-    } catch (error) {
-      console.error('Error generating LLM feedback:', error);
-      return this.getFallbackFeedback(gameRecord, profile);
-    }
+    return this.parseFeedback(rawFeedback);
   }
 
   /**
