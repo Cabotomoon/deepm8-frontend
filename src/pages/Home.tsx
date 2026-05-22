@@ -602,6 +602,14 @@ export default function ChessGame() {
   const leftHistoryRef = useRef<HTMLDivElement>(null);
   const rightHistoryRef = useRef<HTMLDivElement>(null);
 
+  // Force reload profile when victory screen shows
+  useEffect(() => {
+    if (chessGamePro.showVictoryScreen) {
+      console.log('🔄 Victory screen shown - forcing profile reload');
+      chessGamePro.loadStats();
+    }
+  }, [chessGamePro.showVictoryScreen]);
+
   // Helper function to get display name
   const getDisplayName = () => {
     const username = getUsername();
@@ -2880,22 +2888,19 @@ export default function ChessGame() {
 
             {/* 📚 Study Recommendations Section - Updated Format */}
             {chessGamePro.userProfile && (() => {
-              // Cargar el perfil ACTUAL desde playerProfileService (igual que GameAnalysis)
-              const currentProfile = playerProfileService.getProfile();
+              // Usar el perfil del hook que ya está actualizado
+              const currentProfile = chessGamePro.userProfile;
 
-              if (!currentProfile) {
-                return null;
-              }
-
-              // Calcular métricas con el perfil ACTUAL (igual que GameAnalysis)
+              // Calcular métricas con el perfil ACTUALIZADO (igual que GameAnalysis)
               const metrics = studyRecommendationService.calculateSkillMetrics(currentProfile);
 
-              // Generar recomendaciones con el perfil ACTUAL (igual que GameAnalysis)
+              // Generar recomendaciones con el perfil ACTUALIZADO (igual que GameAnalysis)
               const recommendations = studyRecommendationService.generateRecommendations(currentProfile, metrics);
 
               // Debug: Log para verificar el estado
-              console.log('📊 Debug Recomendaciones (VERSIÓN ACTUALIZADA V4 - PERFIL ACTUAL):', {
+              console.log('📊 Debug Recomendaciones (V5 - HOOK PROFILE):', {
                 totalGames: currentProfile.gameHistory?.length || 0,
+                lastGame: currentProfile.gameHistory?.[currentProfile.gameHistory.length - 1],
                 metrics,
                 recommendationsCount: recommendations.length,
                 recommendations
