@@ -2895,7 +2895,7 @@ export default function ChessGame() {
               {/* Analyze Button */}
               <div className="flex justify-center">
                 <button
-                  onClick={() => setActiveView('game-history')}
+                  onClick={() => setShowGameHistory(true)}
                   className="group relative bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center gap-3"
                 >
                   <span className="text-2xl">🧠</span>
