@@ -1,8 +1,9 @@
 /**
  * LLM Coach Service
- * Generates personalized feedback using local analysis
+ * Generates personalized feedback using SeaCloud SDK
  */
 
+import { llmChatCompletions } from 'seacloud-sdk';
 import type { PlayerProfile, GameRecord } from './playerProfileService';
 import { gamePhaseService } from './gamePhaseService';
 
@@ -23,8 +24,32 @@ class LLMCoachService {
     profile: PlayerProfile,
     moveAnalysis: Array<{ moveNumber: number; classification: string; notation: string; comment: string; fen?: string }>
   ): Promise<CoachFeedback> {
-    // Always use local analysis (no API calls)
-    return this.getFallbackFeedback(gameRecord, profile);
+    try {
+      const prompt = this.buildPrompt(gameRecord, profile, moveAnalysis);
+
+      const response = await llmChatCompletions({
+        model: 'gemini-2.0-flash-001',
+        messages: [
+          {
+            role: 'system',
+            content: 'Eres un entrenador experto de ajedrez con años de experiencia. Tu tarea es analizar partidas y proporcionar feedback constructivo, personalizado y motivador a jugadores para ayudarles a mejorar. Sé específico, claro y siempre positivo.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500
+      });
+
+      const rawFeedback = response.resources[0]?.content || '';
+
+      return this.parseFeedback(rawFeedback);
+    } catch (error) {
+      console.error('Error generating LLM feedback:', error);
+      return this.getFallbackFeedback(gameRecord, profile);
+    }
   }
 
   /**
@@ -169,105 +194,38 @@ ANALISIS_DETALLADO:
   }
 
   /**
-   * Generate local feedback based on game statistics
+   * Fallback feedback when LLM fails
    */
   private getFallbackFeedback(gameRecord: GameRecord, profile: PlayerProfile): CoachFeedback {
     const accuracy = gameRecord.accuracy;
-    const blunders = gameRecord.blunders;
-    const mistakes = gameRecord.mistakes;
-    const totalErrors = blunders + mistakes + gameRecord.inaccuracies;
 
-    // Dynamic summary based on performance
-    let summary = `Jugaste con ${accuracy}% de precisión en esta partida. `;
-    if (accuracy >= 90) {
-      summary += '¡Rendimiento excepcional! Mantuviste un nivel muy alto durante toda la partida.';
-    } else if (accuracy >= 80) {
-      summary += 'Muy buen juego, con solo algunos detalles por pulir.';
-    } else if (accuracy >= 70) {
-      summary += 'Sólido desempeño general, aunque hubo algunos momentos críticos que mejorar.';
+    let summary = `Jugaste con ${accuracy}% de precisión. `;
+    if (accuracy >= 80) {
+      summary += '¡Excelente rendimiento!';
     } else if (accuracy >= 60) {
-      summary += 'Desempeño promedio con varias oportunidades de mejora identificadas.';
+      summary += 'Buen desempeño con espacio para mejorar.';
     } else {
-      summary += 'Esta partida muestra áreas importantes para trabajar. ¡Es una gran oportunidad de aprendizaje!';
+      summary += 'Hay áreas importantes para trabajar.';
     }
 
-    // Dynamic insights based on game statistics
-    const insights: string[] = [];
+    const insights = [
+      `Realizaste ${gameRecord.blunders} error(es) grave(s) en esta partida`,
+      `Tu precisión es ${accuracy >= profile.averageAccuracy ? 'superior' : 'inferior'} a tu promedio (${profile.averageAccuracy}%)`,
+      `Tuviste ${gameRecord.excellentMoves + gameRecord.goodMoves} movimientos de buena calidad`
+    ];
 
-    if (blunders === 0) {
-      insights.push('Excelente: No cometiste ningún error grave en toda la partida');
-    } else if (blunders === 1) {
-      insights.push('Solo cometiste 1 blunder - buen control general de la posición');
-    } else {
-      insights.push(`Cometiste ${blunders} blunders - enfócate en calcular más profundamente antes de mover`);
-    }
-
-    if (accuracy >= profile.averageAccuracy) {
-      insights.push(`Tu precisión está por encima de tu promedio histórico (${profile.averageAccuracy}%) - ¡vas mejorando!`);
-    } else {
-      insights.push(`Tu precisión está por debajo de tu promedio (${profile.averageAccuracy}%) - revisa tus errores`);
-    }
-
-    const goodMovesPercent = Math.round(((gameRecord.excellentMoves + gameRecord.goodMoves) / gameRecord.totalMoves) * 100);
-    if (goodMovesPercent >= 70) {
-      insights.push(`${goodMovesPercent}% de tus movimientos fueron buenos o excelentes - gran consistencia`);
-    } else {
-      insights.push(`Solo ${goodMovesPercent}% de tus movimientos fueron buenos - hay margen de mejora`);
-    }
-
-    // Dynamic training plan
-    const training: string[] = [];
-
-    if (blunders > 2) {
-      training.push('Practica cálculo táctico: dedica 20 minutos diarios a resolver puzzles');
-      training.push('Antes de cada movimiento, pregúntate: "¿Qué amenazas tiene mi rival?"');
-    } else if (blunders > 0) {
-      training.push('Revisa los momentos críticos de tus partidas para entender tus blunders');
-      training.push('Practica puzzles de nivel intermedio 15 minutos al día');
-    } else {
-      training.push('Mantén tu excelente nivel táctico con puzzles desafiantes diarios');
-    }
-
-    if (mistakes + gameRecord.inaccuracies > 5) {
-      training.push('Estudia las aperturas que juegas habitualmente para mejorar tu repertorio');
-    }
-
-    if (accuracy < 70) {
-      training.push('Juega partidas más lentas para tener tiempo de calcular variantes');
-    } else {
-      training.push('Estudia finales clásicos para perfeccionar la técnica en posiciones ganadoras');
-    }
-
-    // Motivational message based on trend
-    let motivational = '';
-    const trend = this.getImprovementTrend(profile);
-    if (trend === 'improving') {
-      motivational = '¡Estás en una tendencia positiva! Tu progreso es evidente. Sigue así y pronto alcanzarás un nuevo nivel.';
-    } else if (trend === 'declining') {
-      motivational = 'Todos tenemos rachas difíciles. Toma cada partida como una lección y volverás más fuerte. ¡No te rindas!';
-    } else {
-      motivational = 'Tu juego es consistente. Ahora es momento de dar el siguiente paso. ¡El esfuerzo constante siempre da frutos!';
-    }
-
-    // Detailed analysis
-    const detailedAnalysis = `
-Análisis completo de tu partida:
-
-Rendimiento general: Lograste una precisión de ${accuracy}% en ${gameRecord.totalMoves} movimientos. ${gameRecord.excellentMoves} fueron excelentes y ${gameRecord.goodMoves} fueron buenos, lo que representa un ${goodMovesPercent}% de jugadas de calidad.
-
-Errores críticos: ${blunders > 0 ? `Cometiste ${blunders} blunder(s) que afectaron significativamente la evaluación de la posición. Estos momentos críticos suelen ocurrir por falta de cálculo profundo o por no considerar los recursos tácticos del rival.` : 'No cometiste blunders en esta partida, lo que demuestra un buen control posicional y cálculo táctico.'}
-
-Áreas de mejora: ${totalErrors > 5 ? `Con ${totalErrors} imprecisiones y errores en total, hay espacio para mejorar tu consistencia. Enfócate en verificar cada jugada antes de ejecutarla, especialmente en posiciones complejas.` : 'Tu juego mostró buena consistencia con pocos errores. Continúa refinando tu técnica en las fases donde aún tienes debilidades.'}
-
-Comparación histórica: ${accuracy >= profile.averageAccuracy ? `Esta partida está por encima de tu promedio histórico, lo que indica progreso.` : `Esta partida está por debajo de tu promedio. Analiza qué fue diferente y aprende de ello.`} Con ${profile.totalGames} partidas jugadas, tu experiencia está creciendo constantemente.
-    `.trim();
+    const training = [
+      'Practica puzzles tácticos 15 minutos diarios',
+      'Revisa tus partidas para identificar patrones de error',
+      'Estudia finales básicos'
+    ];
 
     return {
       summary,
       keyInsights: insights,
       trainingPlan: training,
-      motivationalMessage: motivational,
-      detailedAnalysis
+      motivationalMessage: '¡Cada partida es una oportunidad para aprender! Sigue adelante.',
+      detailedAnalysis: `Análisis detallado: Tu partida mostró ${gameRecord.excellentMoves} jugadas excelentes y ${gameRecord.goodMoves} jugadas buenas, lo cual es positivo. Sin embargo, los ${gameRecord.blunders} blunders indican áreas de mejora en el cálculo de variantes. Enfócate en verificar tus jugadas antes de ejecutarlas, especialmente en posiciones críticas.`
     };
   }
 
