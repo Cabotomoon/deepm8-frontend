@@ -3636,21 +3636,10 @@ export default function ChessGame() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_300px] gap-4 items-start">
-          {/* Left panel - Captured pieces (Black) */}
+          {/* Left panel - Move history */}
           <div className="order-1 lg:order-1">
-            <div className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700">
-              <h3 className="text-sm font-semibold mb-3 text-slate-400">♚ Capturadas (Negras)</h3>
-              <div className="flex flex-wrap gap-2 min-h-[60px]">
-                {capturedPieces.black.map((piece, i) => (
-                  <span key={i} className="text-3xl opacity-60">
-                    {PIECE_SYMBOLS[piece.color][piece.type]}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             {/* Move history */}
-            <div className="mt-4 bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto">
+            <div className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto">
               <h3 className="text-sm font-semibold mb-3 text-slate-400 sticky top-0 bg-slate-800/90 backdrop-blur -m-4 p-4">
                 📋 Historial de Jugadas
               </h3>
@@ -3710,11 +3699,15 @@ export default function ChessGame() {
             )}
 
             {/* Información Jugador Negro (arriba del tablero) */}
-            <div className="w-full max-w-[672px] flex items-center justify-between bg-slate-800/50 backdrop-blur rounded-xl p-3 border border-slate-700">
-              {/* Nombre y ELO del jugador negro */}
-              <div className="flex items-center gap-3">
+            <div className={`w-full max-w-[672px] flex items-center justify-between backdrop-blur rounded-xl p-3 border-2 transition-all duration-300 ${
+              currentPlayer === 'black'
+                ? 'bg-purple-500/20 border-purple-500 shadow-lg shadow-purple-500/30'
+                : 'bg-slate-800/50 border-slate-700'
+            }`}>
+              {/* Nombre, ELO y Piezas Capturadas del jugador negro */}
+              <div className="flex items-center gap-3 flex-1">
                 <div className="text-3xl">♚</div>
-                <div>
+                <div className="flex-1">
                   <div className="font-bold text-white">
                     {gameMode === 'ai' ? 'IA DeepM8' :
                      gameMode === 'online' && myColor === 'white' ? opponentName :
@@ -3727,23 +3720,16 @@ export default function ChessGame() {
                           gameMode === 'online' && myColor === 'black' ? (chessGamePro.userProfile?.eloRating || 1200) :
                           1200}
                   </div>
-                </div>
-              </div>
-
-              {/* Indicador de Turno en el centro - Solo si es turno de negras */}
-              {currentPlayer === 'black' && (
-                <div className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/50">
-                  <div className="text-sm font-semibold">
-                    <span className="text-slate-300">Turno:</span>{' '}
-                    <span className="text-white">Negras ♚</span>
-                    {gameMode === 'ai' && isAiThinking && (
-                      <span className="ml-2 text-blue-400 animate-pulse text-xs">
-                        (IA pensando...)
+                  {/* Piezas capturadas por las negras (pequeñas) */}
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {capturedPieces.black.map((piece, i) => (
+                      <span key={i} className="text-lg opacity-60">
+                        {PIECE_SYMBOLS[piece.color][piece.type]}
                       </span>
-                    )}
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Reloj del jugador negro */}
               <div className={`px-4 py-2 rounded-lg font-mono text-xl font-bold ${
@@ -3849,11 +3835,15 @@ export default function ChessGame() {
             </div>
 
             {/* Información Jugador Blanco (abajo del tablero) */}
-            <div className="w-full max-w-[672px] flex items-center justify-between bg-slate-800/50 backdrop-blur rounded-xl p-3 border border-slate-700">
-              {/* Nombre y ELO del jugador blanco */}
-              <div className="flex items-center gap-3">
+            <div className={`w-full max-w-[672px] flex items-center justify-between backdrop-blur rounded-xl p-3 border-2 transition-all duration-300 ${
+              currentPlayer === 'white'
+                ? 'bg-purple-500/20 border-purple-500 shadow-lg shadow-purple-500/30'
+                : 'bg-slate-800/50 border-slate-700'
+            }`}>
+              {/* Nombre, ELO y Piezas Capturadas del jugador blanco */}
+              <div className="flex items-center gap-3 flex-1">
                 <div className="text-3xl">♔</div>
-                <div>
+                <div className="flex-1">
                   <div className="font-bold text-white">
                     {gameMode === 'ai' ? getDisplayName() :
                      gameMode === 'online' && myColor === 'white' ? getDisplayName() :
@@ -3866,18 +3856,16 @@ export default function ChessGame() {
                           gameMode === 'online' && myColor === 'black' ? opponentElo :
                           1200}
                   </div>
-                </div>
-              </div>
-
-              {/* Indicador de Turno en el centro - Solo si es turno de blancas */}
-              {currentPlayer === 'white' && (
-                <div className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/50">
-                  <div className="text-sm font-semibold">
-                    <span className="text-slate-300">Turno:</span>{' '}
-                    <span className="text-white">Blancas ♔</span>
+                  {/* Piezas capturadas por las blancas (pequeñas) */}
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {capturedPieces.white.map((piece, i) => (
+                      <span key={i} className="text-lg opacity-60">
+                        {PIECE_SYMBOLS[piece.color][piece.type]}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Reloj del jugador blanco */}
               <div className={`px-4 py-2 rounded-lg font-mono text-xl font-bold ${
@@ -3939,21 +3927,10 @@ export default function ChessGame() {
             </div>
           </div>
 
-          {/* Right panel - Captured pieces (White) */}
+          {/* Right panel - Move history and Chat */}
           <div className="order-3 lg:order-3">
-            <div className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700">
-              <h3 className="text-sm font-semibold mb-3 text-slate-400">♔ Capturadas (Blancas)</h3>
-              <div className="flex flex-wrap gap-2 min-h-[60px]">
-                {capturedPieces.white.map((piece, i) => (
-                  <span key={i} className="text-3xl opacity-60">
-                    {PIECE_SYMBOLS[piece.color][piece.type]}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             {/* Move history */}
-            <div className="mt-4 bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto">
+            <div className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 border border-slate-700 max-h-[400px] overflow-y-auto">
               <h3 className="text-sm font-semibold mb-3 text-slate-400 sticky top-0 bg-slate-800/90 backdrop-blur -m-4 p-4">
                 📋 Historial de Jugadas
               </h3>
