@@ -2791,31 +2791,31 @@ export default function ChessGame() {
     };
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-4 md:p-8 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-2 sm:p-4 md:p-8 flex items-center justify-center">
         <div className="max-w-4xl w-full">
           {/* 🎯 Unified Container - Same style for Victory and Defeat */}
-          <div className={`bg-slate-800/50 backdrop-blur border-4 ${isVictory ? 'border-amber-500 shadow-amber-500/50' : 'border-red-500 shadow-red-500/50'} shadow-2xl rounded-3xl p-8 md:p-12`}>
-            <div className="text-center mb-8">
+          <div className={`bg-slate-800/50 backdrop-blur border-2 sm:border-4 ${isVictory ? 'border-amber-500 shadow-amber-500/50' : 'border-red-500 shadow-red-500/50'} shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12`}>
+            <div className="text-center mb-6 sm:mb-8">
               {/* Icon */}
-              <div className="text-8xl mb-6 animate-bounce">
+              <div className="text-6xl sm:text-7xl md:text-8xl mb-4 sm:mb-6 animate-bounce">
                 {isVictory ? '🏆' : '💀'}
               </div>
 
               {/* Title */}
-              <h1 className={`text-5xl md:text-7xl font-bold mb-8 drop-shadow-lg ${isVictory ? 'text-amber-400' : 'text-red-400'}`}>
+              <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 drop-shadow-lg ${isVictory ? 'text-amber-400' : 'text-red-400'}`}>
                 {isVictory ? '¡VICTORIA!' : '¡DERROTA!'}
               </h1>
 
               {/* 📦 Info Box - Enhanced with King & Queen icons */}
               {chessGamePro.userProfile && (
-                <div className={`relative bg-slate-900/90 backdrop-blur border-4 ${isVictory ? 'border-amber-500/80' : 'border-red-500/80'} rounded-2xl p-8 max-w-2xl mx-auto shadow-2xl overflow-hidden`}>
-                  <div className="space-y-4 relative z-10">
+                <div className={`relative bg-slate-900/90 backdrop-blur border-2 sm:border-4 ${isVictory ? 'border-amber-500/80' : 'border-red-500/80'} rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 max-w-2xl mx-auto shadow-2xl overflow-hidden`}>
+                  <div className="space-y-3 sm:space-y-4 relative z-10">
                     {/* Player Info */}
                     <div className="text-center">
-                      <div className={`text-3xl font-bold mb-2 ${isVictory ? 'text-amber-400' : 'text-red-400'}`}>
+                      <div className={`text-xl sm:text-2xl md:text-3xl font-bold mb-2 ${isVictory ? 'text-amber-400' : 'text-red-400'}`}>
                         {chessGamePro.userProfile.name}
                       </div>
-                      <div className="text-2xl font-bold text-white">
+                      <div className="text-xl sm:text-2xl font-bold text-white">
                         {newElo}
                         <span className={`ml-2 ${eloChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           ({eloChange > 0 ? '+' : ''}{eloChange})
@@ -2824,8 +2824,8 @@ export default function ChessGame() {
 
                       {/* 🚨 Abandonment Notice */}
                       {wasAbandonment && isDefeat && (
-                        <div className="mt-3 px-4 py-2 bg-orange-900/50 border-2 border-orange-500 rounded-lg">
-                          <div className="text-orange-300 text-sm font-semibold">
+                        <div className="mt-3 px-3 sm:px-4 py-2 bg-orange-900/50 border-2 border-orange-500 rounded-lg">
+                          <div className="text-orange-300 text-xs sm:text-sm font-semibold">
                             ⚠️ Partida abandonada
                           </div>
                         </div>
@@ -2833,42 +2833,42 @@ export default function ChessGame() {
                     </div>
 
                     {/* VS Separator with Chess Pieces */}
-                    <div className="flex items-center gap-4 relative">
-                      {/* King icon - Left side */}
-                      <div className="text-4xl opacity-40 absolute -left-6">
+                    <div className="flex items-center gap-2 sm:gap-4 relative">
+                      {/* King icon - Left side (hidden on mobile) */}
+                      <div className="hidden sm:block text-3xl md:text-4xl opacity-40 absolute -left-4 md:-left-6">
                         ♔
                       </div>
 
                       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-500 to-transparent"></div>
-                      <div className="text-slate-300 font-bold text-xl px-4">VS</div>
+                      <div className="text-slate-300 font-bold text-lg sm:text-xl px-2 sm:px-4">VS</div>
                       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-500 to-transparent"></div>
 
-                      {/* Queen icon - Right side */}
-                      <div className="text-4xl opacity-40 absolute -right-6">
+                      {/* Queen icon - Right side (hidden on mobile) */}
+                      <div className="hidden sm:block text-3xl md:text-4xl opacity-40 absolute -right-4 md:-right-6">
                         ♕
                       </div>
                     </div>
 
                     {/* Opponent Info */}
                     <div className="text-center">
-                      <div className="text-2xl font-semibold text-slate-300 mb-1">
+                      <div className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-300 mb-1">
                         {opponentName}
                       </div>
-                      <div className="text-lg text-slate-400">
+                      <div className="text-base sm:text-lg text-slate-400">
                         {opponentElo} ELO
                       </div>
                     </div>
 
                     {/* Game Stats */}
-                    <div className="mt-6 pt-4 border-t border-slate-700/50">
-                      <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-slate-700/50">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
                         <div>
-                          <div className="text-slate-400 text-sm mb-1">Movimientos</div>
-                          <div className="text-xl font-bold text-white">{totalMoves}</div>
+                          <div className="text-slate-400 text-xs sm:text-sm mb-1">Movimientos</div>
+                          <div className="text-lg sm:text-xl font-bold text-white">{totalMoves}</div>
                         </div>
                         <div>
-                          <div className="text-slate-400 text-sm mb-1">Duración</div>
-                          <div className="text-xl font-bold text-white">{formatDuration(gameDuration)}</div>
+                          <div className="text-slate-400 text-xs sm:text-sm mb-1">Duración</div>
+                          <div className="text-lg sm:text-xl font-bold text-white">{formatDuration(gameDuration)}</div>
                         </div>
                       </div>
                     </div>
@@ -2878,56 +2878,56 @@ export default function ChessGame() {
             </div>
 
             {/* DeepM8 Coach Engine Analysis Section */}
-            <div className="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-xl border-2 border-purple-500/40 rounded-2xl p-8 shadow-2xl">
+            <div className="mt-6 sm:mt-8 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-xl border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl">
               {/* Header */}
-              <div className="text-center mb-8">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <img src="./branding/logo-knight.png" alt="Knight Logo" className="w-16 h-16 object-contain" />
-                  <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                    Recomendaciones de Estudio<br />por DeepM8 Coach Engine
+              <div className="text-center mb-6 sm:mb-8">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <img src="./branding/logo-knight.png" alt="Knight Logo" className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain" />
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent text-center">
+                    Recomendaciones de Estudio<br className="hidden sm:block" /><span className="sm:inline"> por DeepM8 Coach Engine</span>
                   </h3>
                 </div>
-                <p className="text-slate-300 text-sm">
+                <p className="text-slate-300 text-xs sm:text-sm px-2">
                   Analiza tus partidas con IA avanzada para recibir recomendaciones personalizadas
                 </p>
               </div>
 
               {/* Analyze Button */}
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center mb-4 sm:mb-6">
                 <button
                   onClick={() => setShowGameAnalysis(true)}
-                  className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                  className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 shadow-lg w-full sm:w-auto"
                 >
                   🔍 Analizar Partida
                 </button>
               </div>
 
               {/* Info Cards */}
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
-                  <div className="text-3xl mb-2">🎯</div>
-                  <div className="text-sm text-slate-300">Análisis detallado de jugadas</div>
+              <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="bg-slate-800/50 rounded-xl p-3 sm:p-4 border border-slate-700 text-center">
+                  <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🎯</div>
+                  <div className="text-xs sm:text-sm text-slate-300">Análisis detallado de jugadas</div>
                 </div>
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
-                  <div className="text-3xl mb-2">📊</div>
-                  <div className="text-sm text-slate-300">Estadísticas avanzadas</div>
+                <div className="bg-slate-800/50 rounded-xl p-3 sm:p-4 border border-slate-700 text-center">
+                  <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">📊</div>
+                  <div className="text-xs sm:text-sm text-slate-300">Estadísticas avanzadas</div>
                 </div>
-                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 text-center">
-                  <div className="text-3xl mb-2">💡</div>
-                  <div className="text-sm text-slate-300">Recomendaciones inteligentes</div>
+                <div className="bg-slate-800/50 rounded-xl p-3 sm:p-4 border border-slate-700 text-center">
+                  <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">💡</div>
+                  <div className="text-xs sm:text-sm text-slate-300">Recomendaciones inteligentes</div>
                 </div>
               </div>
             </div>
 
             {/* Buttons - Unified Style */}
-            <div className="flex flex-wrap gap-4 justify-center mt-6">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center mt-4 sm:mt-6">
               <button
                 onClick={() => {
                   chessGamePro.setShowVictoryScreen(false);
                   setGameResult(null);
                   setGameMode('menu');
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 shadow-lg w-full sm:w-auto"
               >
                 🏠 Menú Principal
               </button>
@@ -2938,7 +2938,7 @@ export default function ChessGame() {
                   setGameResult(null);
                   resetGame();
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 shadow-lg w-full sm:w-auto"
               >
                 🔄 Nueva Partida
               </button>
@@ -2948,14 +2948,14 @@ export default function ChessGame() {
                   chessGamePro.loadStats();
                   setGameMode('stats');
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 shadow-lg w-full sm:w-auto"
               >
                 📊 Ver Estadísticas
               </button>
 
               <button
                 onClick={() => setShowGameAnalysis(true)}
-                className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg invisible"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:scale-105 shadow-lg invisible"
               >
                 🔍 Analizar Partida
               </button>
@@ -2994,28 +2994,28 @@ export default function ChessGame() {
 
   if (gameMode === 'menu') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-4 md:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-2 sm:p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header with Hamburger Menu and Logo */}
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex items-center justify-between mb-6 sm:mb-8 md:mb-12">
             {/* Hamburger Menu - Left */}
             {chessGamePro.userProfile && (
               <div className="relative hamburger-menu-container">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="group relative bg-[#181825] backdrop-blur border border-white/6 rounded-xl p-3 hover:border-purple-400/40 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-purple-500/20"
+                  className="group relative bg-[#181825] backdrop-blur border border-white/6 rounded-xl p-2 sm:p-3 hover:border-purple-400/40 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-purple-500/20"
                   aria-label="Menú"
                 >
                   <div className="flex flex-col gap-1.5">
-                    <div className={`w-6 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
-                    <div className={`w-6 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></div>
-                    <div className={`w-6 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
+                    <div className={`w-5 sm:w-6 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></div>
+                    <div className={`w-5 sm:w-6 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></div>
+                    <div className={`w-5 sm:w-6 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></div>
                   </div>
                 </button>
 
                 {/* Dropdown Menu */}
                 {isMenuOpen && (
-                  <div className="absolute top-full mt-3 left-0 min-w-[420px] bg-[#181825] backdrop-blur-xl border border-white/8 rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-in z-50">
+                  <div className="absolute top-full mt-2 sm:mt-3 left-0 w-[calc(100vw-2rem)] sm:w-[420px] max-w-md bg-[#181825] backdrop-blur-xl border border-white/8 rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-in z-50">
                     {/* Mi Perfil Button */}
                     <button
                       onClick={() => {
@@ -3023,33 +3023,33 @@ export default function ChessGame() {
                         setGameMode('stats');
                         setIsMenuOpen(false);
                       }}
-                      className="w-full group relative bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-b border-white/6 p-6 hover:from-purple-500/20 hover:to-blue-500/20 transition-all duration-300"
+                      className="w-full group relative bg-gradient-to-br from-purple-500/10 to-blue-500/10 border-b border-white/6 p-4 sm:p-6 hover:from-purple-500/20 hover:to-blue-500/20 transition-all duration-300"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="text-4xl">👤</div>
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="text-3xl sm:text-4xl">👤</div>
                         <div className="text-left flex-1">
-                          <h3 className="text-lg font-bold mb-1 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">Mi Perfil</h3>
-                          <p className="text-slate-300 text-sm font-medium">
+                          <h3 className="text-base sm:text-lg font-bold mb-1 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">Mi Perfil</h3>
+                          <p className="text-slate-300 text-xs sm:text-sm font-medium">
                             ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas
                           </p>
-                          <p className="text-xs text-slate-400 mt-0.5">
+                          <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">
                             Progreso completo de todas tus partidas
                           </p>
                         </div>
-                        <div className="text-2xl text-slate-600 group-hover:text-purple-400 transition-colors">→</div>
+                        <div className="text-xl sm:text-2xl text-slate-600 group-hover:text-purple-400 transition-colors">→</div>
                       </div>
                     </button>
 
                     {/* User Session Section */}
-                    <div className="bg-gradient-to-r from-green-500/10 to-green-600/10 border-b border-white/6 p-6">
-                      <div className="flex items-center gap-4">
-                        <div className="text-3xl">✅</div>
-                        <div className="flex-1">
-                          <h3 className="text-base font-semibold text-green-400 mb-1">
+                    <div className="bg-gradient-to-r from-green-500/10 to-green-600/10 border-b border-white/6 p-4 sm:p-6">
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="text-2xl sm:text-3xl">✅</div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm sm:text-base font-semibold text-green-400 mb-1 truncate">
                             {chessGamePro.userProfile.name}
                           </h3>
-                          <p className="text-sm text-slate-300">
-                            ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas jugadas
+                          <p className="text-xs sm:text-sm text-slate-300 truncate">
+                            ELO: {chessGamePro.userProfile.eloRating} • {chessGamePro.userProfile.totalGames} partidas
                           </p>
                         </div>
                         <button
@@ -3060,35 +3060,35 @@ export default function ChessGame() {
                               setIsMenuOpen(false);
                             }
                           }}
-                          className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-500 rounded-lg font-semibold transition-all duration-200 text-sm"
+                          className="px-3 sm:px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-500 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm whitespace-nowrap"
                         >
-                          🚪 Cerrar Sesión
+                          🚪 Salir
                         </button>
                       </div>
                     </div>
 
                     {/* Configuración Section */}
-                    <div className="p-6">
-                      <h3 className="text-base font-semibold mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">⚙️ Configuración</h3>
+                    <div className="p-4 sm:p-6">
+                      <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">⚙️ Configuración</h3>
 
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         <div>
-                          <label className="block text-sm font-medium mb-2 text-slate-300">Tema del tablero</label>
-                          <div className="grid grid-cols-6 gap-2">
+                          <label className="block text-xs sm:text-sm font-medium mb-2 text-slate-300">Tema del tablero</label>
+                          <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
                             {Object.entries(THEMES).map(([key, theme]) => (
                               <button
                                 key={key}
                                 onClick={() => setCurrentTheme(key)}
-                                className={`p-3 rounded-lg border-2 transition-all ${
+                                className={`p-2 sm:p-3 rounded-lg border-2 transition-all ${
                                   currentTheme === key
                                     ? 'border-purple-500 scale-110 shadow-lg shadow-purple-500/30'
                                     : 'border-slate-600 hover:border-slate-500'
                                 }`}
                                 title={theme.name}
                               >
-                                <div className="flex gap-1">
-                                  <div className={`w-3 h-3 ${theme.light} rounded`}></div>
-                                  <div className={`w-3 h-3 ${theme.dark} rounded`}></div>
+                                <div className="flex gap-0.5 sm:gap-1">
+                                  <div className={`w-2 sm:w-3 h-2 sm:h-3 ${theme.light} rounded`}></div>
+                                  <div className={`w-2 sm:w-3 h-2 sm:h-3 ${theme.dark} rounded`}></div>
                                 </div>
                               </button>
                             ))}
