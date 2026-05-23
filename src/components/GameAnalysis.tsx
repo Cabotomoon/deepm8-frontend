@@ -305,42 +305,44 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] rounded-2xl border-2 border-slate-700 max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="flex items-center gap-3">
-                <img src="/branding/logo-knight.png" alt="Deep M8" className="w-8 h-8" />
-                <h2 className="text-3xl font-bold text-white">DeepM8 Coach Engine</h2>
-                <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-white">V1</span>
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 sm:p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <img src="/branding/logo-knight.png" alt="Deep M8" className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" />
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-white truncate">DeepM8 Coach Engine</h2>
+                <span className="px-2 sm:px-3 py-0.5 sm:py-1 bg-white/20 rounded-full text-xs font-bold text-white flex-shrink-0">V1</span>
               </div>
-              <p className="text-purple-100 mt-1">Análisis inteligente con IA</p>
+              <p className="text-purple-100 mt-1 text-xs sm:text-sm">Análisis inteligente con IA</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {/* Export buttons (only when analysis is complete) */}
               {phase === 'complete' && (
                 <>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5 sm:gap-2 flex-1 sm:flex-initial">
                     <button
                       onClick={handleCopyToClipboard}
-                      className="bg-white/10 hover:bg-white/20 text-white rounded-lg px-3 py-2 text-sm transition-all flex items-center gap-2"
+                      className="bg-white/10 hover:bg-white/20 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm transition-all flex items-center justify-center gap-1 sm:gap-2 flex-1 sm:flex-initial"
                       title="Copiar al portapapeles"
                     >
                       📋
                     </button>
                     <button
                       onClick={handleExportMarkdown}
-                      className="bg-white/10 hover:bg-white/20 text-white rounded-lg px-3 py-2 text-sm transition-all flex items-center gap-2"
+                      className="bg-white/10 hover:bg-white/20 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm transition-all flex items-center justify-center gap-1 sm:gap-2 flex-1 sm:flex-initial"
                       title="Exportar como Markdown"
                     >
-                      📄 MD
+                      <span className="hidden sm:inline">📄 MD</span>
+                      <span className="sm:hidden">📄</span>
                     </button>
                     <button
                       onClick={handleExportJSON}
-                      className="bg-white/10 hover:bg-white/20 text-white rounded-lg px-3 py-2 text-sm transition-all flex items-center gap-2"
+                      className="bg-white/10 hover:bg-white/20 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm transition-all flex items-center justify-center gap-1 sm:gap-2 flex-1 sm:flex-initial"
                       title="Exportar como JSON"
                     >
-                      💾 JSON
+                      <span className="hidden sm:inline">💾 JSON</span>
+                      <span className="sm:hidden">💾</span>
                     </button>
                     <button
                       onClick={() => {
@@ -352,15 +354,16 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                           });
                         }
                       }}
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg px-3 py-2 text-sm transition-all flex items-center gap-2"
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm transition-all flex items-center justify-center gap-1 sm:gap-2 flex-1 sm:flex-initial"
                       title="Compartir partida en redes sociales"
                     >
-                      📤 Compartir
+                      <span className="hidden sm:inline">📤 Compartir</span>
+                      <span className="sm:hidden">📤</span>
                     </button>
                   </div>
 
                   {exportMessage && (
-                    <div className="bg-green-500/20 text-green-300 px-3 py-2 rounded-lg text-sm">
+                    <div className="bg-green-500/20 text-green-300 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm">
                       {exportMessage}
                     </div>
                   )}
@@ -369,9 +372,10 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
               <button
                 onClick={onClose}
-                className="text-white hover:bg-white/20 rounded-lg px-4 py-2 transition-all"
+                className="text-white hover:bg-white/20 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 transition-all text-sm sm:text-base flex-shrink-0"
               >
-                ✕ Cerrar
+                <span className="hidden sm:inline">✕ Cerrar</span>
+                <span className="sm:hidden">✕</span>
               </button>
             </div>
           </div>
@@ -453,24 +457,24 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
               <div className="p-6">
                 {/* Recommendations Tab */}
                 {activeTab === 'recommendations' && profile && skillMetrics && weeklyGoal && (
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Weekly Goal Card */}
-                    <div className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-xl p-6 border border-yellow-500/50">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <div className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 rounded-xl p-4 sm:p-6 border border-yellow-500/50">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2">
+                        <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                           <span>🎯</span> Objetivo Semanal
                         </h3>
-                        <span className="text-sm text-yellow-200">{weeklyGoal.daysActive}/{weeklyGoal.daysTotal} días</span>
+                        <span className="text-xs sm:text-sm text-yellow-200">{weeklyGoal.daysActive}/{weeklyGoal.daysTotal} días</span>
                       </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-200">Completar {weeklyGoal.modulesTotal} módulos de práctica</span>
-                          <span className="text-green-400 font-bold">{weeklyGoal.modulesCompleted}/{weeklyGoal.modulesTotal}</span>
+                      <div className="space-y-2 sm:space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+                          <span className="text-sm sm:text-base text-slate-200">Completar {weeklyGoal.modulesTotal} módulos de práctica</span>
+                          <span className="text-green-400 font-bold text-sm sm:text-base">{weeklyGoal.modulesCompleted}/{weeklyGoal.modulesTotal}</span>
                         </div>
-                        <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                        <div className="w-full bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden">
                           <div className="bg-gradient-to-r from-yellow-500 to-orange-500 h-full transition-all duration-500" style={{ width: `${(weeklyGoal.modulesCompleted / weeklyGoal.modulesTotal) * 100}%` }} />
                         </div>
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm gap-1 sm:gap-0">
                           <span className="text-slate-300">Mejorar {weeklyGoal.skillImprovement.skill} +{weeklyGoal.skillImprovement.target - weeklyGoal.skillImprovement.current + 5} pts</span>
                           <span className="text-blue-400 font-bold">+{weeklyGoal.skillImprovement.current - (weeklyGoal.skillImprovement.target - 10)} pts</span>
                         </div>
@@ -479,25 +483,25 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
                     {/* Section Title */}
                     <div>
-                      <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                      <h3 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2 flex items-center gap-2">
                         <span>🚀</span> Tu Evolución como Jugador
                       </h3>
-                      <p className="text-slate-400">Áreas priorizadas según tus últimas 10 partidas</p>
+                      <p className="text-slate-400 text-sm sm:text-base">Áreas priorizadas según tus últimas 10 partidas</p>
                     </div>
 
                     {/* Skills Progress Bars */}
-                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                      <h3 className="text-xl font-bold text-white mb-4">Tu Progreso por Área</h3>
-                      <div className="space-y-4">
+                    <div className="bg-slate-800/50 rounded-xl p-4 sm:p-6 border border-slate-700">
+                      <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Tu Progreso por Área</h3>
+                      <div className="space-y-3 sm:space-y-4">
                         {/* Openings */}
                         <div>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-slate-200 font-medium">Aperturas</span>
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${skillMetrics.openings >= 70 ? 'text-green-400' : skillMetrics.openings >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
+                          <div className="flex justify-between items-center mb-2 gap-2">
+                            <span className="text-sm sm:text-base text-slate-200 font-medium">Aperturas</span>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <span className={`font-bold text-sm sm:text-base ${skillMetrics.openings >= 70 ? 'text-green-400' : skillMetrics.openings >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
                                 {skillMetrics.openings}
                               </span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
+                              <span className={`text-xs px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap ${
                                 skillMetrics.openings >= 70 ? 'text-green-400 bg-green-500/20' :
                                 skillMetrics.openings >= 50 ? 'text-blue-400 bg-blue-500/20' :
                                 'text-orange-400 bg-orange-500/20'
@@ -506,7 +510,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                               </span>
                             </div>
                           </div>
-                          <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                          <div className="w-full bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden">
                             <div className={`h-full transition-all duration-500 ${
                               skillMetrics.openings >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                               skillMetrics.openings >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
@@ -517,13 +521,13 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
                         {/* Endgames */}
                         <div>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-slate-200 font-medium">Finales</span>
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${skillMetrics.endgames >= 70 ? 'text-green-400' : skillMetrics.endgames >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
+                          <div className="flex justify-between items-center mb-2 gap-2">
+                            <span className="text-sm sm:text-base text-slate-200 font-medium">Finales</span>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <span className={`font-bold text-sm sm:text-base ${skillMetrics.endgames >= 70 ? 'text-green-400' : skillMetrics.endgames >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
                                 {skillMetrics.endgames}
                               </span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
+                              <span className={`text-xs px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap ${
                                 skillMetrics.endgames >= 70 ? 'text-green-400 bg-green-500/20' :
                                 skillMetrics.endgames >= 50 ? 'text-blue-400 bg-blue-500/20' :
                                 'text-orange-400 bg-orange-500/20'
@@ -532,7 +536,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                               </span>
                             </div>
                           </div>
-                          <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                          <div className="w-full bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden">
                             <div className={`h-full transition-all duration-500 ${
                               skillMetrics.endgames >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                               skillMetrics.endgames >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
@@ -543,13 +547,13 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
                         {/* Tactics */}
                         <div>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-slate-200 font-medium">Táctica</span>
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${skillMetrics.tactics >= 70 ? 'text-green-400' : skillMetrics.tactics >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
+                          <div className="flex justify-between items-center mb-2 gap-2">
+                            <span className="text-sm sm:text-base text-slate-200 font-medium">Táctica</span>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <span className={`font-bold text-sm sm:text-base ${skillMetrics.tactics >= 70 ? 'text-green-400' : skillMetrics.tactics >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
                                 {skillMetrics.tactics}
                               </span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
+                              <span className={`text-xs px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap ${
                                 skillMetrics.tactics >= 70 ? 'text-green-400 bg-green-500/20' :
                                 skillMetrics.tactics >= 50 ? 'text-blue-400 bg-blue-500/20' :
                                 'text-orange-400 bg-orange-500/20'
@@ -558,7 +562,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                               </span>
                             </div>
                           </div>
-                          <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                          <div className="w-full bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden">
                             <div className={`h-full transition-all duration-500 ${
                               skillMetrics.tactics >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                               skillMetrics.tactics >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
@@ -569,13 +573,13 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
                         {/* Middlegame */}
                         <div>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-slate-200 font-medium">Medio Juego</span>
-                            <div className="flex items-center gap-3">
-                              <span className={`font-bold ${skillMetrics.middlegame >= 70 ? 'text-green-400' : skillMetrics.middlegame >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
+                          <div className="flex justify-between items-center mb-2 gap-2">
+                            <span className="text-sm sm:text-base text-slate-200 font-medium">Medio Juego</span>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <span className={`font-bold text-sm sm:text-base ${skillMetrics.middlegame >= 70 ? 'text-green-400' : skillMetrics.middlegame >= 50 ? 'text-blue-400' : 'text-orange-400'}`}>
                                 {skillMetrics.middlegame}
                               </span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
+                              <span className={`text-xs px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap ${
                                 skillMetrics.middlegame >= 70 ? 'text-green-400 bg-green-500/20' :
                                 skillMetrics.middlegame >= 50 ? 'text-blue-400 bg-blue-500/20' :
                                 'text-orange-400 bg-orange-500/20'
@@ -584,7 +588,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                               </span>
                             </div>
                           </div>
-                          <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                          <div className="w-full bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden">
                             <div className={`h-full transition-all duration-500 ${
                               skillMetrics.middlegame >= 70 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                               skillMetrics.middlegame >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
@@ -596,7 +600,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                     </div>
 
                     {/* Study Recommendations */}
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       {recommendations.map((rec) => {
                         const priorityConfig = {
                           high: {
@@ -631,29 +635,29 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                         const config = priorityConfig[rec.priority];
 
                         return (
-                          <div key={rec.id} className={`bg-gradient-to-br ${config.bgGradient} rounded-xl p-6 ${config.border}`}>
-                            <div className="flex items-start gap-4">
-                              <div className="text-4xl">{config.icon}</div>
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between mb-3">
-                                  <div>
-                                    <h4 className="text-xl font-bold text-white mb-1">{rec.title}</h4>
-                                    <p className={`${config.textColor} text-sm`}>
+                          <div key={rec.id} className={`bg-gradient-to-br ${config.bgGradient} rounded-xl p-4 sm:p-6 ${config.border}`}>
+                            <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                              <div className="text-3xl sm:text-4xl flex-shrink-0">{config.icon}</div>
+                              <div className="flex-1 w-full min-w-0">
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 sm:mb-3 gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-lg sm:text-xl font-bold text-white mb-1">{rec.title}</h4>
+                                    <p className={`${config.textColor} text-xs sm:text-sm`}>
                                       <span className="font-semibold">Por qué:</span> {rec.reason}
                                     </p>
                                   </div>
-                                  <span className={`px-3 py-1 ${config.badge} rounded-full text-xs font-bold whitespace-nowrap`}>
+                                  <span className={`px-2 sm:px-3 py-1 ${config.badge} rounded-full text-xs font-bold whitespace-nowrap self-start`}>
                                     {config.badgeText}
                                   </span>
                                 </div>
-                                <p className="text-slate-200 mb-4">
+                                <p className="text-slate-200 mb-3 sm:mb-4 text-sm sm:text-base">
                                   {rec.description}
                                 </p>
-                                <div className="flex gap-3">
-                                  <button className={`flex-1 ${config.primaryButton} text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2`}>
+                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                                  <button className={`flex-1 ${config.primaryButton} text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base`}>
                                     <span>👉</span> {rec.actionLabel}
                                   </button>
-                                  <button className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg transition-all">
+                                  <button className="sm:flex-initial bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all text-sm sm:text-base">
                                     {rec.secondaryActionLabel}
                                   </button>
                                 </div>
@@ -665,11 +669,11 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                     </div>
 
                     {/* Study Tips */}
-                    <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-xl p-6 border border-purple-500/50">
-                      <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                    <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-xl p-4 sm:p-6 border border-purple-500/50">
+                      <h3 className="text-base sm:text-lg font-bold text-white mb-2 sm:mb-3 flex items-center gap-2">
                         <span>💡</span> Consejo del Coach
                       </h3>
-                      <p className="text-slate-200 leading-relaxed">
+                      <p className="text-slate-200 leading-relaxed text-sm sm:text-base">
                         {studyRecommendationService.getCoachTip(skillMetrics)}
                       </p>
                     </div>
