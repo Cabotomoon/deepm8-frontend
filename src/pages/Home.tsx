@@ -3589,25 +3589,25 @@ export default function ChessGame() {
                 : 'bg-slate-800/50 border-slate-700'
             }`}>
               {/* Nombre, ELO y Piezas Capturadas del jugador negro */}
-              <div className="flex items-center gap-3 flex-1">
-                <div className="text-3xl">♚</div>
-                <div className="flex-1">
-                  <div className="font-bold text-white">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="text-2xl sm:text-3xl flex-shrink-0">♚</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-white text-sm sm:text-base truncate">
                     {gameMode === 'ai' ? 'IA DeepM8' :
                      gameMode === 'online' && myColor === 'white' ? opponentName :
                      gameMode === 'online' && myColor === 'black' ? getDisplayName() :
                      'Jugador 2'}
                   </div>
-                  <div className="text-sm text-slate-400">
+                  <div className="text-xs sm:text-sm text-slate-400">
                     ELO: {gameMode === 'ai' ? DIFFICULTY_LEVELS[aiDifficulty].elo :
                           gameMode === 'online' && myColor === 'white' ? opponentElo :
                           gameMode === 'online' && myColor === 'black' ? (chessGamePro.userProfile?.eloRating || 1200) :
                           1200}
                   </div>
                   {/* Piezas capturadas por las negras (pequeñas) */}
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <div className="flex flex-wrap gap-0.5 sm:gap-1 mt-1">
                     {capturedPieces.black.map((piece, i) => (
-                      <span key={i} className="text-lg opacity-60">
+                      <span key={i} className="text-base sm:text-lg opacity-60">
                         {PIECE_SYMBOLS[piece.color][piece.type]}
                       </span>
                     ))}
@@ -3616,7 +3616,7 @@ export default function ChessGame() {
               </div>
 
               {/* Reloj del jugador negro */}
-              <div className={`px-4 py-2 rounded-lg font-mono text-xl font-bold ${
+              <div className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-mono text-base sm:text-lg md:text-xl font-bold flex-shrink-0 ${
                 currentPlayer === 'black' ? 'bg-amber-500 text-black' : 'bg-slate-700 text-white'
               } ${blackTime <= 10 ? 'animate-pulse' : ''}`}>
                 {formatTime(blackTime)}
@@ -3624,7 +3624,7 @@ export default function ChessGame() {
             </div>
 
             {/* Board container with wooden border effect */}
-            <div className="bg-[#312e2b] p-3 md:p-4 rounded-xl shadow-2xl border-4 border-[#1a1816]">
+            <div className="bg-[#312e2b] p-2 sm:p-3 md:p-4 rounded-xl shadow-2xl border-2 sm:border-4 border-[#1a1816]">
               {/* Coordinates wrapper */}
               <div className="relative">
                 {/* Top coordinates (a-h) */}
@@ -3719,31 +3719,31 @@ export default function ChessGame() {
             </div>
 
             {/* Información Jugador Blanco (abajo del tablero) */}
-            <div className={`w-full max-w-[672px] flex items-center justify-between backdrop-blur rounded-xl p-3 border-2 transition-all duration-300 ${
+            <div className={`w-full max-w-[672px] flex items-center justify-between backdrop-blur rounded-xl p-2 sm:p-3 border-2 transition-all duration-300 ${
               currentPlayer === 'white'
                 ? 'bg-purple-500/20 border-purple-500 shadow-lg shadow-purple-500/30'
                 : 'bg-slate-800/50 border-slate-700'
             }`}>
               {/* Nombre, ELO y Piezas Capturadas del jugador blanco */}
-              <div className="flex items-center gap-3 flex-1">
-                <div className="text-3xl">♔</div>
-                <div className="flex-1">
-                  <div className="font-bold text-white">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="text-2xl sm:text-3xl flex-shrink-0">♔</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-white text-sm sm:text-base truncate">
                     {gameMode === 'ai' ? getDisplayName() :
                      gameMode === 'online' && myColor === 'white' ? getDisplayName() :
                      gameMode === 'online' && myColor === 'black' ? opponentName :
                      'Jugador 1'}
                   </div>
-                  <div className="text-sm text-slate-400">
+                  <div className="text-xs sm:text-sm text-slate-400">
                     ELO: {gameMode === 'ai' ? (chessGamePro.userProfile?.eloRating || 1200) :
                           gameMode === 'online' && myColor === 'white' ? (chessGamePro.userProfile?.eloRating || 1200) :
                           gameMode === 'online' && myColor === 'black' ? opponentElo :
                           1200}
                   </div>
                   {/* Piezas capturadas por las blancas (pequeñas) */}
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <div className="flex flex-wrap gap-0.5 sm:gap-1 mt-1">
                     {capturedPieces.white.map((piece, i) => (
-                      <span key={i} className="text-lg opacity-60">
+                      <span key={i} className="text-base sm:text-lg opacity-60">
                         {PIECE_SYMBOLS[piece.color][piece.type]}
                       </span>
                     ))}
@@ -3752,7 +3752,7 @@ export default function ChessGame() {
               </div>
 
               {/* Reloj del jugador blanco */}
-              <div className={`px-4 py-2 rounded-lg font-mono text-xl font-bold ${
+              <div className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg font-mono text-base sm:text-lg md:text-xl font-bold flex-shrink-0 ${
                 currentPlayer === 'white' ? 'bg-amber-500 text-black' : 'bg-slate-700 text-white'
               } ${whiteTime <= 10 ? 'animate-pulse' : ''}`}>
                 {formatTime(whiteTime)}
@@ -3760,35 +3760,38 @@ export default function ChessGame() {
             </div>
 
             {/* Controls */}
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
               <button
                 onClick={resetGame}
-                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg"
               >
-                🔄 Nueva Partida
+                <span className="hidden sm:inline">🔄 Nueva Partida</span>
+                <span className="sm:hidden">🔄 Nueva</span>
               </button>
               <button
                 onClick={handleResign}
-                className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg"
                 disabled={gameStatus === 'checkmate' || gameStatus === 'stalemate' || gameStatus === 'resigned'}
               >
-                🏳️ Rendirse
+                <span className="hidden sm:inline">🏳️ Rendirse</span>
+                <span className="sm:hidden">🏳️</span>
               </button>
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg ${
+                className={`px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg ${
                   soundEnabled
                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
                     : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800'
                 }`}
               >
-                {soundEnabled ? '🔊 Sonido' : '🔇 Mudo'}
+                {soundEnabled ? '🔊' : '🔇'}
+                <span className="hidden sm:inline ml-1">{soundEnabled ? 'Sonido' : 'Mudo'}</span>
               </button>
               <button
                 onClick={handleBackToMenuDuringOnlineGame}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg"
               >
-                ☰ Menú
+                ☰ <span className="hidden sm:inline">Menú</span>
               </button>
 
               {/* DEBUG: Test disconnection with REAL server (only in development) */}
