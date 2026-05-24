@@ -33,7 +33,7 @@ class SocialShareService {
     const { achievement, profile } = data;
     const rarityEmoji = this.getRarityEmoji(achievement.rarity);
 
-    return `🏆 ¡Logro Desbloqueado en Deep M8 Coach! ${rarityEmoji}
+    return `🏆 ¡Logro Desbloqueado en DeepM8 Coach Engine! ${rarityEmoji}
 
 ${achievement.icon} ${achievement.name}
 ${achievement.description}
@@ -43,7 +43,7 @@ ${achievement.description}
 • ${profile.averageAccuracy}% precisión promedio
 • ${(profile.achievements || []).length} logros desbloqueados
 
-#DeepM8Coach #Chess #Achievement #Gaming`;
+#DeepM8 #DeepM8CoachEngine #Chess #Achievement #Gaming`;
   }
 
   /**
@@ -56,7 +56,7 @@ ${achievement.description}
                    gameRecord.result === 'loss' ? '❌ Derrota' :
                    gameRecord.result === 'draw' ? '⚖️ Tablas' : '🎮 Partida';
 
-    return `♟️ ${result} - Deep M8 Coach Analysis
+    return `♟️ ${result} - DeepM8 Coach Engine
 
 📊 Estadísticas:
 • Precisión: ${gameRecord.accuracy}%
@@ -68,7 +68,7 @@ ${achievement.description}
 • ${profile.totalGames} partidas analizadas
 • ${profile.averageAccuracy}% precisión promedio
 
-#DeepM8Coach #Chess #ChessGame #Strategy`;
+#DeepM8 #DeepM8CoachEngine #Chess #ChessGame #Strategy`;
   }
 
   /**
@@ -283,7 +283,7 @@ ${achievement.description}
   generateGameSummary(data: ShareableGame): string {
     const { gameRecord, highlights } = data;
 
-    let summary = `🎯 Partida Deep M8 Coach\n\n`;
+    let summary = `🎯 Partida DeepM8 Coach Engine\n\n`;
     summary += `📊 ${gameRecord.accuracy}% precisión | ${gameRecord.totalMoves} movimientos\n`;
     summary += `✓✓ ${gameRecord.excellentMoves} excelentes | ?? ${gameRecord.blunders} blunders\n\n`;
 
@@ -445,7 +445,7 @@ ${achievement.description}
       `).join('')}
     </div>
     <div class="footer">
-      🧠 Deep M8 Coach Engine
+      ♟️ DeepM8 Coach Engine
     </div>
   </div>
 </body>
