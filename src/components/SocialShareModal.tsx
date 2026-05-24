@@ -294,20 +294,20 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-slate-900 rounded-2xl border-2 border-slate-700 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-2 sm:p-4">
+      <div className="bg-slate-900 rounded-xl sm:rounded-2xl border-2 border-slate-700 max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-white">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 sm:p-6">
+          <div className="flex justify-between items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
                 {type === 'achievement' ? '🏆 Compartir Logro' : '♟️ Compartir Partida'}
               </h2>
-              <p className="text-purple-100 text-sm mt-1">Comparte tu progreso con el mundo</p>
+              <p className="text-purple-100 text-xs sm:text-sm mt-0.5 sm:mt-1 truncate">Comparte tu progreso con el mundo</p>
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:bg-white/20 rounded-lg px-4 py-2 transition-all"
+              className="text-white hover:bg-white/20 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 transition-all text-sm sm:text-base flex-shrink-0"
             >
               ✕
             </button>
@@ -315,75 +315,87 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-6">
           {/* Generated Image Preview */}
           {generatingImage ? (
-            <div className="bg-slate-800/50 rounded-xl p-8 border border-slate-700 text-center">
-              <div className="text-6xl mb-4 animate-pulse">🎨</div>
-              <div className="text-slate-400">Generando imagen compartible...</div>
+            <div className="bg-slate-800/50 rounded-lg sm:rounded-xl p-6 sm:p-8 border border-slate-700 text-center">
+              <div className="text-4xl sm:text-6xl mb-3 sm:mb-4 animate-pulse">🎨</div>
+              <div className="text-slate-400 text-sm sm:text-base">Generando imagen compartible...</div>
             </div>
           ) : generatedImage ? (
-            <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-              <div className="flex justify-between items-center mb-3">
-                <div className="text-sm text-slate-400 font-semibold">📸 Imagen Generada</div>
+            <div className="bg-slate-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-slate-700">
+              <div className="flex justify-between items-center mb-2 sm:mb-3 gap-2">
+                <div className="text-xs sm:text-sm text-slate-400 font-semibold flex items-center gap-1">
+                  <span>📸</span>
+                  <span className="hidden xs:inline">Imagen Generada</span>
+                </div>
                 <button
                   onClick={handleDownloadImage}
-                  className="text-sm px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all flex items-center gap-2"
+                  className="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all flex items-center gap-1 sm:gap-2 flex-shrink-0"
                 >
-                  <span>💾</span> Descargar
+                  <span>💾</span>
+                  <span className="hidden xs:inline">Descargar</span>
                 </button>
               </div>
-              <div className="bg-slate-900/50 rounded-lg p-2 overflow-hidden">
+              <div className="bg-slate-900/50 rounded-lg p-1.5 sm:p-2 overflow-hidden">
                 <img
                   src={generatedImage}
                   alt="Preview"
                   className="w-full h-auto rounded-lg"
-                  style={{ maxHeight: '300px', objectFit: 'contain' }}
+                  style={{ maxHeight: '250px', objectFit: 'contain' }}
                 />
               </div>
-              <div className="text-xs text-slate-500 mt-2 text-center">
+              <div className="text-[10px] sm:text-xs text-slate-500 mt-1.5 sm:mt-2 text-center">
                 Optimizada para redes sociales (1200x630px)
               </div>
 
               {/* Separate Share Buttons for Image */}
-              <div className="mt-4 pt-4 border-t border-slate-700">
-                <div className="text-xs text-slate-400 mb-2 text-center font-semibold">Compartir esta imagen en:</div>
-                <div className="grid grid-cols-3 gap-2">
+              <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-700">
+                <div className="text-[10px] sm:text-xs text-slate-400 mb-2 text-center font-semibold">
+                  Compartir<span className="hidden xs:inline"> esta imagen</span> en:
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   <button
                     onClick={handleShareImageTwitter}
-                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                   >
-                    <span className="text-lg">𝕏</span> Twitter
+                    <span className="text-base sm:text-lg">𝕏</span>
+                    <span className="hidden xs:inline">Twitter</span>
                   </button>
                   <button
                     onClick={handleShareImageWhatsApp}
-                    className="bg-green-500 hover:bg-green-600 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                    className="bg-green-500 hover:bg-green-600 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                   >
-                    <span className="text-lg">💚</span> WhatsApp
+                    <span className="text-base sm:text-lg">💚</span>
+                    <span className="hidden xs:inline">WhatsApp</span>
                   </button>
                   <button
                     onClick={handleShareImageFacebook}
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                   >
-                    <span className="text-lg">📘</span> Facebook
+                    <span className="text-base sm:text-lg">📘</span>
+                    <span className="hidden xs:inline">Facebook</span>
                   </button>
                   <button
                     onClick={handleShareImageDiscord}
-                    className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                   >
-                    <span className="text-lg">💬</span> Discord
+                    <span className="text-base sm:text-lg">💬</span>
+                    <span className="hidden xs:inline">Discord</span>
                   </button>
                   <button
                     onClick={handleShareImageInstagram}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                   >
-                    <span className="text-lg">📷</span> Instagram
+                    <span className="text-base sm:text-lg">📷</span>
+                    <span className="hidden xs:inline">Instagram</span>
                   </button>
                   <button
                     onClick={handleShareImageTikTok}
-                    className="bg-black hover:bg-gray-900 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                    className="bg-black hover:bg-gray-900 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                   >
-                    <span className="text-lg">🎵</span> TikTok
+                    <span className="text-base sm:text-lg">🎵</span>
+                    <span className="hidden xs:inline">TikTok</span>
                   </button>
                 </div>
               </div>
@@ -392,49 +404,54 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
 
           {/* Video Generation (only for games) */}
           {type === 'game' && (
-            <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-              <div className="flex justify-between items-center mb-3">
-                <div className="text-sm text-slate-400 font-semibold">🎬 Video Replay</div>
+            <div className="bg-slate-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-slate-700">
+              <div className="flex justify-between items-center mb-2 sm:mb-3 gap-2">
+                <div className="text-xs sm:text-sm text-slate-400 font-semibold flex items-center gap-1">
+                  <span>🎬</span>
+                  <span className="hidden xs:inline">Video Replay</span>
+                </div>
                 {!generatedVideo && !generatingVideo && (
                   <button
                     onClick={handleGenerateVideo}
-                    className="text-sm px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all flex items-center gap-2"
+                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all flex items-center gap-1 sm:gap-2 flex-shrink-0"
                   >
-                    <span>🎬</span> Generar
+                    <span>🎬</span>
+                    <span className="hidden xs:inline">Generar</span>
                   </button>
                 )}
                 {generatedVideo && (
                   <button
                     onClick={handleDownloadVideo}
-                    className="text-sm px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg transition-all flex items-center gap-2"
+                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg transition-all flex items-center gap-1 sm:gap-2 flex-shrink-0"
                   >
-                    <span>💾</span> Descargar
+                    <span>💾</span>
+                    <span className="hidden xs:inline">Descargar</span>
                   </button>
                 )}
               </div>
 
               {generatingVideo ? (
-                <div className="bg-slate-900/50 rounded-lg p-8 text-center">
-                  <div className="text-6xl mb-4 animate-bounce">🎥</div>
-                  <div className="text-slate-400 mb-4">Generando video replay...</div>
-                  <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                <div className="bg-slate-900/50 rounded-lg p-6 sm:p-8 text-center">
+                  <div className="text-4xl sm:text-6xl mb-3 sm:mb-4 animate-bounce">🎥</div>
+                  <div className="text-slate-400 mb-3 sm:mb-4 text-sm sm:text-base">Generando video replay...</div>
+                  <div className="w-full bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
                       style={{ width: `${videoProgress}%` }}
                     />
                   </div>
-                  <div className="text-sm text-slate-500 mt-2">{videoProgress}%</div>
+                  <div className="text-xs sm:text-sm text-slate-500 mt-2">{videoProgress}%</div>
                 </div>
               ) : generatedVideo ? (
                 <div>
-                  <div className="bg-slate-900/50 rounded-lg p-2 overflow-hidden">
+                  <div className="bg-slate-900/50 rounded-lg p-1.5 sm:p-2 overflow-hidden">
                     <video
                       src={URL.createObjectURL(generatedVideo)}
                       controls
                       className="w-full h-auto rounded-lg"
-                      style={{ maxHeight: '300px' }}
+                      style={{ maxHeight: '250px' }}
                     />
-                    <div className="text-xs text-slate-500 mt-2 text-center">
+                    <div className="text-[10px] sm:text-xs text-slate-500 mt-1.5 sm:mt-2 text-center leading-tight">
                       {generatedVideo.type === 'video/mp4'
                         ? '✅ Formato MP4 (1280x720px HD, 30fps) - Compatible con todas las plataformas'
                         : '✅ Formato WebM (1280x720px HD, 30fps) - Compatible con Chrome, Firefox, Edge, Safari'}
@@ -442,57 +459,65 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
                   </div>
 
                   {/* Separate Share Buttons for Video */}
-                  <div className="mt-4 pt-4 border-t border-slate-700">
-                    <div className="text-xs text-slate-400 mb-2 text-center font-semibold">Compartir este video en:</div>
-                    <div className="grid grid-cols-3 gap-2">
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-700">
+                    <div className="text-[10px] sm:text-xs text-slate-400 mb-2 text-center font-semibold">
+                      Compartir<span className="hidden xs:inline"> este video</span> en:
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                       <button
                         onClick={handleShareVideoTwitter}
-                        className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                        className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                       >
-                        <span className="text-lg">𝕏</span> Twitter
+                        <span className="text-base sm:text-lg">𝕏</span>
+                        <span className="hidden xs:inline">Twitter</span>
                       </button>
                       <button
                         onClick={handleShareVideoWhatsApp}
-                        className="bg-green-500 hover:bg-green-600 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                        className="bg-green-500 hover:bg-green-600 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                       >
-                        <span className="text-lg">💚</span> WhatsApp
+                        <span className="text-base sm:text-lg">💚</span>
+                        <span className="hidden xs:inline">WhatsApp</span>
                       </button>
                       <button
                         onClick={handleShareVideoFacebook}
-                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                       >
-                        <span className="text-lg">📘</span> Facebook
+                        <span className="text-base sm:text-lg">📘</span>
+                        <span className="hidden xs:inline">Facebook</span>
                       </button>
                       <button
                         onClick={handleShareVideoDiscord}
-                        className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                        className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                       >
-                        <span className="text-lg">💬</span> Discord
+                        <span className="text-base sm:text-lg">💬</span>
+                        <span className="hidden xs:inline">Discord</span>
                       </button>
                       <button
                         onClick={handleShareVideoInstagram}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                       >
-                        <span className="text-lg">📷</span> Instagram
+                        <span className="text-base sm:text-lg">📷</span>
+                        <span className="hidden xs:inline">Instagram</span>
                       </button>
                       <button
                         onClick={handleShareVideoTikTok}
-                        className="bg-black hover:bg-gray-900 text-white rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-1 text-sm"
+                        className="bg-black hover:bg-gray-900 text-white rounded-lg py-2 sm:py-2.5 px-2 sm:px-3 transition-all flex items-center justify-center gap-1 text-xs sm:text-sm"
                       >
-                        <span className="text-lg">🎵</span> TikTok
+                        <span className="text-base sm:text-lg">🎵</span>
+                        <span className="hidden xs:inline">TikTok</span>
                       </button>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="bg-slate-900/50 rounded-lg p-8 text-center border-2 border-dashed border-slate-700">
-                  <div className="text-4xl mb-2">🎬</div>
-                  <div className="text-slate-400 text-sm">Haz clic en "Generar" para crear un replay animado de la partida</div>
-                  <div className="text-xs text-slate-500 mt-2">
-                    📹 Incluye intro, análisis de jugadas y highlights
+                <div className="bg-slate-900/50 rounded-lg p-6 sm:p-8 text-center border-2 border-dashed border-slate-700">
+                  <div className="text-3xl sm:text-4xl mb-2">🎬</div>
+                  <div className="text-slate-400 text-xs sm:text-sm">Haz clic en "Generar" para crear un replay animado de la partida</div>
+                  <div className="text-[10px] sm:text-xs text-slate-500 mt-2">
+                    📹 Incluye intro, análisis<span className="hidden xs:inline"> de jugadas</span> y highlights
                   </div>
-                  <div className="text-xs text-slate-600 mt-1">
-                    🎞️ Formato: WebM (compatible con todos los navegadores modernos)
+                  <div className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight">
+                    🎞️ Formato: WebM (compatible<span className="hidden xs:inline"> con todos los navegadores modernos</span>)
                   </div>
                 </div>
               )}
@@ -500,23 +525,26 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
           )}
 
           {/* Text Preview */}
-          <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-            <div className="text-sm text-slate-400 mb-2">📋 Texto para Compartir:</div>
-            <div className="text-white whitespace-pre-line text-sm font-mono bg-slate-900/50 p-4 rounded-lg">
+          <div className="bg-slate-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-slate-700">
+            <div className="text-xs sm:text-sm text-slate-400 mb-2 flex items-center gap-1">
+              <span>📋</span>
+              <span>Texto<span className="hidden xs:inline"> para Compartir</span>:</span>
+            </div>
+            <div className="text-white whitespace-pre-line text-xs sm:text-sm font-mono bg-slate-900/50 p-3 sm:p-4 rounded-lg leading-relaxed">
               {shareText}
             </div>
-            <div className="text-xs text-slate-500 mt-2 text-center">
-              ✨ Este texto se copiará/compartirá automáticamente con los botones de arriba
+            <div className="text-[10px] sm:text-xs text-slate-500 mt-1.5 sm:mt-2 text-center">
+              ✨ Este texto se copiará/compartirá automáticamente<span className="hidden xs:inline"> con los botones de arriba</span>
             </div>
           </div>
 
           {/* Game Highlights (only for games) */}
           {type === 'game' && 'highlights' in data && data.highlights.length > 0 && (
-            <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                <span>⭐</span> Momentos Destacados
+            <div className="bg-slate-800/50 rounded-lg sm:rounded-xl p-3 sm:p-6 border border-slate-700">
+              <h3 className="text-white font-bold mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base">
+                <span className="text-lg sm:text-xl">⭐</span> Momentos Destacados
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {data.highlights.map((highlight, idx) => {
                   const emoji = highlight.type === 'brilliant' ? '🌟' :
                                highlight.type === 'blunder' ? '💥' : '🔥';
@@ -524,11 +552,11 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
                                highlight.type === 'blunder' ? 'text-red-400' : 'text-orange-400';
 
                   return (
-                    <div key={idx} className="bg-slate-900/50 rounded-lg p-4 flex items-center gap-3">
-                      <span className={`text-2xl ${color}`}>{emoji}</span>
-                      <div className="flex-1">
-                        <div className="text-white font-semibold">Jugada {highlight.moveNumber}: {highlight.notation}</div>
-                        <div className="text-slate-400 text-sm">{highlight.description}</div>
+                    <div key={idx} className="bg-slate-900/50 rounded-lg p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+                      <span className={`text-xl sm:text-2xl ${color} flex-shrink-0`}>{emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-white font-semibold text-xs sm:text-base truncate">Jugada {highlight.moveNumber}: {highlight.notation}</div>
+                        <div className="text-slate-400 text-[11px] sm:text-sm line-clamp-2">{highlight.description}</div>
                       </div>
                     </div>
                   );
@@ -540,7 +568,7 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
           {/* Success Message */}
           {shareMessage && (
             <div className={`
-              text-center p-4 rounded-lg
+              text-center p-3 sm:p-4 rounded-lg text-xs sm:text-sm
               ${copySuccess ? 'bg-green-500/20 text-green-300' : 'bg-blue-500/20 text-blue-300'}
             `}>
               {shareMessage}
@@ -549,9 +577,9 @@ export default function SocialShareModal({ type, data, onClose }: SocialShareMod
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-800/50 p-4 border-t border-slate-700">
-          <div className="text-sm text-slate-400 text-center">
-            💡 Tip: Comparte tus logros para inspirar a otros jugadores
+        <div className="bg-slate-800/50 p-2.5 sm:p-4 border-t border-slate-700">
+          <div className="text-xs sm:text-sm text-slate-400 text-center leading-tight">
+            💡 Tip: Comparte tus logros<span className="hidden xs:inline"> para inspirar a otros jugadores</span>
           </div>
         </div>
       </div>
