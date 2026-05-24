@@ -27,6 +27,7 @@ class VideoReplayService {
   private videoHeight = 720;
   private maxFramesInMemory = 100;
   private logoImage: HTMLImageElement | null = null;
+  private knightLogoImage: HTMLImageElement | null = null;
 
   constructor() {
     this.canvas = document.createElement('canvas');
@@ -37,8 +38,9 @@ class VideoReplayService {
       alpha: false
     })!;
 
-    // Load logo
+    // Load logos
     this.loadLogo();
+    this.loadKnightLogo();
   }
 
   /**
@@ -60,7 +62,25 @@ class VideoReplayService {
   }
 
   /**
-   * Draw watermark with logo
+   * Load Knight logo for bottom-left watermark
+   */
+  private async loadKnightLogo(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        this.knightLogoImage = img;
+        resolve();
+      };
+      img.onerror = (error) => {
+        console.error('Error loading knight logo:', error);
+        resolve(); // Continue without logo if it fails
+      };
+      img.src = '/branding/logo-knight.png';
+    });
+  }
+
+  /**
+   * Draw watermark with logo (top-left)
    */
   private drawWatermark(): void {
     if (!this.logoImage) return;
@@ -78,6 +98,28 @@ class VideoReplayService {
     // Draw logo with slight transparency
     this.ctx.globalAlpha = 0.9;
     this.ctx.drawImage(this.logoImage, x, y, logoSize, logoSize);
+    this.ctx.globalAlpha = 1.0;
+  }
+
+  /**
+   * Draw knight logo watermark (bottom-left)
+   */
+  private drawKnightWatermark(): void {
+    if (!this.knightLogoImage) return;
+
+    // Position: bottom-left corner with padding
+    const logoSize = 80;
+    const padding = 40;
+    const x = padding;
+    const y = this.videoHeight - logoSize - padding;
+
+    // Semi-transparent background for better visibility
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    this.roundRect(this.ctx, x - 10, y - 10, logoSize + 20, logoSize + 20, 12);
+
+    // Draw logo with slight transparency
+    this.ctx.globalAlpha = 0.85;
+    this.ctx.drawImage(this.knightLogoImage, x, y, logoSize, logoSize);
     this.ctx.globalAlpha = 1.0;
   }
 
@@ -189,7 +231,7 @@ class VideoReplayService {
     this.ctx.font = 'bold 120px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     this.ctx.fillStyle = '#ffffff';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('♟️ DeepM8 Coach', this.videoWidth / 2, 300);
+    this.ctx.fillText('DeepM8 Coach', this.videoWidth / 2, 300);
 
     // Subtitle
     this.ctx.font = 'bold 60px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -218,8 +260,9 @@ class VideoReplayService {
       750
     );
 
-    // Draw watermark
-    this.drawWatermark();
+    // Draw watermarks
+    this.drawWatermark(); // Top-left: DeepM8 logo
+    this.drawKnightWatermark(); // Bottom-left: Knight logo
 
     return this.canvas.toDataURL('image/jpeg', 0.85); // OPTIMIZACIÓN: JPEG con 85% calidad (menor tamaño)
   }
@@ -329,10 +372,11 @@ class VideoReplayService {
     this.ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     this.ctx.fillStyle = '#475569';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('♟️ DeepM8 Coach Engine', this.videoWidth / 2, this.videoHeight - 40);
+    this.ctx.fillText('DeepM8 Coach Engine', this.videoWidth / 2, this.videoHeight - 40);
 
-    // Draw watermark
-    this.drawWatermark();
+    // Draw watermarks
+    this.drawWatermark(); // Top-left: DeepM8 logo
+    this.drawKnightWatermark(); // Bottom-left: Knight logo
 
     return this.canvas.toDataURL('image/jpeg', 0.85); // OPTIMIZACIÓN: JPEG con 85% calidad (menor tamaño)
   }
@@ -403,10 +447,11 @@ class VideoReplayService {
     // Call to action
     this.ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillText('♟️ Mejora tu juego con DeepM8 Coach', this.videoWidth / 2, this.videoHeight - 100);
+    this.ctx.fillText('Mejora tu juego con DeepM8 Coach Engine', this.videoWidth / 2, this.videoHeight - 100);
 
-    // Draw watermark
-    this.drawWatermark();
+    // Draw watermarks
+    this.drawWatermark(); // Top-left: DeepM8 logo
+    this.drawKnightWatermark(); // Bottom-left: Knight logo
 
     return this.canvas.toDataURL('image/jpeg', 0.85); // OPTIMIZACIÓN: JPEG con 85% calidad (menor tamaño)
   }
