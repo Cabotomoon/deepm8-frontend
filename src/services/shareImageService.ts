@@ -25,6 +25,38 @@ interface ShareableGame {
 
 class ShareImageService {
   /**
+   * Load DeepM8 logo
+   */
+  private async loadLogo(): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = '/branding/logo-m8.png';
+    });
+  }
+
+  /**
+   * Draw watermark with logo
+   */
+  private drawWatermark(ctx: CanvasRenderingContext2D, logo: HTMLImageElement, width: number, height: number): void {
+    // Position: bottom-right corner with padding
+    const logoSize = 80;
+    const padding = 30;
+    const x = width - logoSize - padding;
+    const y = height - logoSize - padding;
+
+    // Semi-transparent background for better visibility
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    this.roundRect(ctx, x - 10, y - 10, logoSize + 20, logoSize + 20, 12);
+
+    // Draw logo with slight transparency
+    ctx.globalAlpha = 0.9;
+    ctx.drawImage(logo, x, y, logoSize, logoSize);
+    ctx.globalAlpha = 1.0;
+  }
+
+  /**
    * Generate achievement card image
    */
   async generateAchievementImage(data: ShareableAchievement): Promise<string> {
@@ -36,6 +68,9 @@ class ShareImageService {
     canvas.height = 630;
 
     const { achievement, profile } = data;
+
+    // Load logo
+    const logo = await this.loadLogo();
 
     // Background gradient based on rarity
     const gradient = this.createRarityGradient(ctx, achievement.rarity, canvas.width, canvas.height);
@@ -117,6 +152,9 @@ class ShareImageService {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.fillText('🧠 Deep M8 Coach Engine', canvas.width / 2, canvas.height - 30);
 
+    // Draw watermark with logo
+    this.drawWatermark(ctx, logo, canvas.width, canvas.height);
+
     return canvas.toDataURL('image/png');
   }
 
@@ -131,6 +169,9 @@ class ShareImageService {
     canvas.height = 630;
 
     const { gameRecord, profile, highlights } = data;
+
+    // Load logo
+    const logo = await this.loadLogo();
 
     // Background gradient (blue/purple)
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -218,6 +259,9 @@ class ShareImageService {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.textAlign = 'center';
     ctx.fillText(`🧠 Mi nivel: ${profile.totalGames} partidas • ${profile.averageAccuracy}% precisión promedio`, canvas.width / 2, canvas.height - 30);
+
+    // Draw watermark with logo
+    this.drawWatermark(ctx, logo, canvas.width, canvas.height);
 
     return canvas.toDataURL('image/png');
   }
