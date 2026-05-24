@@ -3760,38 +3760,35 @@ export default function ChessGame() {
             </div>
 
             {/* Controls */}
-            <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
+            <div className="flex flex-wrap gap-1.5 sm:gap-3 justify-center">
               <button
                 onClick={resetGame}
-                className="px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-lg sm:rounded-xl font-semibold text-[9px] sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg whitespace-nowrap"
               >
-                <span className="hidden sm:inline">🔄 Nueva Partida</span>
-                <span className="sm:hidden">🔄 Nueva</span>
+                🔄 Nueva Partida
               </button>
               <button
                 onClick={handleResign}
-                className="px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg sm:rounded-xl font-semibold text-[9px] sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg whitespace-nowrap"
                 disabled={gameStatus === 'checkmate' || gameStatus === 'stalemate' || gameStatus === 'resigned'}
               >
-                <span className="hidden sm:inline">🏳️ Rendirse</span>
-                <span className="sm:hidden">🏳️</span>
+                🏳️ Rendirse
               </button>
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className={`px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg ${
+                className={`px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl font-semibold text-[9px] sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg whitespace-nowrap ${
                   soundEnabled
                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
                     : 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800'
                 }`}
               >
-                {soundEnabled ? '🔊' : '🔇'}
-                <span className="hidden sm:inline ml-1">{soundEnabled ? 'Sonido' : 'Mudo'}</span>
+                {soundEnabled ? '🔊 Sonido' : '🔇 Mudo'}
               </button>
               <button
                 onClick={handleBackToMenuDuringOnlineGame}
-                className="px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg"
+                className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-lg sm:rounded-xl font-semibold text-[9px] sm:text-sm md:text-base transition-all duration-200 hover:scale-105 shadow-lg whitespace-nowrap"
               >
-                ☰ <span className="hidden sm:inline">Menú</span>
+                ☰ Menú
               </button>
 
               {/* DEBUG: Test disconnection with REAL server (only in development) */}
