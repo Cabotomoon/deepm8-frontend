@@ -26,6 +26,7 @@ class VideoReplayService {
   private videoWidth = 1280;
   private videoHeight = 720;
   private maxFramesInMemory = 100;
+  private logoImage: HTMLImageElement | null = null;
 
   constructor() {
     this.canvas = document.createElement('canvas');
@@ -35,6 +36,49 @@ class VideoReplayService {
       willReadFrequently: true,
       alpha: false
     })!;
+
+    // Load logo
+    this.loadLogo();
+  }
+
+  /**
+   * Load DeepM8 logo
+   */
+  private async loadLogo(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        this.logoImage = img;
+        resolve();
+      };
+      img.onerror = (error) => {
+        console.error('Error loading logo:', error);
+        resolve(); // Continue without logo if it fails
+      };
+      img.src = '/branding/logo-m8.png';
+    });
+  }
+
+  /**
+   * Draw watermark with logo
+   */
+  private drawWatermark(): void {
+    if (!this.logoImage) return;
+
+    // Position: bottom-right corner with padding
+    const logoSize = 100;
+    const padding = 40;
+    const x = this.videoWidth - logoSize - padding;
+    const y = this.videoHeight - logoSize - padding;
+
+    // Semi-transparent background for better visibility
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    this.roundRect(this.ctx, x - 10, y - 10, logoSize + 20, logoSize + 20, 12);
+
+    // Draw logo with slight transparency
+    this.ctx.globalAlpha = 0.9;
+    this.ctx.drawImage(this.logoImage, x, y, logoSize, logoSize);
+    this.ctx.globalAlpha = 1.0;
   }
 
   /**
@@ -174,6 +218,9 @@ class VideoReplayService {
       750
     );
 
+    // Draw watermark
+    this.drawWatermark();
+
     return this.canvas.toDataURL('image/jpeg', 0.85); // OPTIMIZACIÓN: JPEG con 85% calidad (menor tamaño)
   }
 
@@ -284,6 +331,9 @@ class VideoReplayService {
     this.ctx.textAlign = 'center';
     this.ctx.fillText('🧠 Deep M8 Coach Engine', this.videoWidth / 2, this.videoHeight - 40);
 
+    // Draw watermark
+    this.drawWatermark();
+
     return this.canvas.toDataURL('image/jpeg', 0.85); // OPTIMIZACIÓN: JPEG con 85% calidad (menor tamaño)
   }
 
@@ -354,6 +404,9 @@ class VideoReplayService {
     this.ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     this.ctx.fillStyle = '#ffffff';
     this.ctx.fillText('🧠 Mejora tu juego con Deep M8 Coach', this.videoWidth / 2, this.videoHeight - 100);
+
+    // Draw watermark
+    this.drawWatermark();
 
     return this.canvas.toDataURL('image/jpeg', 0.85); // OPTIMIZACIÓN: JPEG con 85% calidad (menor tamaño)
   }
