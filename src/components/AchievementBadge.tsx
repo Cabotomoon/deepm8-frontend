@@ -29,9 +29,9 @@ export default function AchievementBadge({
   }
 
   const sizeClasses = {
-    small: 'w-16 h-16 text-2xl',
-    medium: 'w-24 h-24 text-4xl',
-    large: 'w-32 h-32 text-5xl'
+    small: 'w-12 h-12 sm:w-16 sm:h-16 text-xl sm:text-2xl',
+    medium: 'w-16 h-16 sm:w-24 sm:h-24 text-2xl sm:text-4xl',
+    large: 'w-20 h-20 sm:w-32 sm:h-32 text-3xl sm:text-5xl'
   };
 
   const rarityGlow = {
@@ -42,13 +42,13 @@ export default function AchievementBadge({
   };
 
   return (
-    <div className="flex flex-col items-center gap-2 group">
+    <div className="flex flex-col items-center gap-1 sm:gap-2 group relative">
       {/* Badge Circle */}
       <div
         className={`
           ${sizeClasses[size]}
           rounded-full
-          border-4
+          border-2 sm:border-4
           ${achievementService.getRarityColor(achievement.rarity)}
           ${isLocked ? 'bg-slate-800/50 grayscale opacity-40' : `bg-gradient-to-br from-slate-800 to-slate-700 ${rarityGlow[achievement.rarity]} shadow-lg`}
           flex items-center justify-center
@@ -64,15 +64,15 @@ export default function AchievementBadge({
         {/* Rarity indicator */}
         {!isLocked && (
           <div className={`
-            absolute -top-2 -right-2
-            w-6 h-6
+            absolute -top-1 -right-1 sm:-top-2 sm:-right-2
+            w-4 h-4 sm:w-6 sm:h-6
             rounded-full
             ${achievement.rarity === 'legendary' ? 'bg-yellow-500' :
               achievement.rarity === 'epic' ? 'bg-purple-500' :
               achievement.rarity === 'rare' ? 'bg-blue-500' :
               'bg-slate-500'}
-            border-2 border-slate-900
-            text-white text-xs
+            border border-slate-900 sm:border-2
+            text-white text-[8px] sm:text-xs
             flex items-center justify-center
             font-bold
           `}>
@@ -84,17 +84,17 @@ export default function AchievementBadge({
       </div>
 
       {/* Badge Info */}
-      <div className="text-center max-w-[120px]">
-        <div className={`font-bold text-sm ${isLocked ? 'text-slate-500' : 'text-white'}`}>
+      <div className="text-center max-w-[80px] sm:max-w-[120px]">
+        <div className={`font-bold text-[10px] sm:text-sm leading-tight ${isLocked ? 'text-slate-500' : 'text-white'} line-clamp-2`}>
           {isLocked ? '???' : achievement.name}
         </div>
 
-        <div className="text-xs text-slate-400 mt-1">
+        <div className="text-[8px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1 truncate">
           {isLocked ? 'Bloqueado' : achievementService.getRarityLabel(achievement.rarity)}
         </div>
 
         {!isLocked && unlockedAt && showUnlockDate && (
-          <div className="text-xs text-slate-500 mt-1">
+          <div className="text-[8px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1 hidden sm:block">
             {new Date(unlockedAt).toLocaleDateString()}
           </div>
         )}
@@ -106,14 +106,14 @@ export default function AchievementBadge({
               e.stopPropagation();
               onShare();
             }}
-            className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-full transition-all opacity-0 group-hover:opacity-100"
+            className="mt-1 sm:mt-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-blue-600 hover:bg-blue-700 text-white text-[8px] sm:text-xs rounded-full transition-all opacity-0 group-hover:opacity-100"
           >
-            📤 Compartir
+            📤 <span className="hidden sm:inline">Compartir</span>
           </button>
         )}
       </div>
 
-      {/* Tooltip on hover */}
+      {/* Tooltip on hover (only desktop) */}
       <div className="
         absolute
         bottom-full
@@ -123,22 +123,23 @@ export default function AchievementBadge({
         bg-slate-800
         border border-slate-700
         rounded-lg
-        px-4 py-3
+        px-3 sm:px-4 py-2 sm:py-3
         opacity-0 group-hover:opacity-100
         transition-opacity
         pointer-events-none
         z-50
-        w-64
+        w-48 sm:w-64
         shadow-xl
+        hidden sm:block
       ">
-        <div className="text-white font-bold text-sm mb-1">
+        <div className="text-white font-bold text-xs sm:text-sm mb-1">
           {isLocked ? '???' : achievement.name}
         </div>
-        <div className="text-slate-300 text-xs mb-2">
+        <div className="text-slate-300 text-[10px] sm:text-xs mb-2">
           {isLocked ? 'Sigue jugando para descubrir este logro' : achievement.description}
         </div>
         {!isLocked && achievement.reward && (
-          <div className="text-purple-400 text-xs italic">
+          <div className="text-purple-400 text-[10px] sm:text-xs italic">
             🎁 {achievement.reward}
           </div>
         )}
