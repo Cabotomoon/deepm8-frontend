@@ -65,11 +65,11 @@ class VideoReplayService {
   private drawWatermark(): void {
     if (!this.logoImage) return;
 
-    // Position: bottom-right corner with padding
+    // Position: top-left corner with padding
     const logoSize = 100;
     const padding = 40;
-    const x = this.videoWidth - logoSize - padding;
-    const y = this.videoHeight - logoSize - padding;
+    const x = padding;
+    const y = padding;
 
     // Semi-transparent background for better visibility
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
@@ -189,7 +189,7 @@ class VideoReplayService {
     this.ctx.font = 'bold 120px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     this.ctx.fillStyle = '#ffffff';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('♟️ Deep M8 Coach', this.videoWidth / 2, 300);
+    this.ctx.fillText('♟️ DeepM8 Coach', this.videoWidth / 2, 300);
 
     // Subtitle
     this.ctx.font = 'bold 60px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -329,7 +329,7 @@ class VideoReplayService {
     this.ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     this.ctx.fillStyle = '#475569';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('🧠 Deep M8 Coach Engine', this.videoWidth / 2, this.videoHeight - 40);
+    this.ctx.fillText('♟️ DeepM8 Coach Engine', this.videoWidth / 2, this.videoHeight - 40);
 
     // Draw watermark
     this.drawWatermark();
@@ -403,7 +403,7 @@ class VideoReplayService {
     // Call to action
     this.ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillText('🧠 Mejora tu juego con Deep M8 Coach', this.videoWidth / 2, this.videoHeight - 100);
+    this.ctx.fillText('♟️ Mejora tu juego con DeepM8 Coach', this.videoWidth / 2, this.videoHeight - 100);
 
     // Draw watermark
     this.drawWatermark();
