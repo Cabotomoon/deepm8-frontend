@@ -354,11 +354,12 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                           });
                         }
                       }}
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm transition-all flex items-center justify-center gap-1 sm:gap-2 flex-1 sm:flex-initial"
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial font-semibold"
                       title="Compartir partida en redes sociales"
                     >
-                      <span className="hidden sm:inline">📤 Compartir</span>
-                      <span className="sm:hidden">📤</span>
+                      <span className="text-sm sm:text-base">📤</span>
+                      <span className="hidden xs:inline sm:hidden">Compartir</span>
+                      <span className="hidden sm:inline">Compartir Partida</span>
                     </button>
                   </div>
 
@@ -816,49 +817,51 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
                 {/* Profile Tab */}
                 {activeTab === 'profile' && profile && (
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Profile Header */}
-                    <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-6 border border-purple-500/50">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-2xl font-bold text-white flex items-center gap-3">
-                          <span>👤</span> Tu Perfil de Jugador
+                    <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-4 sm:p-6 border border-purple-500/50">
+                      <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+                        <h3 className="text-lg sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3 min-w-0">
+                          <span className="text-2xl sm:text-3xl flex-shrink-0">👤</span>
+                          <span className="truncate">Tu Perfil de Jugador</span>
                         </h3>
-                        <span className="text-4xl">{getTrendIcon(profile)}</span>
+                        <span className="text-3xl sm:text-4xl flex-shrink-0">{getTrendIcon(profile)}</span>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-slate-900/50 rounded-lg p-4 text-center">
-                          <div className="text-3xl font-bold text-purple-400">{profile.totalGames}</div>
-                          <div className="text-slate-400 text-sm">Partidas Jugadas</div>
+                      <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-4">
+                        <div className="bg-slate-900/50 rounded-lg p-2 sm:p-4 text-center">
+                          <div className="text-xl sm:text-3xl font-bold text-purple-400">{profile.totalGames}</div>
+                          <div className="text-slate-400 text-[10px] sm:text-sm leading-tight mt-1">Partidas<span className="hidden sm:inline"> Jugadas</span></div>
                         </div>
-                        <div className="bg-slate-900/50 rounded-lg p-4 text-center">
-                          <div className="text-3xl font-bold text-blue-400">{profile.averageAccuracy}%</div>
-                          <div className="text-slate-400 text-sm">Precisión Promedio</div>
+                        <div className="bg-slate-900/50 rounded-lg p-2 sm:p-4 text-center">
+                          <div className="text-xl sm:text-3xl font-bold text-blue-400">{profile.averageAccuracy}%</div>
+                          <div className="text-slate-400 text-[10px] sm:text-sm leading-tight mt-1">Precisión<span className="hidden sm:inline"> Promedio</span></div>
                         </div>
-                        <div className="bg-slate-900/50 rounded-lg p-4 text-center">
-                          <div className="text-3xl font-bold text-green-400">{profile.totalMoves}</div>
-                          <div className="text-slate-400 text-sm">Movimientos Totales</div>
+                        <div className="bg-slate-900/50 rounded-lg p-2 sm:p-4 text-center">
+                          <div className="text-xl sm:text-3xl font-bold text-green-400">{profile.totalMoves}</div>
+                          <div className="text-slate-400 text-[10px] sm:text-sm leading-tight mt-1">Movimientos<span className="hidden sm:inline"> Totales</span></div>
                         </div>
                       </div>
                     </div>
 
                     {/* Achievements Gallery */}
-                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                          <span>🏆</span> Logros y Badges
+                    <div className="bg-slate-800/50 rounded-xl p-4 sm:p-6 border border-slate-700">
+                      <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+                        <h3 className="text-base sm:text-xl font-bold text-white flex items-center gap-1.5 sm:gap-2 min-w-0">
+                          <span className="text-xl sm:text-2xl flex-shrink-0">🏆</span>
+                          <span className="truncate">Logros<span className="hidden sm:inline"> y Badges</span></span>
                         </h3>
-                        <div className="text-sm text-slate-400">
+                        <div className="text-xs sm:text-sm text-slate-400 flex-shrink-0">
                           {achievementService.getStats(profile).unlocked} / {achievementService.getStats(profile).total}
                         </div>
                       </div>
 
                       {/* Progress Bar */}
-                      <div className="mb-6">
-                        <div className="flex justify-between text-xs text-slate-400 mb-2">
-                          <span>Progreso de Logros</span>
+                      <div className="mb-4 sm:mb-6">
+                        <div className="flex justify-between text-[10px] sm:text-xs text-slate-400 mb-1.5 sm:mb-2">
+                          <span>Progreso<span className="hidden sm:inline"> de Logros</span></span>
                           <span>{achievementService.getStats(profile).percentage}%</span>
                         </div>
-                        <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                        <div className="w-full bg-slate-700 rounded-full h-2 sm:h-3 overflow-hidden">
                           <div
                             className="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-500"
                             style={{ width: `${achievementService.getStats(profile).percentage}%` }}
@@ -867,7 +870,7 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                       </div>
 
                       {/* Achievement Grid */}
-                      <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-4">
                         {achievementService.getAllAchievements().map((achievement) => {
                           const unlocked = (profile.achievements || []).find(
                             a => a.achievementId === achievement.id
@@ -897,11 +900,11 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                       </div>
 
                       {/* Stats by Category */}
-                      <div className="mt-6 grid grid-cols-2 md:grid-cols-5 gap-3">
+                      <div className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
                         {Object.entries(achievementService.getStats(profile).byCategory).map(([category, stats]) => (
-                          <div key={category} className="bg-slate-900/50 rounded-lg p-3 text-center">
-                            <div className="text-sm text-slate-400 capitalize">{category}</div>
-                            <div className="text-lg font-bold text-white">
+                          <div key={category} className="bg-slate-900/50 rounded-lg p-2 sm:p-3 text-center">
+                            <div className="text-[10px] sm:text-sm text-slate-400 capitalize truncate">{category}</div>
+                            <div className="text-base sm:text-lg font-bold text-white">
                               {stats.unlocked}/{stats.total}
                             </div>
                           </div>
@@ -911,13 +914,13 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
                     {/* Strengths */}
                     {profile.strengths.length > 0 && (
-                      <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                          <span>💪</span> Tus Fortalezas
+                      <div className="bg-slate-800/50 rounded-xl p-4 sm:p-6 border border-slate-700">
+                        <h3 className="text-base sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-xl sm:text-2xl">💪</span> Tus Fortalezas
                         </h3>
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-wrap gap-2 sm:gap-3">
                           {profile.strengths.map((strength, idx) => (
-                            <span key={idx} className="px-4 py-2 bg-green-600/20 text-green-400 rounded-full border border-green-600/50 font-medium">
+                            <span key={idx} className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-600/20 text-green-400 rounded-full border border-green-600/50 font-medium text-xs sm:text-sm">
                               {strength}
                             </span>
                           ))}
@@ -927,19 +930,19 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
 
                     {/* Weaknesses */}
                     {profile.weaknesses.length > 0 && (
-                      <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                          <span>🎯</span> Áreas de Mejora
+                      <div className="bg-slate-800/50 rounded-xl p-4 sm:p-6 border border-slate-700">
+                        <h3 className="text-base sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+                          <span className="text-xl sm:text-2xl">🎯</span> Áreas de Mejora
                         </h3>
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                           {profile.weaknesses.map((weakness, idx) => (
-                            <div key={idx} className="flex items-center justify-between bg-slate-900/50 rounded-lg p-4">
-                              <div>
-                                <div className="text-slate-200 font-medium">{weakness.description}</div>
-                                <div className="text-slate-500 text-sm mt-1">Tipo: {weakness.type}</div>
+                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-slate-900/50 rounded-lg p-3 sm:p-4 gap-2 sm:gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-slate-200 font-medium text-sm sm:text-base">{weakness.description}</div>
+                                <div className="text-slate-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Tipo: {weakness.type}</div>
                               </div>
-                              <div className="text-right">
-                                <div className="text-orange-400 font-bold">{weakness.occurrences}x</div>
+                              <div className="flex items-center gap-2 sm:text-right self-start sm:self-auto">
+                                <div className="text-orange-400 font-bold text-lg sm:text-xl">{weakness.occurrences}x</div>
                                 <div className="text-slate-500 text-xs">ocurrencias</div>
                               </div>
                             </div>
@@ -949,35 +952,42 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                     )}
 
                     {/* Progress Chart */}
-                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span>📊</span> Gráfico de Progreso
+                    <div className="bg-slate-800/50 rounded-xl p-4 sm:p-6 border border-slate-700">
+                      <h3 className="text-base sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+                        <span className="text-xl sm:text-2xl">📊</span> Gráfico de Progreso
                       </h3>
-                      <ProgressChart gameHistory={profile.gameHistory} />
+                      <div className="overflow-x-auto -mx-2 sm:mx-0">
+                        <div className="min-w-[300px]">
+                          <ProgressChart gameHistory={profile.gameHistory} />
+                        </div>
+                      </div>
                     </div>
 
                     {/* Recent History */}
-                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span>📜</span> Historial Detallado
+                    <div className="bg-slate-800/50 rounded-xl p-4 sm:p-6 border border-slate-700">
+                      <h3 className="text-base sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-1.5 sm:gap-2">
+                        <span className="text-xl sm:text-2xl">📜</span> Historial Detallado
                       </h3>
                       <div className="space-y-2">
                         {profile.gameHistory.slice(0, 10).map((game, idx) => (
-                          <div key={idx} className="flex items-center justify-between bg-slate-900/50 rounded-lg p-3">
-                            <div className="flex items-center gap-3">
-                              <span className="text-slate-500 font-mono text-sm">#{profile.gameHistory.length - idx}</span>
-                              <span className={`w-3 h-3 rounded-full ${game.playerColor === 'white' ? 'bg-slate-300' : 'bg-slate-700'}`}></span>
+                          <div key={idx} className="flex items-center justify-between bg-slate-900/50 rounded-lg p-2.5 sm:p-3 gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                              <span className="text-slate-500 font-mono text-xs sm:text-sm flex-shrink-0">#{profile.gameHistory.length - idx}</span>
+                              <span className={`w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full flex-shrink-0 ${game.playerColor === 'white' ? 'bg-slate-300' : 'bg-slate-700'}`}></span>
                             </div>
-                            <div className="flex items-center gap-4">
-                              <span className={`font-bold ${
+                            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                              <span className={`font-bold text-sm sm:text-base ${
                                 game.accuracy >= 80 ? 'text-green-400' :
                                 game.accuracy >= 60 ? 'text-blue-400' :
                                 'text-orange-400'
                               }`}>
                                 {game.accuracy}%
                               </span>
-                              <span className="text-slate-500 text-sm">
+                              <span className="text-slate-500 text-[10px] sm:text-sm hidden sm:inline">
                                 {new Date(game.timestamp).toLocaleDateString()}
+                              </span>
+                              <span className="text-slate-500 text-[10px] sm:hidden">
+                                {new Date(game.timestamp).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
                               </span>
                             </div>
                           </div>
