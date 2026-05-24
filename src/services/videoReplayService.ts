@@ -231,7 +231,7 @@ class VideoReplayService {
     this.ctx.font = 'bold 120px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     this.ctx.fillStyle = '#ffffff';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('DeepM8 Coach', this.videoWidth / 2, 300);
+    this.ctx.fillText('DeepM8 Coach Engine', this.videoWidth / 2, 300);
 
     // Subtitle
     this.ctx.font = 'bold 60px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
