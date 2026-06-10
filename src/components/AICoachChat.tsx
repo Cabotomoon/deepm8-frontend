@@ -31,33 +31,47 @@ export const AICoachChat: React.FC<AICoachChatProps> = ({
   }, [messages]);
 
   const handleSend = async () => {
-    if (!inputValue.trim() || isLoading) return;
+    const trimmedInput = inputValue.trim();
 
-    const userMessage = inputValue.trim();
+    // Validate input
+    if (!trimmedInput || isLoading) {
+      console.warn('⚠️ Cannot send: empty message or already loading');
+      return;
+    }
+
+    const userMessage = trimmedInput;
     setInputValue('');
 
-    // Add user message
+    // Filter out welcome message (role: assistant without user interaction)
+    const conversationMessages = messages.filter(msg =>
+      msg.role === 'user' || (msg.role === 'assistant' && messages.some(m => m.role === 'user'))
+    );
+
+    // Add user message with validation
     const newMessages: ChatMessage[] = [
-      ...messages,
+      ...conversationMessages,
       { role: 'user', content: userMessage }
     ];
-    setMessages(newMessages);
+
+    console.log('📨 Sending messages:', newMessages.length, newMessages);
+
+    setMessages([...messages, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
     try {
       const response = await llmService.chat(newMessages);
 
-      setMessages([
-        ...newMessages,
-        { role: 'assistant', content: response.content }
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: response.content || 'No response received' }
       ]);
     } catch (error) {
-      console.error('Error getting AI response:', error);
-      setMessages([
-        ...newMessages,
+      console.error('❌ Error getting AI response:', error);
+      setMessages(prev => [
+        ...prev,
         {
           role: 'assistant',
-          content: '❌ Lo siento, ocurrió un error al procesar tu mensaje. Por favor verifica tu API key e intenta nuevamente.'
+          content: `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}\n\nVerifica que el servidor backend esté ejecutándose y que la API key sea válida.`
         }
       ]);
     } finally {
