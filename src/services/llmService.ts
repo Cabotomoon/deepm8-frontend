@@ -58,19 +58,11 @@ explicaciones claras y consejos estratégicos. Sé conciso, didáctico y alentad
         ? messages
         : [{ role: 'system' as const, content: this.systemPrompt }, ...messages];
 
-      // Get SeaVerse token from localStorage
-      const token = localStorage.getItem('seaverse_token');
-
-      if (!token) {
-        throw new Error('No authentication token found. Please log in to SeaVerse.');
-      }
-
-      // Call secure backend API with authentication
+      // Call backend API (OpenAI integration)
       const response = await fetch(`${this.backendUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           messages: fullMessages,
