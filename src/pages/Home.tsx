@@ -12,6 +12,7 @@ import GameReplay from '../components/GameReplay';
 import ProgressChart from '../components/ProgressChart';
 import AchievementsGrid from '../components/AchievementsGrid';
 import TrainingSession from '../components/TrainingSession';
+import { AICoachChat } from '../components/AICoachChat';
 import { socketService } from '../services/socketService';
 import { studyRecommendationService } from '../services/studyRecommendationService';
 import type { Room, ChatMessage } from '../types/socket.types';
