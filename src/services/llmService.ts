@@ -53,10 +53,32 @@ explicaciones claras y consejos estratégicos. Sé conciso, didáctico y alentad
         temperature
       });
 
+      // Validate messages have content
+      const validMessages = messages.filter(msg =>
+        msg.content && typeof msg.content === 'string' && msg.content.trim().length > 0
+      );
+
+      if (validMessages.length === 0) {
+        throw new Error('No valid messages to send');
+      }
+
       // Add system prompt if not already present
-      const fullMessages = messages[0]?.role === 'system'
-        ? messages
-        : [{ role: 'system' as const, content: this.systemPrompt }, ...messages];
+      const fullMessages = validMessages[0]?.role === 'system'
+        ? validMessages
+        : [{ role: 'system' as const, content: this.systemPrompt }, ...validMessages];
+
+      // Final validation before sending
+      const requestBody = {
+        messages: fullMessages.map(msg => ({
+          role: msg.role,
+          content: String(msg.content).trim()
+        })),
+        model,
+        temperature,
+        maxTokens: 1000
+      };
+
+      console.log('📤 Request payload:', JSON.stringify(requestBody, null, 2));
 
       // Call backend API (OpenAI integration)
       const response = await fetch(`${this.backendUrl}/api/chat`, {
@@ -64,12 +86,7 @@ explicaciones claras y consejos estratégicos. Sé conciso, didáctico y alentad
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messages: fullMessages,
-          model,
-          temperature,
-          maxTokens: 1000
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
