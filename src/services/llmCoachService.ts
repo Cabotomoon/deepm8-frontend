@@ -1,9 +1,8 @@
 /**
  * LLM Coach Service
- * Generates personalized feedback using SeaCloud SDK
+ * Generates personalized feedback using OpenAI via backend API
  */
 
-import { llmChatCompletions } from 'seacloud-sdk';
 import type { PlayerProfile, GameRecord } from './playerProfileService';
 import { gamePhaseService } from './gamePhaseService';
 
@@ -16,6 +15,8 @@ export interface CoachFeedback {
 }
 
 class LLMCoachService {
+  private backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+
   /**
    * Generate personalized feedback based on game and profile
    */
@@ -27,27 +28,43 @@ class LLMCoachService {
     try {
       const prompt = this.buildPrompt(gameRecord, profile, moveAnalysis);
 
-      const response = await llmChatCompletions({
-        model: 'gemini-2.0-flash-001',
-        messages: [
-          {
-            role: 'system',
-            content: 'Eres un entrenador experto de ajedrez con años de experiencia. Tu tarea es analizar partidas y proporcionar feedback constructivo, personalizado y motivador a jugadores para ayudarles a mejorar. Sé específico, claro y siempre positivo.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1500
+      console.log('🤖 Calling backend API for coach feedback...');
+
+      const response = await fetch(`${this.backendUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: 'Eres un entrenador experto de ajedrez con años de experiencia. Tu tarea es analizar partidas y proporcionar feedback constructivo, personalizado y motivador a jugadores para ayudarles a mejorar. Sé específico, claro y siempre positivo.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          model: 'gpt-4o-mini',
+          temperature: 0.7,
+          maxTokens: 1500
+        })
       });
 
-      const rawFeedback = response.resources[0]?.content || '';
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const rawFeedback = data.content || '';
+
+      console.log('✅ Coach feedback generated successfully');
 
       return this.parseFeedback(rawFeedback);
     } catch (error) {
-      console.error('Error generating LLM feedback:', error);
+      console.error('❌ Error generating LLM feedback:', error);
       return this.getFallbackFeedback(gameRecord, profile);
     }
   }
