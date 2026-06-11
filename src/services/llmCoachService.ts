@@ -26,55 +26,28 @@ class LLMCoachService {
     moveAnalysis: Array<{ moveNumber: number; classification: string; notation: string; comment: string; fen?: string }>
   ): Promise<CoachFeedback> {
     try {
-      const prompt = this.buildPrompt(gameRecord, profile, moveAnalysis);
+      const baseContext = this.buildBaseContext(gameRecord, profile, moveAnalysis);
 
-      console.log('🤖 Calling backend API for coach feedback...');
+      console.log('🤖 Generating comprehensive coach feedback in multiple calls...');
 
-      const response = await fetch(`${this.backendUrl}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content: `Eres el Maestro Internacional Miguel Sánchez, un entrenador de ajedrez de élite con 20 años de experiencia.
+      // Generate each section separately to force detailed responses
+      const [summary, keyInsights, trainingPlan, motivationalMessage, detailedAnalysis] = await Promise.all([
+        this.generateSummary(baseContext),
+        this.generateInsights(baseContext),
+        this.generateTrainingPlan(baseContext),
+        this.generateMotivationalMessage(baseContext),
+        this.generateDetailedAnalysis(baseContext)
+      ]);
 
-REGLA ABSOLUTA: Debes escribir análisis MUY EXTENSOS y DETALLADOS. Cada sección debe ser un ensayo completo, no un párrafo corto.
+      console.log('✅ All sections generated successfully');
 
-- RESUMEN: Escribe AL MENOS 10 oraciones completas (no bullet points)
-- INSIGHTS_CLAVE: Cada insight debe ser un PÁRRAFO COMPLETO de 6-8 oraciones (NO una línea)
-- PLAN_ENTRENAMIENTO: Cada ejercicio debe ser un PÁRRAFO de 4-5 oraciones explicando QUÉ hacer, CÓMO hacerlo, POR QUÉ es importante, y CÓMO medir progreso
-- MENSAJE_MOTIVACIONAL: Escribe AL MENOS 7-8 oraciones inspiradoras
-- ANALISIS_DETALLADO: Escribe AL MENOS 12 párrafos, cada uno de 6-8 oraciones
-
-SI ESCRIBES RESPUESTAS CORTAS, TU ANÁLISIS SERÁ RECHAZADO.
-
-Tu tono debe ser profesional, técnico, didáctico y motivador. Imagina que estás escribiendo un informe de análisis que el jugador va a estudiar durante una semana completa.`
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          model: 'gpt-4o',
-          temperature: 1.0,
-          maxTokens: 4000
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.message || `HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      const rawFeedback = data.content || '';
-
-      console.log('✅ Coach feedback generated successfully');
-
-      return this.parseFeedback(rawFeedback);
+      return {
+        summary,
+        keyInsights,
+        trainingPlan,
+        motivationalMessage,
+        detailedAnalysis
+      };
     } catch (error) {
       console.error('❌ Error generating LLM feedback:', error);
       return this.getFallbackFeedback(gameRecord, profile);
@@ -82,24 +55,20 @@ Tu tono debe ser profesional, técnico, didáctico y motivador. Imagina que est�
   }
 
   /**
-   * Build prompt for LLM
+   * Build base context for all prompts
    */
-  private buildPrompt(
+  private buildBaseContext(
     gameRecord: GameRecord,
     profile: PlayerProfile,
     moveAnalysis: Array<{ moveNumber: number; classification: string; notation: string; comment: string; fen?: string }>
   ): string {
     const trend = this.getImprovementTrend(profile);
-
-    // Analyze phase distribution
     const phaseStats = gamePhaseService.analyzePhaseDistribution(moveAnalysis);
     const phaseAdvice = phaseStats.weakestPhase
       ? gamePhaseService.getPhaseAdvice(phaseStats.weakestPhase)
       : [];
 
-    return `Analiza esta partida de ajedrez y proporciona feedback personalizado:
-
-**DATOS DEL JUGADOR:**
+    return `**DATOS DEL JUGADOR:**
 - Partidas jugadas: ${profile.totalGames}
 - Precisión promedio histórica: ${profile.averageAccuracy}%
 - Tendencia reciente: ${trend === 'improving' ? 'Mejorando 📈' : trend === 'declining' ? 'Necesita atención 📉' : 'Estable ➡️'}
@@ -123,121 +92,240 @@ Tu tono debe ser profesional, técnico, didáctico y motivador. Imagina que est�
 ${phaseStats.weakestPhase ? `- Fase más débil: ${phaseStats.weakestPhase === 'opening' ? 'Apertura' : phaseStats.weakestPhase === 'middlegame' ? 'Medio juego' : 'Final'}` : ''}
 
 **MOVIMIENTOS MÁS IMPORTANTES:**
-${moveAnalysis.slice(0, 5).map(m => `- ${m.notation}: ${m.classification} - ${m.comment}`).join('\n')}
-
-${phaseStats.weakestPhase ? `\n**CONSEJOS PARA ${phaseStats.weakestPhase.toUpperCase()}:**\n${phaseAdvice.map(a => `- ${a}`).join('\n')}` : ''}
-
-**IMPORTANTE - ESCRIBE ANÁLISIS EXTENSOS:**
-
-RESUMEN:
-Escribe un párrafo extenso de 10-12 oraciones analizando el rendimiento general, la fase más débil, comparación con historial, diagnóstico del problema principal, estilo de juego, y fortalezas observadas.
-
-INSIGHTS_CLAVE:
-Escribe 5 insights. Cada insight debe ser un párrafo completo de 6-8 oraciones:
-- Insight 1: Análisis de la fase más débil (6-8 oraciones)
-- Insight 2: Patrones tácticos perdidos (6-8 oraciones)
-- Insight 3: Comparación histórica con números (6-8 oraciones)
-- Insight 4: Momento crítico de la partida (6-8 oraciones)
-- Insight 5: Psicología y gestión mental (6-8 oraciones)
-
-PLAN_ENTRENAMIENTO:
-Escribe 5 ejercicios. Cada ejercicio debe ser un párrafo de 4-5 oraciones explicando qué hacer, cómo, por qué, y cómo medir progreso:
-- Ejercicio 1: Para la debilidad principal (4-5 oraciones)
-- Ejercicio 2: Estudio teórico específico (4-5 oraciones)
-- Ejercicio 3: Cálculo y visualización (4-5 oraciones)
-- Ejercicio 4: Partidas maestras (4-5 oraciones)
-- Ejercicio 5: Práctica deliberada (4-5 oraciones)
-
-MENSAJE_MOTIVACIONAL:
-Escribe un mensaje de 7-8 oraciones mencionando 2 logros concretos, progreso medible, referencia a un GM, perspectiva de 3-6 meses, y frase memorable final.
-
-ANALISIS_DETALLADO:
-Escribe 12 párrafos extensos. Cada párrafo debe tener 6-8 oraciones:
-1. Visión General de la Partida (6-8 oraciones)
-2. Apertura Detallada (6-8 oraciones)
-3. Transición al Medio Juego (6-8 oraciones)
-4. Medio Juego Estratégico (6-8 oraciones)
-5. Medio Juego Táctico (6-8 oraciones)
-6. Gestión de Ventajas (6-8 oraciones)
-7. Final si aplica (6-8 oraciones)
-8. Patrones de Errores Recurrentes (6-8 oraciones)
-9. Comparación Histórica (6-8 oraciones)
-10. Análisis Psicológico (6-8 oraciones)
-11. Referencias a Partidas Maestras (6-8 oraciones)
-12. Recomendación Estratégica Final (6-8 oraciones)`;
+${moveAnalysis.slice(0, 5).map(m => `- ${m.notation}: ${m.classification} - ${m.comment}`).join('\n')}`;
   }
 
   /**
-   * Parse LLM response into structured feedback
+   * Generate summary section
    */
-  private parseFeedback(rawFeedback: string): CoachFeedback {
-    const sections = {
-      summary: '',
-      keyInsights: [] as string[],
-      trainingPlan: [] as string[],
-      motivationalMessage: '',
-      detailedAnalysis: ''
-    };
+  private async generateSummary(baseContext: string): Promise<string> {
+    const response = await this.callLLM(
+      `${baseContext}
 
-    try {
-      const lines = rawFeedback.split('\n');
-      let currentSection = '';
+Escribe un RESUMEN EXTENSO de la partida. Debe ser un párrafo completo de 10-15 oraciones que cubra:
+1. Evaluación técnica general de la partida
+2. Análisis de la fase más débil y su impacto
+3. Comparación con el nivel histórico del jugador
+4. Diagnóstico del problema principal
+5. Estilo de juego observado
+6. 2-3 fortalezas específicas demostradas
 
-      for (const line of lines) {
-        const trimmed = line.trim();
+Escribe un párrafo largo y detallado, como si fueras un entrenador profesional escribiendo un informe.`,
+      800
+    );
 
-        if (trimmed.startsWith('RESUMEN:')) {
-          currentSection = 'summary';
-          continue;
-        } else if (trimmed.startsWith('INSIGHTS_CLAVE:')) {
-          currentSection = 'insights';
-          continue;
-        } else if (trimmed.startsWith('PLAN_ENTRENAMIENTO:')) {
-          currentSection = 'training';
-          continue;
-        } else if (trimmed.startsWith('MENSAJE_MOTIVACIONAL:')) {
-          currentSection = 'motivational';
-          continue;
-        } else if (trimmed.startsWith('ANALISIS_DETALLADO:')) {
-          currentSection = 'detailed';
-          continue;
-        }
+    return response;
+  }
 
-        if (trimmed.length === 0) continue;
+  /**
+   * Generate key insights section
+   */
+  private async generateInsights(baseContext: string): Promise<string[]> {
+    const response = await this.callLLM(
+      `${baseContext}
 
-        switch (currentSection) {
-          case 'summary':
-            sections.summary += trimmed + ' ';
-            break;
-          case 'insights':
-            if (trimmed.startsWith('-')) {
-              sections.keyInsights.push(trimmed.substring(1).trim());
-            }
-            break;
-          case 'training':
-            if (trimmed.startsWith('-')) {
-              sections.trainingPlan.push(trimmed.substring(1).trim());
-            }
-            break;
-          case 'motivational':
-            sections.motivationalMessage += trimmed + ' ';
-            break;
-          case 'detailed':
-            sections.detailedAnalysis += trimmed + '\n';
-            break;
-        }
-      }
-    } catch (error) {
-      console.error('Error parsing feedback:', error);
+Escribe 5 INSIGHTS CLAVE sobre esta partida. Cada insight debe ser un párrafo completo de 6-8 oraciones.
+
+Escribe en el siguiente formato:
+
+INSIGHT 1:
+[Párrafo de 6-8 oraciones sobre la fase más débil]
+
+INSIGHT 2:
+[Párrafo de 6-8 oraciones sobre patrones tácticos perdidos]
+
+INSIGHT 3:
+[Párrafo de 6-8 oraciones sobre comparación histórica con números]
+
+INSIGHT 4:
+[Párrafo de 6-8 oraciones sobre el momento crítico]
+
+INSIGHT 5:
+[Párrafo de 6-8 oraciones sobre psicología y gestión mental]
+
+Cada insight debe ser EXTENSO y DETALLADO.`,
+      2000
+    );
+
+    return this.parseInsights(response);
+  }
+
+  /**
+   * Generate training plan section
+   */
+  private async generateTrainingPlan(baseContext: string): Promise<string[]> {
+    const response = await this.callLLM(
+      `${baseContext}
+
+Escribe 5 EJERCICIOS DE ENTRENAMIENTO específicos. Cada ejercicio debe ser un párrafo de 4-6 oraciones.
+
+Escribe en el siguiente formato:
+
+EJERCICIO 1:
+[Párrafo de 4-6 oraciones para la debilidad principal]
+
+EJERCICIO 2:
+[Párrafo de 4-6 oraciones de estudio teórico]
+
+EJERCICIO 3:
+[Párrafo de 4-6 oraciones de cálculo y visualización]
+
+EJERCICIO 4:
+[Párrafo de 4-6 oraciones de partidas maestras]
+
+EJERCICIO 5:
+[Párrafo de 4-6 oraciones de práctica deliberada]
+
+Cada ejercicio debe explicar QUÉ hacer, CÓMO hacerlo, POR QUÉ es importante, y CÓMO medir progreso.`,
+      1500
+    );
+
+    return this.parseExercises(response);
+  }
+
+  /**
+   * Generate motivational message
+   */
+  private async generateMotivationalMessage(baseContext: string): Promise<string> {
+    const response = await this.callLLM(
+      `${baseContext}
+
+Escribe un MENSAJE MOTIVACIONAL EXTENSO de 7-10 oraciones que incluya:
+1. 2 logros técnicos concretos de esta partida
+2. Progreso medible comparado con partidas anteriores
+3. Referencia inspiradora a un Gran Maestro
+4. Perspectiva de mejora a 3-6 meses
+5. Frase memorable final
+
+Escribe un párrafo inspirador y motivador, pero específico y técnico.`,
+      800
+    );
+
+    return response;
+  }
+
+  /**
+   * Generate detailed analysis
+   */
+  private async generateDetailedAnalysis(baseContext: string): Promise<string> {
+    const response = await this.callLLM(
+      `${baseContext}
+
+Escribe un ANÁLISIS DETALLADO EXTENSO de la partida. Debe tener 10-12 párrafos, cada uno de 6-8 oraciones:
+
+**Párrafo 1 - Visión General**: Tipo de partida, factor decisivo, aprendizajes macro
+
+**Párrafo 2 - Apertura**: Desarrollo, control del centro, seguridad del rey, estructura de peones
+
+**Párrafo 3 - Transición**: Cómo se pasó al medio juego, completitud del desarrollo
+
+**Párrafo 4 - Medio Juego Estratégico**: Planificación, conceptos estratégicos aplicados
+
+**Párrafo 5 - Medio Juego Táctico**: Oportunidades tácticas, motivos presentes
+
+**Párrafo 6 - Gestión de Ventajas**: Cómo se manejó la ventaja o desventaja
+
+**Párrafo 7 - Final**: Técnica en finales, principios aplicados
+
+**Párrafo 8 - Patrones Recurrentes**: Errores que se repiten en múltiples partidas
+
+**Párrafo 9 - Comparación Histórica**: Estadísticas vs. últimas 10 partidas
+
+**Párrafo 10 - Análisis Psicológico**: Gestión emocional y mental
+
+**Párrafo 11 - Referencias a Maestros**: Partidas famosas similares
+
+**Párrafo 12 - Recomendación Final**: Concepto clave para el siguiente nivel
+
+Escribe cada párrafo con 6-8 oraciones completas. Este es un informe profesional extenso.`,
+      3000
+    );
+
+    return response;
+  }
+
+  /**
+   * Call LLM with prompt
+   */
+  private async callLLM(prompt: string, maxTokens: number = 1000): Promise<string> {
+    const response = await fetch(`${this.backendUrl}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'system',
+            content: `Eres el Maestro Internacional Miguel Sánchez, entrenador de ajedrez profesional.
+
+REGLA CRÍTICA: Debes escribir respuestas MUY EXTENSAS Y DETALLADAS. No resumas. No acortes. Escribe análisis completos y profundos como un verdadero entrenador profesional.`
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        model: 'gpt-4o',
+        temperature: 0.9,
+        maxTokens
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
 
-    return {
-      summary: sections.summary.trim() || 'Partida analizada exitosamente.',
-      keyInsights: sections.keyInsights.length > 0 ? sections.keyInsights.slice(0, 5) : ['Mantén el enfoque en tus jugadas'],
-      trainingPlan: sections.trainingPlan.length > 0 ? sections.trainingPlan.slice(0, 5) : ['Practica táctica diaria'],
-      motivationalMessage: sections.motivationalMessage.trim() || '¡Sigue practicando!',
-      detailedAnalysis: sections.detailedAnalysis.trim() || 'Continúa mejorando tu juego paso a paso.'
-    };
+    const data = await response.json();
+    return data.content || '';
+  }
+
+  /**
+   * Parse insights from response
+   */
+  private parseInsights(response: string): string[] {
+    const insights: string[] = [];
+    const regex = /INSIGHT \d+:\s*([\s\S]*?)(?=INSIGHT \d+:|$)/gi;
+    let match;
+
+    while ((match = regex.exec(response)) !== null) {
+      const insight = match[1].trim();
+      if (insight) {
+        insights.push(insight);
+      }
+    }
+
+    // If parsing fails, split by double newlines
+    if (insights.length === 0) {
+      const parts = response.split(/\n\n+/).filter(p => p.trim().length > 50);
+      return parts.slice(0, 5);
+    }
+
+    return insights.slice(0, 5);
+  }
+
+  /**
+   * Parse exercises from response
+   */
+  private parseExercises(response: string): string[] {
+    const exercises: string[] = [];
+    const regex = /EJERCICIO \d+:\s*([\s\S]*?)(?=EJERCICIO \d+:|$)/gi;
+    let match;
+
+    while ((match = regex.exec(response)) !== null) {
+      const exercise = match[1].trim();
+      if (exercise) {
+        exercises.push(exercise);
+      }
+    }
+
+    // If parsing fails, split by double newlines
+    if (exercises.length === 0) {
+      const parts = response.split(/\n\n+/).filter(p => p.trim().length > 50);
+      return parts.slice(0, 5);
+    }
+
+    return exercises.slice(0, 5);
   }
 
   /**
