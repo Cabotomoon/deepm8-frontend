@@ -15,8 +15,8 @@ import type { Player, Room, Move, ChatMessage } from '../types/socket.types';
 // Re-export types for convenience
 export type { Player, Room, Move, ChatMessage };
 
-// Socket.IO server URL (deploy your own or use SeaVerse infrastructure)
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+// Socket.IO server URL (same as backend - Railway deployment)
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
 class SocketService {
   private socket: Socket | null = null;
