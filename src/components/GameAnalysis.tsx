@@ -795,11 +795,11 @@ PREGUNTA DEL JUGADOR: ${userMessage.content}`;
                       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                         <span>💎</span> Insights Clave
                       </h3>
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {coachFeedback.keyInsights.map((insight, idx) => (
-                          <div key={idx} className="flex items-start gap-3 bg-slate-900/50 rounded-lg p-4">
-                            <span className="text-blue-400 font-bold text-lg">{idx + 1}.</span>
-                            <p className="text-slate-200 flex-1">{insight}</p>
+                          <div key={idx} className="flex items-start gap-3 bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                            <span className="text-blue-400 font-bold text-xl flex-shrink-0">{idx + 1}.</span>
+                            <p className="text-slate-200 flex-1 leading-relaxed">{insight}</p>
                           </div>
                         ))}
                       </div>
@@ -810,11 +810,11 @@ PREGUNTA DEL JUGADOR: ${userMessage.content}`;
                       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                         <span>📚</span> Plan de Entrenamiento
                       </h3>
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {coachFeedback.trainingPlan.map((task, idx) => (
                           <div key={idx} className="flex items-start gap-3 bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-lg p-4 border border-green-700/30">
-                            <span className="text-green-400 text-xl">✓</span>
-                            <p className="text-slate-200 flex-1">{task}</p>
+                            <span className="text-green-400 text-2xl flex-shrink-0">✓</span>
+                            <p className="text-slate-200 flex-1 leading-relaxed">{task}</p>
                           </div>
                         ))}
                       </div>
@@ -825,7 +825,7 @@ PREGUNTA DEL JUGADOR: ${userMessage.content}`;
                       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                         <span>🔍</span> Análisis Profundo
                       </h3>
-                      <div className="text-slate-300 leading-relaxed whitespace-pre-line">
+                      <div className="text-slate-300 leading-relaxed whitespace-pre-line space-y-4 text-base">
                         {coachFeedback.detailedAnalysis}
                       </div>
                     </div>
