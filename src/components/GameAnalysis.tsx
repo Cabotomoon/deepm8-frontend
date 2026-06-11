@@ -40,6 +40,12 @@ interface GameAnalysisProps {
   onClose: () => void;
 }
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
 type AnalysisPhase = 'analyzing' | 'generating-feedback' | 'complete';
 
 export default function GameAnalysis({ moves, playerColor, gameResult, onClose }: GameAnalysisProps) {
@@ -58,6 +64,9 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
   const [skillMetrics, setSkillMetrics] = useState<SkillMetrics | null>(null);
   const [recommendations, setRecommendations] = useState<StudyRecommendation[]>([]);
   const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isSendingChat, setIsSendingChat] = useState(false);
 
   useEffect(() => {
     analyzeGame();
@@ -299,6 +308,92 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
     if (recentAvg > olderAvg + 5) return '📈';
     if (recentAvg < olderAvg - 5) return '📉';
     return '➡️';
+  };
+
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || isSendingChat || !gameRecord || !profile) return;
+
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: chatInput.trim(),
+      timestamp: Date.now()
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    setIsSendingChat(true);
+
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+
+      // Build context for the coach
+      const contextPrompt = `Eres el Maestro Internacional Miguel Sánchez, entrenador de ajedrez de élite.
+
+CONTEXTO DE LA PARTIDA DEL JUGADOR:
+- Precisión en esta partida: ${gameRecord.accuracy}%
+- Movimientos totales: ${gameRecord.totalMoves}
+- Errores graves (blunders): ${gameRecord.blunders}
+- Color jugado: ${gameRecord.playerColor === 'white' ? 'Blancas' : 'Negras'}
+- Resultado: ${gameRecord.result === 'win' ? 'Victoria' : gameRecord.result === 'loss' ? 'Derrota' : gameRecord.result === 'draw' ? 'Tablas' : 'Incompleta'}
+
+PERFIL HISTÓRICO:
+- Partidas totales: ${profile.totalGames}
+- Precisión promedio: ${profile.averageAccuracy}%
+- Debilidades conocidas: ${profile.weaknesses.map(w => w.description).join(', ') || 'Ninguna'}
+
+El jugador te está haciendo una pregunta sobre su partida o ajedrez en general. Responde de forma profesional, técnica pero accesible, y siempre relacionando con su nivel y debilidades específicas.
+
+PREGUNTA DEL JUGADOR: ${userMessage.content}`;
+
+      const response = await fetch(`${backendUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: contextPrompt
+            },
+            ...chatMessages.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            })),
+            {
+              role: 'user',
+              content: userMessage.content
+            }
+          ],
+          model: 'gpt-4o-mini',
+          temperature: 0.8,
+          maxTokens: 800
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: data.content || 'No pude generar una respuesta.',
+        timestamp: Date.now()
+      };
+
+      setChatMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      const errorMessage: ChatMessage = {
+        role: 'assistant',
+        content: 'Disculpa, tuve un problema al procesar tu pregunta. Intenta de nuevo.',
+        timestamp: Date.now()
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsSendingChat(false);
+    }
   };
 
   return (
@@ -741,6 +836,82 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
                       <p className="text-lg text-slate-100 font-medium italic">
                         "{coachFeedback.motivationalMessage}"
                       </p>
+                    </div>
+
+                    {/* Interactive Chat with Coach */}
+                    <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
+                      <div className="bg-gradient-to-r from-purple-600/30 to-blue-600/30 p-4 border-b border-slate-700">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                          <span>💬</span> Pregúntale al Entrenador
+                        </h3>
+                        <p className="text-slate-300 text-sm mt-1">Haz preguntas específicas sobre tu partida o conceptos de ajedrez</p>
+                      </div>
+
+                      {/* Chat Messages */}
+                      <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+                        {chatMessages.length === 0 && (
+                          <div className="text-center py-8 text-slate-400">
+                            <p className="mb-2">👋 ¡Hola! Soy tu entrenador.</p>
+                            <p className="text-sm">Pregúntame sobre tu partida, estrategias, aperturas, finales o cualquier duda de ajedrez.</p>
+                          </div>
+                        )}
+
+                        {chatMessages.map((msg, idx) => (
+                          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[80%] rounded-lg p-3 ${
+                              msg.role === 'user'
+                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                                : 'bg-slate-700 text-slate-200'
+                            }`}>
+                              <div className="flex items-start gap-2">
+                                {msg.role === 'assistant' && <span className="text-xl">🎓</span>}
+                                <p className="text-sm leading-relaxed whitespace-pre-line flex-1">{msg.content}</p>
+                              </div>
+                              <p className="text-xs opacity-60 mt-1">
+                                {new Date(msg.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+
+                        {isSendingChat && (
+                          <div className="flex justify-start">
+                            <div className="bg-slate-700 rounded-lg p-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">🎓</span>
+                                <div className="flex gap-1">
+                                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"></span>
+                                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-100"></span>
+                                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-pulse delay-200"></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Chat Input */}
+                      <div className="p-4 bg-slate-900/50 border-t border-slate-700">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendChatMessage()}
+                            placeholder="Ej: ¿Por qué perdí en el medio juego?"
+                            className="flex-1 bg-slate-800 text-white rounded-lg px-4 py-2 border border-slate-700 focus:border-purple-500 focus:outline-none text-sm"
+                            disabled={isSendingChat}
+                          />
+                          <button
+                            onClick={sendChatMessage}
+                            disabled={!chatInput.trim() || isSendingChat}
+                            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-slate-700 disabled:to-slate-700 text-white rounded-lg px-6 py-2 font-semibold transition-all disabled:cursor-not-allowed text-sm"
+                          >
+                            {isSendingChat ? '⏳' : '📤'} Enviar
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2">💡 Tip: Sé específico para obtener mejores respuestas</p>
+                      </div>
                     </div>
                   </div>
                 )}
