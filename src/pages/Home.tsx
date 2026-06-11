@@ -2135,27 +2135,35 @@ export default function ChessGame() {
     console.log('🔍 My socket ID:', mySocketId);
     console.log('🔍 Match players:', match.players);
 
-    const myPlayerIndex = match.players.findIndex(p => p.id === mySocketId);
-    const color = myPlayerIndex === 0 ? 'white' : 'black';
+    // match.players is an object { white: {...}, black: {...} }, not an array
+    let color: 'white' | 'black' = 'white';
+    let opponent: { userId: string; userName: string; socketId: string; elo: number } | null = null;
+
+    if (match.players.white.socketId === mySocketId) {
+      color = 'white';
+      opponent = match.players.black;
+    } else if (match.players.black.socketId === mySocketId) {
+      color = 'black';
+      opponent = match.players.white;
+    }
+
     setMyColor(color);
+    console.log('🎨 My color:', color);
 
-    console.log('🎨 My color:', color, '(player index:', myPlayerIndex, ')');
-
-    // Find opponent
-    const opponent = match.players.find(p => p.id !== mySocketId);
+    // Set opponent info
     if (opponent) {
-      console.log('👤 Opponent found:', opponent.name, 'ELO:', opponent.elo);
-      console.log('🔧 Opponent ELO type:', typeof opponent.elo, '| Value:', opponent.elo, '| Is 1200?', opponent.elo === 1200);
+      console.log('👤 Opponent found:', opponent.userName, 'ELO:', opponent.elo);
+      console.log('🔧 Opponent ELO type:', typeof opponent.elo, '| Value:', opponent.elo);
       console.log('🔧 Setting opponent state AND ref NOW...');
 
       // Update both state and ref for reliability
-      setOpponentName(opponent.name);
+      setOpponentName(opponent.userName);
       setOpponentElo(opponent.elo);
-      opponentInfoRef.current = { name: opponent.name, elo: opponent.elo };
+      opponentInfoRef.current = { name: opponent.userName, elo: opponent.elo };
 
       // ⚠️ CRITICAL: Also save to sessionStorage as backup (survives re-renders)
       sessionStorage.setItem('current_opponent_info', JSON.stringify({
-        name: opponent.name,
+        name: opponent.userName,
         elo: opponent.elo
       }));
 
