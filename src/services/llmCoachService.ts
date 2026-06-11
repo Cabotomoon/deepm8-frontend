@@ -39,7 +39,23 @@ class LLMCoachService {
           messages: [
             {
               role: 'system',
-              content: 'Eres un entrenador experto de ajedrez con años de experiencia. Tu tarea es analizar partidas y proporcionar feedback constructivo, personalizado y motivador a jugadores para ayudarles a mejorar. Sé específico, claro y siempre positivo.'
+              content: `Eres el Maestro Internacional Miguel Sánchez, un entrenador de ajedrez de élite con 20 años de experiencia formando jugadores desde nivel principiante hasta Gran Maestro.
+
+Tu estilo de coaching se caracteriza por:
+- **Análisis profundo y técnico**: Identificas patrones estratégicos, tácticos y posicionales con gran detalle
+- **Explicaciones didácticas**: No solo señalas errores, sino que enseñas el "por qué" detrás de cada concepto
+- **Feedback estructurado**: Organizas tus análisis por fases del juego (apertura, medio juego, final)
+- **Motivación profesional**: Reconoces logros específicos y ofreces crítica constructiva con empatía
+- **Planes de entrenamiento personalizados**: Diseñas ejercicios adaptados a las debilidades exactas del jugador
+
+Cuando analices partidas:
+1. Identifica los momentos críticos (turning points) de la partida
+2. Explica conceptos estratégicos (estructura de peones, control del centro, desarrollo de piezas, actividad del rey, debilidades permanentes)
+3. Detecta patrones tácticos perdidos (clavadas, enfiladas, horquillas, ataques dobles, sacrificios posicionales)
+4. Evalúa la gestión del tiempo mental del jugador según la calidad de decisiones en cada fase
+5. Proporciona referencias a partidas de maestros o aperturas teóricas cuando sea relevante
+
+Tono: Profesional pero cercano, como un mentor que realmente se preocupa por el progreso de su alumno. Evita frases genéricas.`
             },
             {
               role: 'user',
@@ -47,8 +63,8 @@ class LLMCoachService {
             }
           ],
           model: 'gpt-4o-mini',
-          temperature: 0.7,
-          maxTokens: 1500
+          temperature: 0.8,
+          maxTokens: 2500
         })
       });
 
@@ -115,26 +131,47 @@ ${moveAnalysis.slice(0, 5).map(m => `- ${m.notation}: ${m.classification} - ${m.
 
 ${phaseStats.weakestPhase ? `\n**CONSEJOS PARA ${phaseStats.weakestPhase.toUpperCase()}:**\n${phaseAdvice.map(a => `- ${a}`).join('\n')}` : ''}
 
-**FORMATO DE RESPUESTA (ESTRICTO):**
+**FORMATO DE RESPUESTA (ESTRICTO - MÁXIMA CALIDAD):**
 
 RESUMEN:
-[2-3 frases sobre el rendimiento general, menciona la fase más débil si existe]
+[3-4 frases sobre el rendimiento general. Menciona:
+ - Evaluación técnica de la partida (calidad posicional, decisiones tácticas)
+ - Fase del juego más débil y su impacto en el resultado
+ - Comparación con el nivel histórico del jugador
+ - Un diagnóstico específico del problema principal]
 
 INSIGHTS_CLAVE:
-- [Insight 1 - relacionado con fase del juego si es relevante]
-- [Insight 2]
-- [Insight 3]
+- [Insight 1: Análisis técnico de la fase más débil - identifica conceptos ajedrecísticos específicos como "desarrollo incompleto", "rey expuesto", "debilidad en casillas oscuras", "peones aislados", etc.]
+- [Insight 2: Patrón táctico o estratégico recurrente - menciona si hay clavadas perdidas, centros mal controlados, finales mal jugados, etc.]
+- [Insight 3: Comparación con partidas anteriores - mejoras detectadas o regresiones en áreas específicas]
+- [Insight 4: Momento crítico de la partida - identifica el movimiento exacto donde se perdió la ventaja o se ganó la partida, explicando por qué]
 
 PLAN_ENTRENAMIENTO:
-- [Ejercicio o foco 1 - específico para la fase más débil]
-- [Ejercicio o foco 2]
-- [Ejercicio o foco 3]
+- [Ejercicio 1: ESPECÍFICO para la debilidad principal - ej: "Resolver 20 puzzles de finales de torre y peón en Chess.com (nivel 1200-1400)" NO genérico como "practica finales"]
+- [Ejercicio 2: Estudio teórico concreto - ej: "Estudiar la estructura de peones de la Defensa Siciliana variante Dragón, enfocándote en las casillas débiles f6 y h6"]
+- [Ejercicio 3: Entrenamiento de visualización - ej: "Practicar cálculo de variantes a 3 movimientos de profundidad sin mover piezas, 10 minutos diarios"]
+- [Ejercicio 4: Revisión de partidas maestras - ej: "Analizar 2 partidas de Capablanca sobre finales de torres, anotando principios clave"]
 
 MENSAJE_MOTIVACIONAL:
-[1-2 frases inspiradoras y constructivas]
+[2-3 frases que:
+ - Reconozcan un logro técnico específico de esta partida (no genérico)
+ - Conecten el esfuerzo actual con progreso a largo plazo
+ - Inspiren confianza en el proceso de mejora]
 
 ANALISIS_DETALLADO:
-[Análisis profundo de 3-4 párrafos sobre patrones, errores específicos, rendimiento por fase del juego y áreas de mejora]`;
+[Análisis profesional de 4-6 párrafos estructurado así:
+
+**Párrafo 1 - Apertura**: Evalúa desarrollo de piezas, control del centro, seguridad del rey, estructura de peones inicial. Identifica desviaciones de principios teóricos.
+
+**Párrafo 2 - Medio Juego**: Analiza planificación estratégica, ejecución táctica, gestión de ventajas/desventajas, decisiones críticas en momentos complejos.
+
+**Párrafo 3 - Final (si aplica)**: Técnica en finales, conocimiento teórico aplicado, precisión en conversión de ventajas o defensa en posiciones inferiores.
+
+**Párrafo 4 - Patrones Detectados**: Identifica errores recurrentes (ej: "tiendes a cambiar piezas prematuramente cuando tienes ventaja espacial", "calculas mal las jugadas forzadas después de capturas")
+
+**Párrafo 5 - Comparación Histórica**: Cómo esta partida se compara con el rendimiento promedio del jugador, áreas donde mostró mejora, áreas donde retrocedió.
+
+**Párrafo 6 - Recomendación Estratégica**: Consejo maestro para el siguiente nivel de juego.]`;
   }
 
   /**
@@ -193,7 +230,7 @@ ANALISIS_DETALLADO:
             sections.motivationalMessage += trimmed + ' ';
             break;
           case 'detailed':
-            sections.detailedAnalysis += trimmed + '\n\n';
+            sections.detailedAnalysis += trimmed + '\n';
             break;
         }
       }
@@ -203,8 +240,8 @@ ANALISIS_DETALLADO:
 
     return {
       summary: sections.summary.trim() || 'Partida analizada exitosamente.',
-      keyInsights: sections.keyInsights.length > 0 ? sections.keyInsights : ['Mantén el enfoque en tus jugadas'],
-      trainingPlan: sections.trainingPlan.length > 0 ? sections.trainingPlan : ['Practica táctica diaria'],
+      keyInsights: sections.keyInsights.length > 0 ? sections.keyInsights.slice(0, 4) : ['Mantén el enfoque en tus jugadas'],
+      trainingPlan: sections.trainingPlan.length > 0 ? sections.trainingPlan.slice(0, 4) : ['Practica táctica diaria'],
       motivationalMessage: sections.motivationalMessage.trim() || '¡Sigue practicando!',
       detailedAnalysis: sections.detailedAnalysis.trim() || 'Continúa mejorando tu juego paso a paso.'
     };
