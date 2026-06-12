@@ -1939,8 +1939,16 @@ export default function ChessGame() {
 
         // ⚠️ CRITICAL: Get opponent info from currentRoom (source of truth)
         const mySocketId = socketService.getSocketId();
-        const opponent = currentRoom?.players.find(p => p.id !== mySocketId);
-        const finalOpponentName = opponent?.name || opponentName || 'Oponente';
+
+        // currentRoom.players is an object { white: {...}, black: {...} }
+        let opponent = null;
+        if (currentRoom?.players.white.socketId === mySocketId) {
+          opponent = currentRoom.players.black;
+        } else if (currentRoom?.players.black.socketId === mySocketId) {
+          opponent = currentRoom.players.white;
+        }
+
+        const finalOpponentName = opponent?.userName || opponentName || 'Oponente';
         const finalOpponentElo = opponent?.elo || opponentElo || 1200;
 
         console.log('🔍 Getting opponent info from currentRoom:', {
@@ -2039,8 +2047,16 @@ export default function ChessGame() {
         // ⚠️ CRITICAL: Get opponent info from currentRoom (source of truth)
         // This ensures we always have the correct ELO, even if state is stale
         const mySocketId = socketService.getSocketId();
-        const opponent = currentRoom?.players.find(p => p.id !== mySocketId);
-        const finalOpponentName = opponent?.name || opponentName || 'Oponente';
+
+        // currentRoom.players is an object { white: {...}, black: {...} }
+        let opponent = null;
+        if (currentRoom?.players.white.socketId === mySocketId) {
+          opponent = currentRoom.players.black;
+        } else if (currentRoom?.players.black.socketId === mySocketId) {
+          opponent = currentRoom.players.white;
+        }
+
+        const finalOpponentName = opponent?.userName || opponentName || 'Oponente';
         const finalOpponentElo = opponent?.elo || opponentElo || 1200;
 
         console.log('💾 Saving game from server event:', {
