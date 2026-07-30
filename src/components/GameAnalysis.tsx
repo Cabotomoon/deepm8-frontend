@@ -15,6 +15,9 @@ import ProgressChart from './ProgressChart';
 import AchievementBadge from './AchievementBadge';
 import AchievementNotification from './AchievementNotification';
 import SocialShareModal from './SocialShareModal';
+import TrainingHub from './TrainingHub';
+import type { TrainingCategory } from '../types/training.types';
+import type { TrainingMode } from './TrainingSession';
 
 interface Move {
   notation: string;
@@ -67,6 +70,8 @@ export default function GameAnalysis({ moves, playerColor, gameResult, onClose }
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [isSendingChat, setIsSendingChat] = useState(false);
+  // Training launched from a recommendation card (overlay on top of analysis)
+  const [trainingLaunch, setTrainingLaunch] = useState<{ moduleId: string; category: TrainingCategory; mode: TrainingMode } | null>(null);
 
   useEffect(() => {
     analyzeGame();
@@ -750,10 +755,20 @@ PREGUNTA DEL JUGADOR: ${userMessage.content}`;
                                   {rec.description}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                                  <button className={`flex-1 ${config.primaryButton} text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base`}>
+                                  <button
+                                    onClick={() => setTrainingLaunch({ moduleId: rec.id, category: rec.category as TrainingCategory, mode: 'full' })}
+                                    className={`flex-1 ${config.primaryButton} text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base`}
+                                  >
                                     <span>👉</span> {rec.actionLabel}
                                   </button>
-                                  <button className="sm:flex-initial bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all text-sm sm:text-base">
+                                  <button
+                                    onClick={() => {
+                                      const label = (rec.secondaryActionLabel || '').toLowerCase();
+                                      const secondaryMode: TrainingMode = label.includes('teor') ? 'theory' : 'puzzles';
+                                      setTrainingLaunch({ moduleId: rec.id, category: rec.category as TrainingCategory, mode: secondaryMode });
+                                    }}
+                                    className="sm:flex-initial bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-all text-sm sm:text-base"
+                                  >
                                     {rec.secondaryActionLabel}
                                   </button>
                                 </div>
@@ -1201,6 +1216,16 @@ PREGUNTA DEL JUGADOR: ${userMessage.content}`;
           type={shareModal.type}
           data={shareModal.data}
           onClose={() => setShareModal(null)}
+        />
+      )}
+
+      {/* Training launched from a study recommendation */}
+      {trainingLaunch && (
+        <TrainingHub
+          initialModuleId={trainingLaunch.moduleId}
+          initialCategory={trainingLaunch.category}
+          initialMode={trainingLaunch.mode}
+          onClose={() => setTrainingLaunch(null)}
         />
       )}
     </div>
