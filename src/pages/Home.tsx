@@ -3012,6 +3012,11 @@ export default function ChessGame() {
 
   if (gameMode === 'menu') {
     return (
+      <>
+      {/* 🎓 Training Hub overlay (accessible from the menu button) */}
+      {showTrainingHub && (
+        <TrainingHub onClose={() => setShowTrainingHub(false)} />
+      )}
       <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-2 sm:p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header with Hamburger Menu and Logo */}
@@ -3332,6 +3337,7 @@ export default function ChessGame() {
           />
         )}
       </div>
+      </>
     );
   }
 
