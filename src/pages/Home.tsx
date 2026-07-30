@@ -11,7 +11,7 @@ import GameHistoryComponent from '../components/GameHistory';
 import GameReplay from '../components/GameReplay';
 import ProgressChart from '../components/ProgressChart';
 import AchievementsGrid from '../components/AchievementsGrid';
-import TrainingSession from '../components/TrainingSession';
+import TrainingHub from '../components/TrainingHub';
 import { AICoachChat } from '../components/AICoachChat';
 import { socketService } from '../services/socketService';
 import { studyRecommendationService } from '../services/studyRecommendationService';
@@ -538,16 +538,9 @@ export default function ChessGame() {
   const [userGameHistory, setUserGameHistory] = useState<GameHistory[]>([]);
   const [loadingGameHistory, setLoadingGameHistory] = useState(false);
 
-  // 🎓 Training session state
-  const [activeTraining, setActiveTraining] = useState<'openings' | 'tactics' | 'endgames' | 'middlegame' | null>(null);
+  // 🎓 Training hub state (permanent "Entrenamiento" section)
+  const [showTrainingHub, setShowTrainingHub] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Debug: Log when activeTraining changes
-  useEffect(() => {
-    console.log('🎓 activeTraining changed to:', activeTraining);
-    console.log('🎓 activeTraining is truthy?', !!activeTraining);
-    console.log('🎓 activeTraining type:', typeof activeTraining);
-  }, [activeTraining]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -3198,6 +3191,21 @@ export default function ChessGame() {
               </div>
             </button>
 
+            {/* 🎓 Training Section */}
+            <button
+              onClick={() => setShowTrainingHub(true)}
+              className="group relative bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300 hover:scale-[1.02]"
+            >
+              <div className="flex items-center gap-6">
+                <div className="text-6xl">🎓</div>
+                <div className="text-left flex-1">
+                  <h3 className="text-2xl font-bold mb-2">Entrenamiento</h3>
+                  <p className="text-slate-400">Teoría, puzzles interactivos y recomendaciones personalizadas</p>
+                </div>
+                <div className="text-3xl text-slate-600 group-hover:text-purple-400 transition-colors">→</div>
+              </div>
+            </button>
+
             {/* AI Mode */}
             <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8">
               <div className="flex items-center gap-6 mb-6">
@@ -3327,19 +3335,11 @@ export default function ChessGame() {
     );
   }
 
-  // Debug log before render
-  console.log('🔥 RENDER - activeTraining value:', activeTraining);
-  console.log('🔥 RENDER - activeTraining is truthy?', !!activeTraining);
-
   return (
     <>
-      {/* 🎓 Training Session - Rendered as top-level overlay */}
-      {console.log('🔍 Checking activeTraining:', activeTraining)}
-      {activeTraining && (
-        <TrainingSession
-          category={activeTraining}
-          onClose={() => setActiveTraining(null)}
-        />
+      {/* 🎓 Training Hub - permanent "Entrenamiento" section, top-level overlay */}
+      {showTrainingHub && (
+        <TrainingHub onClose={() => setShowTrainingHub(false)} />
       )}
 
       <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-4 md:p-8 relative overflow-hidden">
