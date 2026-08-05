@@ -1,11 +1,23 @@
 /**
  * SeaVerse Authentication Service
- * Handles user authentication via iframe PostMessage
- * Also supports standalone mode for Vercel deployment
+ *
+ * Identity is backend-backed via @seaverse/auth-sdk (email/password, Google
+ * OAuth, email verification, session restore). The functions in the "REAL
+ * BACKEND SESSION" section below are the source of truth for who the user is.
+ *
+ * The legacy localStorage helpers further down are retained ONLY for backward
+ * compatibility with existing callers and for the local-profile migration
+ * path. They must not be used to grant access on their own.
  */
 
-import { config } from '../config';
- 
+import {
+  getAuthClient,
+  isInIframe,
+  persistToken,
+  clearToken,
+  getCachedToken,
+  type User
+} from './seaverseAuthClient';
 
 export interface AuthUserProfile {
   userId: string;
@@ -13,6 +25,185 @@ export interface AuthUserProfile {
   email: string;
   avatar?: string;
   username?: string; // Chess-specific username
+}
+
+/* ============================================================
+ * REAL BACKEND SESSION (source of truth)
+ * ============================================================ */
+
+/** Map a backend User into the app's AuthUserProfile shape */
+function toAuthUser(user: User): AuthUserProfile {
+  return {
+    userId: user.id || 'unknown',
+    name: user.username || (user.email ? user.email.split('@')[0] : 'Jugador'),
+    email: user.email || '',
+    avatar: '',
+    username: user.username || undefined
+  };
+}
+
+export interface AuthResult {
+  user: AuthUserProfile;
+  token: string;
+  emailVerified: boolean;
+}
+
+export interface RegisterOutcome {
+  status: 'authenticated' | 'needs-verification' | 'needs-invite' | 'error';
+  result?: AuthResult;
+  message?: string;
+  code?: string;
+}
+
+/**
+ * Restore an existing backend session on app start.
+ * Order: iframe token (embedded) → cached token. Always validated by
+ * getCurrentUser() before it is trusted. Returns null when not signed in.
+ */
+export async function restoreSession(): Promise<AuthResult | null> {
+  const client = getAuthClient();
+
+  // 1. Embedded in SeaVerse: prefer the parent-provided token
+  if (isInIframe() && !getCachedToken()) {
+    try {
+      const iframeToken = await client.getIframeToken({ timeout: 8000 });
+      if (iframeToken) persistToken(iframeToken);
+    } catch {
+      // Not fatal — fall back to cached token / explicit login
+    }
+  }
+
+  const token = getCachedToken();
+  if (!token) return null;
+
+  try {
+    client.setToken(token);
+    const user = await client.getCurrentUser();
+    if (!user || !user.id) return null;
+    return {
+      user: toAuthUser(user),
+      token,
+      emailVerified: user.email_verified !== false
+    };
+  } catch {
+    // Token invalid/expired — drop it so the user re-authenticates
+    clearToken();
+    return null;
+  }
+}
+
+/** Email + password login. Throws with a friendly message on failure. */
+export async function loginWithEmail(email: string, password: string): Promise<AuthResult> {
+  const client = getAuthClient();
+  const res = await client.login({ email: email.trim(), password });
+  persistToken(res.token);
+  return {
+    user: toAuthUser(res.user),
+    token: res.token,
+    emailVerified: res.user.email_verified !== false
+  };
+}
+
+/** Register a new account with email + password. */
+export async function registerWithEmail(
+  email: string,
+  password: string
+): Promise<RegisterOutcome> {
+  const client = getAuthClient();
+  const res = await client.register({
+    email: email.trim(),
+    password,
+    frontend_url: window.location.origin + window.location.pathname
+  });
+
+  if (res.requiresInvitationCode) {
+    return { status: 'needs-invite', message: res.message, code: res.code };
+  }
+  if (res.requiresEmailVerification) {
+    return { status: 'needs-verification', message: res.message };
+  }
+
+  // Some backends auto-login on register: if a session now exists, use it.
+  try {
+    const login = await loginWithEmail(email, password);
+    return { status: 'authenticated', result: login };
+  } catch {
+    return { status: 'needs-verification', message: res.message };
+  }
+}
+
+/** Kick off Google OAuth (full-page redirect via the backend proxy). */
+export async function startGoogleLogin(): Promise<void> {
+  const client = getAuthClient();
+  const returnUrl = window.location.origin + window.location.pathname;
+  const { authorize_url } = await client.googleAuthorize({ return_url: returnUrl });
+  window.location.href = authorize_url;
+}
+
+/**
+ * Handle an OAuth / email-verification redirect back into the app.
+ * Extracts a `token` (or `verify_token`) from the URL, validates it, persists
+ * it and cleans the URL. Returns the session or null when nothing to handle.
+ */
+export async function handleAuthRedirect(): Promise<AuthResult | null> {
+  const params = new URLSearchParams(window.location.search);
+  const oauthToken = params.get('token');
+  const verifyToken = params.get('verify_token');
+  const client = getAuthClient();
+
+  try {
+    if (verifyToken) {
+      const res = await client.verifyEmail(verifyToken);
+      persistToken(res.data.token);
+      cleanAuthParamsFromUrl();
+      return {
+        user: toAuthUser(res.data.user),
+        token: res.data.token,
+        emailVerified: true
+      };
+    }
+    if (oauthToken) {
+      persistToken(oauthToken);
+      client.setToken(oauthToken);
+      const user = await client.getCurrentUser();
+      cleanAuthParamsFromUrl();
+      if (user && user.id) {
+        return {
+          user: toAuthUser(user),
+          token: oauthToken,
+          emailVerified: user.email_verified !== false
+        };
+      }
+    }
+  } catch {
+    cleanAuthParamsFromUrl();
+  }
+  return null;
+}
+
+/** Strip auth-related query params without a reload */
+function cleanAuthParamsFromUrl(): void {
+  const url = new URL(window.location.href);
+  ['token', 'verify_token', 'error_code', 'user_id', 'email'].forEach(p =>
+    url.searchParams.delete(p)
+  );
+  window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+}
+
+/** Sign out of the backend session. Player data is preserved. */
+export async function logout(): Promise<void> {
+  try {
+    await getAuthClient().logout();
+  } catch {
+    // Ignore network errors on logout
+  }
+  clearAuth();
+}
+
+/** True when the current URL carries an auth redirect to process */
+export function hasPendingAuthRedirect(): boolean {
+  const params = new URLSearchParams(window.location.search);
+  return params.has('token') || params.has('verify_token');
 }
 
 /**
@@ -160,29 +351,10 @@ function generateMockJWT(userId: string, name: string, email: string): string {
 
 /**
  * Initialize authentication and return user profile
- * Supports both iframe (SeaVerse) and standalone (Demo) modes
  */
 export async function initAuth(): Promise<{ token: string; user: AuthUserProfile } | null> {
   console.log('🔐 Initializing authentication...');
 
-  // Check if we're in demo mode (standalone Vercel deployment)
-  if (config.isDemoMode) {
-    console.log('🎮 Demo mode enabled - checking for existing local user...');
-
-    // Try to load existing auth
-    const existingAuth = loadAuth();
-    if (existingAuth) {
-      console.log('✅ Found existing local user:', existingAuth.user.name);
-      return existingAuth;
-    }
-
-    // No existing user - create guest user automatically
-    console.log('🆕 No local user found - creating guest user...');
-    const { token, user } = createLocalGuestUser();
-    return { token, user };
-  }
-
-  // Original iframe auth flow
   const token = await getToken();
 
   if (!token) {
@@ -201,6 +373,7 @@ export async function initAuth(): Promise<{ token: string; user: AuthUserProfile
   console.log('✅ Authentication successful:', user.name);
   return { token, user };
 }
+
 /**
  * Check if user is authenticated
  */

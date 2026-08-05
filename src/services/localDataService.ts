@@ -52,13 +52,11 @@ export async function createUserProfile(data: {
     return existing;
   }
 
-  // Check if username is already taken by another user
-  const nameTaken = profiles.find(
-    p => p.name.toLowerCase() === data.name.toLowerCase() && p.userId !== data.userId
-  );
-  if (nameTaken) {
-    throw new Error(`El nombre "${data.name}" ya está en uso. Por favor elige otro nombre.`);
-  }
+  // NOTE: Global username uniqueness is enforced by the backend
+  // (usernameService, `chess_usernames` table) BEFORE a profile is created.
+  // The previous device-local name check is intentionally omitted here so it
+  // cannot produce false conflicts against legacy/local profiles during the
+  // authenticated flow.
 
   const profile: UserProfile = {
     id: `profile_${Date.now()}`,
@@ -256,27 +254,3 @@ export async function clearAllGameHistory(): Promise<void> {
 
 // Export all functions from dataService.ts that don't involve API calls
 export { calculateEloChange, getKFactor, generatePGN } from './dataService';
-
-// Import the re-exported functions for the default export
-import { calculateEloChange, getKFactor, generatePGN } from './dataService';
-
-// Default export for compatibility
-const localDataService = {
-  createUserProfile,
-  getUserProfile,
-  checkUsernameAvailable,
-  updateUserProfile,
-  saveGameHistory,
-  getGameHistory,
-  getGameById,
-  updatePieceStats,
-  getPieceStats,
-  updateLeaderboard,
-  getLeaderboard,
-  clearAllGameHistory,
-  calculateEloChange,
-  getKFactor,
-  generatePGN
-};
-
-export default localDataService;
