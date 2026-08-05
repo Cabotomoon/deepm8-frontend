@@ -3,7 +3,23 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { initAuth, saveAuth, loadAuth, type AuthUserProfile } from '../services/authService';
+import {
+  saveAuth,
+  restoreSession,
+  handleAuthRedirect,
+  hasPendingAuthRedirect,
+  logout as backendLogout,
+  type AuthUserProfile,
+  type AuthResult
+} from '../services/authService';
+import { getUsernameForUser } from '../services/usernameService';
+import {
+  hasMigratableProfile,
+  getBestLegacyProfile,
+  isMigrationDone,
+  markMigrationDone,
+  buildMigratedStats
+} from '../services/localProfileMigration';
 import {
   createUserProfile,
   getUserProfile,
@@ -26,7 +42,22 @@ import stockfish, { type Difficulty } from '../services/stockfishService';
 
 type PieceType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
 type PieceColor = 'white' | 'black';
-type GameMode = 'menu' | 'pvp' | 'ai' | 'tutorial' | 'replay' | 'auth' | 'user-selection' | 'elo-selection';
+type GameMode =
+  | 'loading'
+  | 'auth'
+  | 'email-verify'
+  | 'username'
+  | 'menu'
+  | 'pvp'
+  | 'ai'
+  | 'online'
+  | 'online-lobby'
+  | 'tutorial'
+  | 'replay'
+  | 'user-selection'
+  | 'elo-selection'
+  | 'stats'
+  | 'victory';
 
 // Study recommendations types
 export interface StudyRecommendation {
@@ -75,9 +106,11 @@ export function useChessGame() {
   const [authUser, setAuthUser] = useState<AuthUserProfile | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  // Email pending verification (kept in memory only, never as a credential)
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
 
-  // Game mode - Start with user-selection instead of menu
-  const [gameMode, setGameMode] = useState<GameMode>('user-selection');
+  // Game mode - Start in loading while we restore the backend session
+  const [gameMode, setGameMode] = useState<GameMode>('loading');
 
   // Statistics
   const [pieceStats, setPieceStats] = useState<PieceStatistics[]>([]);
@@ -105,7 +138,9 @@ export function useChessGame() {
   useEffect(() => {
     const loadGameHistory = async () => {
       if (userProfile) {
+        console.log('📚 Loading game history for user:', userProfile.userId);
         const history = await getGameHistory(userProfile.userId, 50); // Load last 50 games
+        console.log(`✅ Loaded ${history.length} games`);
         setGameHistory(history);
       } else {
         setGameHistory([]);
@@ -114,6 +149,11 @@ export function useChessGame() {
     loadGameHistory();
   }, [userProfile]);
 
+  // Log when showVictoryScreen changes
+  useEffect(() => {
+    console.log('🎯 showVictoryScreen changed to:', showVictoryScreen);
+  }, [showVictoryScreen]);
+
   // Game start timestamp
   const gameStartTime = useRef<number>(Date.now());
 
@@ -121,47 +161,177 @@ export function useChessGame() {
   const lastSavedGameId = useRef<string | null>(null);
 
   /**
-   * Initialize authentication on mount (optional - runs in background)
+   * Non-destructive migration: if an authenticated user has no backend profile
+   * yet but legacy local progress exists on this device, adopt it once under
+   * the new userId. Returns the created profile, or null if nothing to migrate.
    */
-  const initializeAuth = useCallback(async (forceNew = false) => {
-    // If forcing new auth, skip loading saved auth
-    if (!forceNew) {
-      // Try to load saved auth
-      const savedAuth = loadAuth();
-      if (savedAuth) {
-        setAuthToken(savedAuth.token);
-        setAuthUser(savedAuth.user);
-        setIsAuthenticated(true);
+  const tryMigrateLegacyProfile = useCallback(
+    async (user: AuthUserProfile): Promise<UserProfile | null> => {
+      if (isMigrationDone(user.userId)) return null;
+      if (!hasMigratableProfile()) return null;
+      const legacy = getBestLegacyProfile();
+      if (!legacy) return null;
 
-        // Load user profile from database
-        const profile = await getUserProfile(savedAuth.user.userId);
-        if (profile) {
-          setUserProfile(profile);
-          setGameMode('menu'); // Go to menu if user already exists
+      try {
+        const { initialElo, carry } = buildMigratedStats(legacy);
+        // Create the profile under the real identity, then apply carried stats
+        const created = await createUserProfile({
+          userId: user.userId,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          initialElo
+        });
+        const merged = { ...created, ...carry, updatedAt: new Date().toISOString() };
+        await updateUserProfile(created.id, merged);
+        markMigrationDone(user.userId);
+        console.log('📦 Migrated legacy local progress to account:', user.userId);
+        return merged as UserProfile;
+      } catch (e) {
+        console.warn('Legacy migration skipped:', e);
+        markMigrationDone(user.userId);
+        return null;
+      }
+    },
+    []
+  );
+
+  /**
+   * Route an authenticated session to the correct next screen.
+   *  needs username → 'username'
+   *  has username + profile → 'menu'
+   *  has username, no profile yet → 'elo-selection'
+   * Identity is the backend userId; username uniqueness is backend-enforced.
+   */
+  const routeAfterAuth = useCallback(async (auth: AuthResult) => {
+    setAuthToken(auth.token);
+    setAuthUser(auth.user);
+    saveAuth(auth.token, auth.user); // cache display info (token already persisted)
+    setIsAuthenticated(true);
+    setPendingVerificationEmail(null);
+
+    if (!auth.emailVerified) {
+      setPendingVerificationEmail(auth.user.email);
+      setGameMode('email-verify');
+      return;
+    }
+
+    // Resolve the globally-unique username from the backend (source of truth)
+    let username: string | null = auth.user.username || null;
+    try {
+      const record = await getUsernameForUser(auth.user.userId);
+      if (record?.username) username = record.username;
+    } catch {
+      // If the lookup fails we fall back to whatever the account carries
+    }
+
+    if (!username) {
+      setGameMode('username');
+      return;
+    }
+
+    // Keep authUser name in sync with the reserved username
+    const syncedUser = { ...auth.user, name: username, username };
+    setAuthUser(syncedUser);
+    saveAuth(auth.token, syncedUser);
+
+    // Load the player profile (ELO / stats) linked to this userId
+    const profile = await getUserProfile(auth.user.userId);
+    if (profile) {
+      setUserProfile(profile);
+      setGameMode('menu');
+      return;
+    }
+
+    // No profile yet — try to adopt legacy local progress (non-destructive)
+    const migrated = await tryMigrateLegacyProfile(syncedUser);
+    if (migrated) {
+      setUserProfile(migrated);
+      setGameMode('menu');
+    } else {
+      setGameMode('elo-selection');
+    }
+  }, [tryMigrateLegacyProfile]);
+
+  /**
+   * Initialize authentication on mount.
+   * 1. Process any OAuth / email-verification redirect in the URL.
+   * 2. Otherwise restore an existing backend session (iframe or cached token).
+   * 3. If neither, show the auth gate.
+   */
+  const initializeAuth = useCallback(async () => {
+    try {
+      if (hasPendingAuthRedirect()) {
+        const redirected = await handleAuthRedirect();
+        if (redirected) {
+          await routeAfterAuth(redirected);
+          return;
         }
+      }
+
+      const session = await restoreSession();
+      if (session) {
+        await routeAfterAuth(session);
         return;
       }
-    }
 
-    // No saved auth or forcing new - initialize fresh auth
-    console.log('📝 Initializing new authentication');
-    const auth = await initAuth();
-    if (auth) {
-      setAuthToken(auth.token);
-      setAuthUser(auth.user);
-      saveAuth(auth.token, auth.user);
-      setIsAuthenticated(true);
-
-      // Don't load profile - user needs to create one
-      console.log('✅ New auth initialized:', auth.user.name);
-    } else {
-      console.log('❌ Authentication failed, staying on user selection');
+      // Not signed in → gate
+      setIsAuthenticated(false);
+      setGameMode('auth');
+    } catch (e) {
+      console.error('Auth init failed:', e);
+      setGameMode('auth');
     }
-  }, []);
+  }, [routeAfterAuth]);
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  /** Called by AuthScreen once a session has been obtained */
+  const completeAuthentication = useCallback(async (auth: AuthResult) => {
+    await routeAfterAuth(auth);
+  }, [routeAfterAuth]);
+
+  /** Called by UsernameScreen once a unique username is reserved */
+  const completeUsername = useCallback(async (username: string) => {
+    if (!authUser) return;
+    const synced = { ...authUser, name: username, username };
+    setAuthUser(synced);
+    if (authToken) saveAuth(authToken, synced);
+
+    const profile = await getUserProfile(authUser.userId);
+    if (profile) {
+      setUserProfile(profile);
+      setGameMode('menu');
+      return;
+    }
+
+    const migrated = await tryMigrateLegacyProfile(synced);
+    if (migrated) {
+      setUserProfile(migrated);
+      setGameMode('menu');
+    } else {
+      setGameMode('elo-selection');
+    }
+  }, [authUser, authToken, tryMigrateLegacyProfile]);
+
+  /** Mark that an account needs email verification */
+  const requireEmailVerification = useCallback((email: string) => {
+    setPendingVerificationEmail(email);
+    setGameMode('email-verify');
+  }, []);
+
+  /** Full sign-out: clears the backend session and returns to the gate */
+  const signOut = useCallback(async () => {
+    await backendLogout();
+    setIsAuthenticated(false);
+    setAuthUser(null);
+    setAuthToken(null);
+    setUserProfile(null);
+    setPendingVerificationEmail(null);
+    setGameMode('auth');
+  }, []);
 
   /**
    * Reload auth user from localStorage (useful after username update)
@@ -689,6 +859,13 @@ export function useChessGame() {
     setAuthToken,
     initAuth: initializeAuth,
     reloadAuthUser,
+
+    // Real backend auth flow
+    completeAuthentication,
+    completeUsername,
+    requireEmailVerification,
+    signOut,
+    pendingVerificationEmail,
 
     // Game mode
     gameMode,
