@@ -1,10 +1,13 @@
 import React, { useState, useCallback, useEffect, useRef, Fragment } from 'react';
 import { useChessGame, type StudyAnalysis } from '../hooks/useChessGame';
 import { getOpeningName } from '../services/openingBook';
-import { hasUsername, updateUsername, getUsername, clearAuth, loginWithProfile, createLocalGuestUser } from '../services/authService';
+import { updateUsername, getUsername } from '../services/authService';
+import { reserveUsername } from '../services/usernameService';
+import AuthScreen from '../components/AuthScreen';
+import UsernameScreen from '../components/UsernameScreen';
+import EmailVerificationScreen from '../components/EmailVerificationScreen';
 import { boardToFEN, getCastlingRights } from '../utils/fenUtils';
 import ProfileSetup from '../components/ProfileSetup';
-import UserSelection from '../components/UserSelection';
 import Matchmaking from '../components/Matchmaking';
 import GameAnalysis from '../components/GameAnalysis';
 import GameHistoryComponent from '../components/GameHistory';
@@ -24,7 +27,7 @@ console.log('✅ Chess App Version: NOTATION_v7 - Added Castling Support (O-O an
 // Chess piece types
 type PieceType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
 type PieceColor = 'white' | 'black';
-type GameMode = 'menu' | 'pvp' | 'ai' | 'online' | 'online-lobby' | 'tutorial' | 'replay' | 'auth' | 'user-selection' | 'elo-selection' | 'stats' | 'victory';
+type GameMode = 'loading' | 'menu' | 'pvp' | 'ai' | 'online' | 'online-lobby' | 'tutorial' | 'replay' | 'auth' | 'email-verify' | 'username' | 'user-selection' | 'elo-selection' | 'stats' | 'victory';
 type Difficulty = 'beginner' | 'intermediate' | 'advanced' | 'master' | 'grandmaster';
 
 interface ChessPiece {
@@ -602,50 +605,14 @@ export default function ChessGame() {
     return chessGamePro.authUser?.name || 'Jugador';
   };
 
-  // User selection handlers
-  const handleSelectExistingUser = (userId: string) => {
-    console.log('📝 Selecting existing user:', userId);
-    const result = loginWithProfile(userId);
-    if (result) {
-      // Force the hook to reload auth
-      chessGamePro.initAuth();
-      chessGamePro.setGameMode('menu');
-    } else {
-      alert('Error al cargar el perfil del usuario');
-    }
-  };
+  // NOTE: The legacy localStorage "user-selection" entry flow has been replaced
+  // by the backend-backed auth gate (AuthScreen → EmailVerification → Username).
+  // Routing after authentication is handled centrally in useChessGame.
 
-  const handleCreateNewUser = async () => {
-    console.log('➕ Creating new user - starting fresh profile creation');
-    // Clear any existing auth state to start fresh
-    clearAuth();
-    // Create a local guest user immediately (no SeaVerse authentication needed)
-    const localUser = createLocalGuestUser();
-    console.log('👤 Local user created:', localUser);
-    // Update hook state with new user
-    chessGamePro.setAuthToken(localUser.token);
-    chessGamePro.setAuthUser(localUser.user);
-    chessGamePro.setIsAuthenticated(true);
-    console.log('🔧 Setting showProfileSetup to true');
-    // Show profile setup modal
-    setShowProfileSetup(true);
-    console.log('✅ showProfileSetup state updated');
-  };
-
-
-  // Auto-redirect to ELO selection when user authenticates (only from auth screen)
+  // Check if user needs to set username (backend-driven routing handles the
+  // primary path; this only re-opens the local rename modal if ever needed).
   useEffect(() => {
-    if (gameMode === 'auth' && chessGamePro.authUser && !chessGamePro.userProfile) {
-      console.log('🔀 Auto-redirecting to elo-selection');
-      chessGamePro.setGameMode('elo-selection');
-    }
-  }, [gameMode, chessGamePro.authUser, chessGamePro.userProfile, chessGamePro]);
-
-  // Check if user needs to set username
-  useEffect(() => {
-    if (chessGamePro.authUser && !hasUsername()) {
-      setShowProfileSetup(true);
-    }
+    // Intentionally left as a no-op guard: username routing is owned by the hook.
   }, [chessGamePro.authUser]);
 
   // 📊 Load game history when user profile is available
@@ -2355,68 +2322,51 @@ export default function ChessGame() {
     "¡Tutorial completo! Presiona 'Menú Principal' para comenzar a jugar."
   ];
 
-  // 👤 User Selection Screen
-  if (gameMode === 'user-selection') {
+  // ⏳ Loading (restoring backend session)
+  if (gameMode === 'loading') {
     return (
-      <>
-        <UserSelection
-          onSelectUser={handleSelectExistingUser}
-          onCreateNew={handleCreateNewUser}
-        />
-
-        {/* 👤 Profile Setup Modal - Rendered on top of user selection */}
-        {showProfileSetup && (
-          <>
-            {console.log('🎨 Rendering ProfileSetup modal, showProfileSetup:', showProfileSetup)}
-            <ProfileSetup
-              defaultName={chessGamePro.authUser?.name || ''}
-              currentUserId={chessGamePro.authUser?.userId}
-              onComplete={(username) => {
-                console.log('📝 Username entered:', username);
-                updateUsername(username);
-                chessGamePro.reloadAuthUser();
-                setShowProfileSetup(false);
-                setGameMode('elo-selection');
-                console.log('✅ Username set, proceeding to ELO selection');
-              }}
-            />
-          </>
-        )}
-      </>
+      <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-6">♔</div>
+          <div className="w-14 h-14 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-400 mt-6">Cargando tu sesión...</p>
+        </div>
+      </div>
     );
   }
 
-  // 🔐 Authentication Screen
+  // 🔐 Authentication gate (Google + email/password + login)
   if (gameMode === 'auth') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white p-4 md:p-8 flex items-center justify-center">
-        <div className="max-w-md w-full text-center">
-          <div className="mb-8 flex justify-center">
-            <img
-              src="/branding/logo-lateral.png"
-              alt="DeepM8"
-              className="h-24 md:h-32 object-contain mb-4"
-            />
-          </div>
+      <AuthScreen
+        onAuthenticated={(result) => { chessGamePro.completeAuthentication(result); }}
+        onNeedsVerification={(email) => { chessGamePro.requireEmailVerification(email); }}
+      />
+    );
+  }
 
-          <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8">
-            <div className="text-6xl mb-6">♔</div>
-            <h2 className="text-2xl font-bold mb-4">Autenticando...</h2>
-            <p className="text-slate-400 mb-6">
-              Conectando con SeaVerse para obtener tu perfil
-            </p>
-            <div className="w-16 h-16 mx-auto border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
+  // 📧 Email verification required
+  if (gameMode === 'email-verify') {
+    return (
+      <EmailVerificationScreen
+        email={chessGamePro.pendingVerificationEmail || chessGamePro.authUser?.email || ''}
+        onVerified={(result) => { chessGamePro.completeAuthentication(result); }}
+        onBackToAuth={() => { chessGamePro.signOut(); }}
+      />
+    );
+  }
 
-          {chessGamePro.authUser && (
-            <div className="mt-6 bg-green-500/20 border border-green-500 rounded-xl p-4">
-              <p className="text-green-400">
-                ✓ Conectado como {chessGamePro.authUser.name}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+  // ✏️ Mandatory unique player name (backend-reserved)
+  if (gameMode === 'username') {
+    return (
+      <UsernameScreen
+        userId={chessGamePro.authUser?.userId || ''}
+        suggestion={chessGamePro.authUser?.username || ''}
+        onReserved={(username) => {
+          updateUsername(username); // sync local cache
+          chessGamePro.completeUsername(username);
+        }}
+      />
     );
   }
 
@@ -3078,9 +3028,8 @@ export default function ChessGame() {
                         <button
                           onClick={() => {
                             if (confirm('¿Cerrar sesión? Tus datos se guardarán y podrás volver más tarde.')) {
-                              clearAuth();
-                              chessGamePro.setGameMode('user-selection');
                               setIsMenuOpen(false);
+                              chessGamePro.signOut();
                             }
                           }}
                           className="px-3 sm:px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-500 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm whitespace-nowrap"
@@ -3292,19 +3241,19 @@ export default function ChessGame() {
             <ProfileSetup
               defaultName={chessGamePro.authUser?.name || ''}
               currentUserId={chessGamePro.authUser?.userId}
-              onComplete={(username) => {
-                console.log('📝 Username entered:', username);
-
-                // Update localStorage with new name (updates both name and username fields)
-                updateUsername(username);
-
-                // Reload authUser from localStorage to get updated name
+              onComplete={async (username) => {
+                const uid = chessGamePro.authUser?.userId;
+                if (!uid) return;
+                // Reserve/rename in the backend (globally unique) before applying
+                const res = await reserveUsername(uid, username);
+                if (!res.ok) {
+                  alert(res.error || 'Ese nombre ya está en uso. Elige otro.');
+                  return;
+                }
+                updateUsername(res.record?.username || username); // sync local cache
                 chessGamePro.reloadAuthUser();
-
                 setShowProfileSetup(false);
-                // After username is set, show ELO selection
                 setGameMode('elo-selection');
-                console.log('✅ Username set, proceeding to ELO selection');
               }}
             />
           </>
@@ -3447,9 +3396,8 @@ export default function ChessGame() {
                         <button
                           onClick={() => {
                             if (confirm('¿Cerrar sesión? Tus datos se guardarán y podrás volver más tarde.')) {
-                              clearAuth();
-                              chessGamePro.setGameMode('user-selection');
                               setIsMenuOpen(false);
+                              chessGamePro.signOut();
                             }
                           }}
                           className="px-3 sm:px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-500 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm whitespace-nowrap"
@@ -3996,14 +3944,18 @@ export default function ChessGame() {
         <ProfileSetup
           defaultName={chessGamePro.authUser?.name || ''}
           currentUserId={chessGamePro.authUser?.userId}
-          onComplete={(username) => {
-            updateUsername(username);
-            // Reload authUser from localStorage to get updated name
+          onComplete={async (username) => {
+            const uid = chessGamePro.authUser?.userId;
+            if (!uid) return;
+            const res = await reserveUsername(uid, username);
+            if (!res.ok) {
+              alert(res.error || 'Ese nombre ya está en uso. Elige otro.');
+              return;
+            }
+            updateUsername(res.record?.username || username);
             chessGamePro.reloadAuthUser();
             setShowProfileSetup(false);
-            // After username is set, show ELO selection
             setGameMode('elo-selection');
-            console.log('✅ Username set:', username);
           }}
         />
       )}
