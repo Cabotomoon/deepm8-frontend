@@ -3157,11 +3157,8 @@ export default function ChessGame() {
                                         await chessGamePro.reloadAuthUser();
                                         // 2. Actualizar userProfile en localStorage
                                         await updateUserProfile(chessGamePro.userProfile.id, { name: finalUsername });
-                                        // 3. Recargar userProfile desde localStorage
-                                        const updatedProfile = await getUserProfile(chessGamePro.userProfile.userId);
-                                        if (updatedProfile) {
-                                          chessGamePro.userProfile = updatedProfile;
-                                        }
+                                        // 3. Refrescar userProfile en React state (reactiva render)
+                                        await chessGamePro.refreshUserProfile();
                                         setUsernameEditOk(true);
                                         setTimeout(() => setShowUsernameEdit(false), 1500);
                                       }
