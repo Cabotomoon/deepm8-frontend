@@ -135,12 +135,9 @@ export default function AuthScreen({ onAuthenticated, onNeedsVerification }: Aut
           <img
             src="/branding/logo-m8.png"
             alt="DeepM8"
-            className="h-28 md:h-36 object-contain mb-4"
+            className="h-40 md:h-52 object-contain mb-4"
             onError={(ev) => { (ev.target as HTMLImageElement).style.display = 'none'; }}
           />
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-200 via-blue-400 to-blue-600 bg-clip-text text-transparent">
-            Deep M8
-          </h1>
           <p className="text-slate-400 mt-2">Inicia sesión para jugar y guardar tu progreso</p>
         </div>
 
