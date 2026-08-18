@@ -3156,7 +3156,9 @@ export default function ChessGame() {
                                         setTimeout(() => setShowUsernameEdit(false), 1500);
                                       }
                                     } catch (err: any) {
-                                      setUsernameEditError('Error al actualizar el nombre. Inténtalo de nuevo.');
+                                      console.error('Username update error:', err);
+                                      const msg = err?.message || String(err);
+                                      setUsernameEditError(`Error: ${msg}`);
                                     } finally {
                                       setUsernameEditBusy(false);
                                     }
