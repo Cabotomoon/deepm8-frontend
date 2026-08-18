@@ -95,11 +95,12 @@ export async function checkUsernameAvailable(username: string, excludeUserId?: s
 }
 
 export async function updateUserProfile(
-  id: string,
+  userIdOrId: string,
   updates: Partial<UserProfile>
 ): Promise<void> {
   const profiles = getLocalData<UserProfile>(STORAGE_KEYS.PROFILES);
-  const index = profiles.findIndex(p => p.id === id);
+  // Try to find by userId first (backend user ID), then fall back to id (profile ID)
+  const index = profiles.findIndex(p => p.userId === userIdOrId || p.id === userIdOrId);
 
   if (index !== -1) {
     profiles[index] = {
