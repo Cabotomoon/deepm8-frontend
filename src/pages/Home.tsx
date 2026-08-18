@@ -3155,8 +3155,8 @@ export default function ChessGame() {
                                         // 1. Actualizar authUser en localStorage
                                         await updateUsername(finalUsername);
                                         await chessGamePro.reloadAuthUser();
-                                        // 2. Actualizar userProfile en localStorage
-                                        await updateUserProfile(chessGamePro.userProfile.id, { name: finalUsername });
+                                        // 2. Actualizar userProfile en localStorage (usar userId, no id)
+                                        await updateUserProfile(chessGamePro.userProfile.userId, { name: finalUsername });
                                         // 3. Refrescar userProfile en React state (reactiva render)
                                         await chessGamePro.refreshUserProfile();
                                         setUsernameEditOk(true);
