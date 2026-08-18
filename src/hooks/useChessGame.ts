@@ -5,6 +5,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   saveAuth,
+  loadAuth,
   restoreSession,
   handleAuthRedirect,
   hasPendingAuthRedirect,
