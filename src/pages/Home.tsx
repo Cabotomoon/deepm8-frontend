@@ -544,6 +544,12 @@ export default function ChessGame() {
   // 🎓 Training hub state (permanent "Entrenamiento" section)
   const [showTrainingHub, setShowTrainingHub] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Cambio de nombre inline en el menú hamburguesa
+  const [showUsernameEdit, setShowUsernameEdit] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [usernameEditBusy, setUsernameEditBusy] = useState(false);
+  const [usernameEditError, setUsernameEditError] = useState<string | null>(null);
+  const [usernameEditOk, setUsernameEditOk] = useState(false);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -3083,6 +3089,97 @@ export default function ChessGame() {
                           >
                             {soundEnabled ? '🔊 Activado' : '🔇 Desactivado'}
                           </button>
+                        </div>
+
+                        {/* ✏️ Cambiar nombre de usuario */}
+                        <div className="pt-1 border-t border-white/6">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-xs sm:text-sm font-medium text-slate-300">Nombre de usuario</label>
+                            {!showUsernameEdit && (
+                              <button
+                                onClick={() => {
+                                  setNewUsername(chessGamePro.userProfile?.name || '');
+                                  setUsernameEditError(null);
+                                  setUsernameEditOk(false);
+                                  setShowUsernameEdit(true);
+                                }}
+                                className="text-xs text-blue-400 hover:text-blue-300 font-semibold"
+                              >
+                                ✏️ Cambiar
+                              </button>
+                            )}
+                          </div>
+                          {!showUsernameEdit && (
+                            <p className="text-xs text-slate-400 font-mono">
+                              {chessGamePro.userProfile?.name || 'Sin nombre'}
+                            </p>
+                          )}
+                          {showUsernameEdit && (
+                            <div className="space-y-2">
+                              <input
+                                type="text"
+                                value={newUsername}
+                                onChange={(e) => {
+                                  setNewUsername(e.target.value);
+                                  setUsernameEditError(null);
+                                  setUsernameEditOk(false);
+                                }}
+                                placeholder="Nuevo nombre (3-20 caracteres)"
+                                maxLength={20}
+                                className="w-full bg-slate-900/70 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                              />
+                              {usernameEditError && (
+                                <div className="bg-red-500/15 border border-red-500/40 rounded-lg px-3 py-2 text-xs text-red-300">
+                                  {usernameEditError}
+                                </div>
+                              )}
+                              {usernameEditOk && (
+                                <div className="bg-green-500/15 border border-green-500/40 rounded-lg px-3 py-2 text-xs text-green-300">
+                                  ✅ Nombre actualizado correctamente
+                                </div>
+                              )}
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={async () => {
+                                    if (!chessGamePro.userProfile?.userId) return;
+                                    setUsernameEditError(null);
+                                    setUsernameEditOk(false);
+                                    setUsernameEditBusy(true);
+                                    try {
+                                      const res = await reserveUsername(chessGamePro.userProfile.userId, newUsername);
+                                      if (!res.ok) {
+                                        setUsernameEditError(res.error || 'No se pudo reservar el nombre.');
+                                      } else {
+                                        await updateUsername(res.record?.username || newUsername.trim());
+                                        await chessGamePro.reloadAuthUser();
+                                        setUsernameEditOk(true);
+                                        setTimeout(() => setShowUsernameEdit(false), 1500);
+                                      }
+                                    } catch (err: any) {
+                                      setUsernameEditError('Error al actualizar el nombre. Inténtalo de nuevo.');
+                                    } finally {
+                                      setUsernameEditBusy(false);
+                                    }
+                                  }}
+                                  disabled={usernameEditBusy || !newUsername.trim()}
+                                  className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-semibold py-2 rounded-lg text-xs transition-all"
+                                >
+                                  {usernameEditBusy ? 'Guardando...' : 'Guardar'}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setShowUsernameEdit(false);
+                                    setUsernameEditError(null);
+                                    setUsernameEditOk(false);
+                                  }}
+                                  disabled={usernameEditBusy}
+                                  className="px-4 py-2 text-slate-400 hover:text-white text-xs disabled:opacity-60"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
