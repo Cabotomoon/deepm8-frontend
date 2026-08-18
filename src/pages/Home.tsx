@@ -3,6 +3,7 @@ import { useChessGame, type StudyAnalysis } from '../hooks/useChessGame';
 import { getOpeningName } from '../services/openingBook';
 import { updateUsername, getUsername } from '../services/authService';
 import { reserveUsername } from '../services/usernameService';
+import { getUserProfile } from '../services/localDataService';
 import AuthScreen from '../components/AuthScreen';
 import UsernameScreen from '../components/UsernameScreen';
 import EmailVerificationScreen from '../components/EmailVerificationScreen';
@@ -3152,6 +3153,11 @@ export default function ChessGame() {
                                       } else {
                                         await updateUsername(res.record?.username || newUsername.trim());
                                         await chessGamePro.reloadAuthUser();
+                                        // Recargar también el userProfile para reflejar el nuevo nombre
+                                        const updatedProfile = await getUserProfile(chessGamePro.userProfile.userId);
+                                        if (updatedProfile) {
+                                          chessGamePro.userProfile = updatedProfile;
+                                        }
                                         setUsernameEditOk(true);
                                         setTimeout(() => setShowUsernameEdit(false), 1500);
                                       }
