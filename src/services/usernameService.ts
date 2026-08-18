@@ -26,20 +26,19 @@ let client: DataClient | null = null;
 
 async function getClient(): Promise<DataClient> {
   if (client) return client;
-  const isDev = import.meta.env.DEV || window.location.hostname === 'localhost';
-  if (isDev) {
-    const appId = (import.meta.env.VITE_APP_ID as string) || 'chess-clash-dev-local';
-    const token =
-      localStorage.getItem('seaverse_token') ||
-      localStorage.getItem('chess_auth_token');
-    if (!token) throw new Error('NO_TOKEN: No se encontró token de autenticación');
-    console.log('[usernameService] Creating DataClient with appId:', appId, 'token:', token.substring(0, 20) + '...');
-    client = await DataClient.create({ appId, token });
-  } else {
-    console.log('[usernameService] Creating DataClient (production mode)');
-    client = await DataClient.create();
-  }
+
+  // Always use explicit appId + token (works both in dev and production on Vercel)
+  const appId = (import.meta.env.VITE_APP_ID as string) || 'app-1775782200629-2f60caf6';
+  const token =
+    localStorage.getItem('seaverse_token') ||
+    localStorage.getItem('chess_auth_token');
+
+  if (!token) throw new Error('NO_TOKEN: No se encontró token de autenticación');
+
+  console.log('[usernameService] Creating DataClient with appId:', appId, 'token:', token.substring(0, 20) + '...');
+  client = await DataClient.create({ appId, token });
   console.log('[usernameService] DataClient created successfully');
+
   return client;
 }
 
