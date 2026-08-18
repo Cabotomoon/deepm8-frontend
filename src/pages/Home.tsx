@@ -3099,7 +3099,7 @@ export default function ChessGame() {
                             {!showUsernameEdit && (
                               <button
                                 onClick={() => {
-                                  setNewUsername(chessGamePro.userProfile?.name || '');
+                                  setNewUsername(chessGamePro.authUser?.name || '');
                                   setUsernameEditError(null);
                                   setUsernameEditOk(false);
                                   setShowUsernameEdit(true);
@@ -3112,7 +3112,7 @@ export default function ChessGame() {
                           </div>
                           {!showUsernameEdit && (
                             <p className="text-xs text-slate-400 font-mono">
-                              {chessGamePro.userProfile?.name || 'Sin nombre'}
+                              {chessGamePro.authUser?.name || 'Sin nombre'}
                             </p>
                           )}
                           {showUsernameEdit && (
