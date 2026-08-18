@@ -394,6 +394,21 @@ export function useChessGame() {
   };
 
   /**
+   * Refresh user profile from localStorage (e.g., after username change)
+   */
+  const refreshUserProfile = useCallback(async () => {
+    if (!userProfile?.userId) return;
+    try {
+      const updated = await getUserProfile(userProfile.userId);
+      if (updated) {
+        setUserProfile(updated);
+      }
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
+    }
+  }, [userProfile?.userId]);
+
+  /**
    * Save game result and update ELO
    */
   const saveGame = async (
@@ -874,6 +889,7 @@ export function useChessGame() {
 
     // Profile management
     createProfile,
+    refreshUserProfile,
 
     // Game management
     saveGame,
