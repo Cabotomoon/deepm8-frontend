@@ -32,11 +32,14 @@ async function getClient(): Promise<DataClient> {
     const token =
       localStorage.getItem('seaverse_token') ||
       localStorage.getItem('chess_auth_token');
-    if (!token) throw new Error('NO_TOKEN');
+    if (!token) throw new Error('NO_TOKEN: No se encontró token de autenticación');
+    console.log('[usernameService] Creating DataClient with appId:', appId, 'token:', token.substring(0, 20) + '...');
     client = await DataClient.create({ appId, token });
   } else {
+    console.log('[usernameService] Creating DataClient (production mode)');
     client = await DataClient.create();
   }
+  console.log('[usernameService] DataClient created successfully');
   return client;
 }
 
@@ -115,59 +118,74 @@ export async function reserveUsername(
   userId: string,
   username: string
 ): Promise<ReserveResult> {
-  const format = validateUsernameFormat(username);
-  if (!format.ok) return { ok: false, error: format.error };
+  try {
+    console.log('[reserveUsername] Starting for userId:', userId, 'username:', username);
+    const format = validateUsernameFormat(username);
+    if (!format.ok) return { ok: false, error: format.error };
 
-  const display = username.trim();
-  const normalized = normalizeUsername(display);
-  const c = await getClient();
+    const display = username.trim();
+    const normalized = normalizeUsername(display);
+    console.log('[reserveUsername] Normalized:', normalized);
 
-  // 1. Pre-check: is it taken by someone else?
-  const taken = await findByNormalized(normalized);
-  const otherOwner = taken.find(o => o.userId !== userId);
-  if (otherOwner) return { ok: false, error: 'Ese nombre ya está en uso. Elige otro.' };
+    const c = await getClient();
+    console.log('[reserveUsername] Client obtained');
 
-  // 2. Does this user already own a username row? (rename path)
-  const existing = await getUsernameForUser(userId);
-  const now = new Date().toISOString();
+    // 1. Pre-check: is it taken by someone else?
+    const taken = await findByNormalized(normalized);
+    console.log('[reserveUsername] Pre-check found', taken.length, 'existing records');
+    const otherOwner = taken.find(o => o.userId !== userId);
+    if (otherOwner) return { ok: false, error: 'Ese nombre ya está en uso. Elige otro.' };
 
-  if (existing) {
-    await c.update(existing.id, {
-      visibility: 'public',
-      data_value: {
-        userId,
-        username: display,
-        usernameNormalized: normalized,
-        createdAt: existing.createdAt,
-        updatedAt: now
-      }
-    });
-  } else {
-    await c.create({
-      table_name: TABLE,
-      visibility: 'public',
-      data_value: {
-        userId,
-        username: display,
-        usernameNormalized: normalized,
-        createdAt: now,
-        updatedAt: now
-      }
-    });
-  }
+    // 2. Does this user already own a username row? (rename path)
+    const existing = await getUsernameForUser(userId);
+    console.log('[reserveUsername] Existing record:', existing ? 'found' : 'none');
+    const now = new Date().toISOString();
 
-  // 3. Post-write re-check for races: if another user grabbed the same
-  //    normalized name, the earliest createdAt wins.
-  const after = await findByNormalized(normalized);
-  if (after.length > 1) {
-    const sorted = [...after].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-    const winner = sorted[0];
-    if (winner.userId !== userId) {
-      return { ok: false, error: 'Ese nombre acaba de ser reservado por otra persona. Elige otro.' };
+    if (existing) {
+      console.log('[reserveUsername] Updating existing record:', existing.id);
+      await c.update(existing.id, {
+        visibility: 'public',
+        data_value: {
+          userId,
+          username: display,
+          usernameNormalized: normalized,
+          createdAt: existing.createdAt,
+          updatedAt: now
+        }
+      });
+    } else {
+      console.log('[reserveUsername] Creating new record');
+      await c.create({
+        table_name: TABLE,
+        visibility: 'public',
+        data_value: {
+          userId,
+          username: display,
+          usernameNormalized: normalized,
+          createdAt: now,
+          updatedAt: now
+        }
+      });
     }
-  }
 
-  const record = await getUsernameForUser(userId);
-  return { ok: true, record: record || undefined };
+    // 3. Post-write re-check for races: if another user grabbed the same
+    //    normalized name, the earliest createdAt wins.
+    const after = await findByNormalized(normalized);
+    console.log('[reserveUsername] Post-check found', after.length, 'records');
+    if (after.length > 1) {
+      const sorted = [...after].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      const winner = sorted[0];
+      if (winner.userId !== userId) {
+        return { ok: false, error: 'Ese nombre acaba de ser reservado por otra persona. Elige otro.' };
+      }
+    }
+
+    const record = await getUsernameForUser(userId);
+    console.log('[reserveUsername] Success! Final record:', record);
+    return { ok: true, record: record || undefined };
+  } catch (error: any) {
+    console.error('[reserveUsername] Error:', error);
+    throw error;
+  }
 }
 
