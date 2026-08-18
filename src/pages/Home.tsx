@@ -2327,7 +2327,11 @@ export default function ChessGame() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#07070A] via-[#0F0F17] to-[#07070A] text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-6">♔</div>
+          <img
+            src="/branding/logo-m8.png"
+            alt="DeepM8"
+            className="h-28 object-contain mx-auto mb-6"
+          />
           <div className="w-14 h-14 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-slate-400 mt-6">Cargando tu sesión...</p>
         </div>
