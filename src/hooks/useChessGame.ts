@@ -198,11 +198,15 @@ export function useChessGame() {
   );
 
   /**
-   * Route an authenticated session to the correct next screen.
-   *  needs username → 'username'
+   * Post-login routing (React Router only mounts Home at "/"; screens are
+   * owned by `gameMode`, not URL paths):
+   *  needs email verify → 'email-verify'
+   *  no reserved chess username → 'username'  (mandatory, before ELO)
    *  has username + profile → 'menu'
    *  has username, no profile yet → 'elo-selection'
-   * Identity is the backend userId; username uniqueness is backend-enforced.
+   *
+   * Google / email display names on the identity account are NOT treated as
+   * a chess username. Only Express / chess_usernames reservations count.
    */
   const routeAfterAuth = useCallback(async (auth: AuthResult) => {
     setAuthToken(auth.token);
@@ -217,13 +221,12 @@ export function useChessGame() {
       return;
     }
 
-    // Resolve the globally-unique username from the backend (source of truth)
-    let username: string | null = auth.user.username || null;
+    let username: string | null = null;
     try {
       const record = await getUsernameForUser(auth.user.userId);
       if (record?.username) username = record.username;
     } catch {
-      // If the lookup fails we fall back to whatever the account carries
+      username = null;
     }
 
     if (!username) {
