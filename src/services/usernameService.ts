@@ -1,33 +1,24 @@
 /**
- * Username Service — backend-enforced global uniqueness
+ * Username Service — globally unique player names
  *
- * Usernames are reserved in the SeaVerse Data backend (NOT localStorage), so a
- * name like "JoseChess" is unique across every browser, device and country.
+ * Source of truth for uniqueness is the DeepM8 Express backend
+ * (POST /api/users/check-username, POST /api/users/set-username).
  *
- * Storage model (data-sdk, public table `chess_usernames`):
- *   {
- *     userId: string,               // owner (auth identity, primary link)
- *     username: string,             // display form as chosen
- *     usernameNormalized: string,   // lowercase+trimmed — the uniqueness key
- *     createdAt, updatedAt
- *   }
- *
- * The data-sdk is a document store without a native UNIQUE constraint, so
- * reservation is done as an atomic-ish "query-normalized → claim" sequence
- * with a final re-check to detect races. Records are keyed to the owner via
- * `userId`; a user has at most one username row.
+ * SeaVerse `chess_usernames` is kept as a compatibility fallback so players
+ * who already reserved a name there are not asked again.
  */
 
 import { DataClient } from '@seaverse/data-sdk';
+import { config } from '../config';
 
 const TABLE = 'chess_usernames';
+const API_BASE = config.backendUrl.replace(/\/$/, '');
 
 let client: DataClient | null = null;
 
 async function getClient(): Promise<DataClient> {
   if (client) return client;
 
-  // Always use explicit appId + token (works both in dev and production on Vercel)
   const appId = (import.meta.env.VITE_APP_ID as string) || 'app-1775782200629-2f60caf6';
   const token =
     localStorage.getItem('seaverse_token') ||
@@ -35,20 +26,16 @@ async function getClient(): Promise<DataClient> {
 
   if (!token) throw new Error('NO_TOKEN: No se encontró token de autenticación');
 
-  console.log('[usernameService] Creating DataClient with appId:', appId, 'token:', token.substring(0, 20) + '...');
   client = await DataClient.create({ appId, token });
-  console.log('[usernameService] DataClient created successfully');
-
   return client;
 }
 
-/** Normalize a username to its uniqueness key (lowercase, trimmed) */
 export function normalizeUsername(username: string): string {
   return username.trim().toLowerCase();
 }
 
 export interface UsernameRecord {
-  id: string;
+  id?: string;
   userId: string;
   username: string;
   usernameNormalized: string;
@@ -56,7 +43,6 @@ export interface UsernameRecord {
   updatedAt: string;
 }
 
-/** Validate the shape of a username before touching the backend */
 export function validateUsernameFormat(username: string): { ok: boolean; error?: string } {
   const trimmed = username.trim();
   if (trimmed.length < 3) return { ok: false, error: 'El nombre debe tener al menos 3 caracteres.' };
@@ -67,38 +53,103 @@ export function validateUsernameFormat(username: string): { ok: boolean; error?:
   return { ok: true };
 }
 
-/** Find the username row that owns a normalized name, if any */
 async function findByNormalized(normalized: string): Promise<UsernameRecord[]> {
-  const c = await getClient();
-  const rows = await c.query({
-    table_name: TABLE,
-    filters: { data: { usernameNormalized: normalized } }
-  });
-  return (rows as any[]).map(r => ({ id: r.id, ...r.data_value })) as UsernameRecord[];
+  try {
+    const c = await getClient();
+    const rows = await c.query({
+      table_name: TABLE,
+      filters: { data: { usernameNormalized: normalized } }
+    });
+    return (rows as any[]).map(r => ({ id: r.id, ...r.data_value })) as UsernameRecord[];
+  } catch {
+    return [];
+  }
 }
 
-/** Get the username currently owned by a user (backend truth) */
+async function getSeaverseUsername(userId: string): Promise<UsernameRecord | null> {
+  try {
+    const c = await getClient();
+    const rows = await c.query({
+      table_name: TABLE,
+      filters: { data: { userId } }
+    });
+    const list = (rows as any[]).map(r => ({ id: r.id, ...r.data_value })) as UsernameRecord[];
+    return list.length > 0 ? list[0] : null;
+  } catch {
+    return null;
+  }
+}
+
+async function syncToExpress(userId: string, username: string): Promise<void> {
+  try {
+    await fetch(`${API_BASE}/api/users/set-username`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, username })
+    });
+  } catch {
+    // Best-effort mirror; uniqueness already held in SeaVerse
+  }
+}
+
+/** Get the username currently owned by a user (Express first, SeaVerse fallback). */
 export async function getUsernameForUser(userId: string): Promise<UsernameRecord | null> {
-  const c = await getClient();
-  const rows = await c.query({
-    table_name: TABLE,
-    filters: { data: { userId } }
-  });
-  const list = (rows as any[]).map(r => ({ id: r.id, ...r.data_value }));
-  return list.length > 0 ? (list[0] as UsernameRecord) : null;
+  try {
+    const res = await fetch(`${API_BASE}/api/users/username?userId=${encodeURIComponent(userId)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.username && data.record) return data.record as UsernameRecord;
+      if (data?.username) {
+        return {
+          userId,
+          username: data.username,
+          usernameNormalized: normalizeUsername(data.username),
+          createdAt: '',
+          updatedAt: ''
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[usernameService] Express lookup failed, trying SeaVerse:', err);
+  }
+
+  const legacy = await getSeaverseUsername(userId);
+  if (legacy?.username) {
+    void syncToExpress(userId, legacy.username);
+    return legacy;
+  }
+  return null;
 }
 
 /**
- * Check availability against the backend.
- * Available when no row uses the normalized name, OR the only row is owned
- * by `selfUserId` (so re-submitting your own name is fine).
+ * Check availability against Express (authoritative) and SeaVerse (legacy).
+ * Available when no row uses the normalized name, OR the only owner is `selfUserId`.
  */
 export async function isUsernameAvailable(
   username: string,
   selfUserId?: string
 ): Promise<boolean> {
-  const normalized = normalizeUsername(username);
-  const owners = await findByNormalized(normalized);
+  const format = validateUsernameFormat(username);
+  if (!format.ok) return false;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/users/check-username`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, userId: selfUserId })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.available === false) return false;
+    } else {
+      throw new Error(`check-username ${res.status}`);
+    }
+  } catch (err) {
+    console.error('[usernameService] check-username failed:', err);
+    throw err;
+  }
+
+  const owners = await findByNormalized(normalizeUsername(username));
   if (owners.length === 0) return true;
   return owners.every(o => o.userId === selfUserId);
 }
@@ -109,82 +160,73 @@ export interface ReserveResult {
   record?: UsernameRecord;
 }
 
-/**
- * Atomically reserve (or rename to) a username for a user.
- * Query-then-claim with a post-write re-check to catch concurrent claims.
- */
 export async function reserveUsername(
   userId: string,
   username: string
 ): Promise<ReserveResult> {
+  const format = validateUsernameFormat(username);
+  if (!format.ok) return { ok: false, error: format.error };
+
   try {
-    console.log('[reserveUsername] Starting for userId:', userId, 'username:', username);
-    const format = validateUsernameFormat(username);
-    if (!format.ok) return { ok: false, error: format.error };
-
-    const display = username.trim();
-    const normalized = normalizeUsername(display);
-    console.log('[reserveUsername] Normalized:', normalized);
-
-    const c = await getClient();
-    console.log('[reserveUsername] Client obtained');
-
-    // 1. Pre-check: is it taken by someone else?
-    const taken = await findByNormalized(normalized);
-    console.log('[reserveUsername] Pre-check found', taken.length, 'existing records');
-    const otherOwner = taken.find(o => o.userId !== userId);
-    if (otherOwner) return { ok: false, error: 'Ese nombre ya está en uso. Elige otro.' };
-
-    // 2. Does this user already own a username row? (rename path)
-    const existing = await getUsernameForUser(userId);
-    console.log('[reserveUsername] Existing record:', existing ? 'found' : 'none');
-    const now = new Date().toISOString();
-
-    if (existing) {
-      console.log('[reserveUsername] Updating existing record:', existing.id);
-      await c.update(existing.id, {
-        visibility: 'public',
-        data_value: {
-          userId,
-          username: display,
-          usernameNormalized: normalized,
-          createdAt: existing.createdAt,
-          updatedAt: now
-        }
-      });
-    } else {
-      console.log('[reserveUsername] Creating new record');
-      await c.create({
-        table_name: TABLE,
-        visibility: 'public',
-        data_value: {
-          userId,
-          username: display,
-          usernameNormalized: normalized,
-          createdAt: now,
-          updatedAt: now
-        }
-      });
+    const res = await fetch(`${API_BASE}/api/users/set-username`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, username })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      return {
+        ok: false,
+        error: data.message || data.error || 'No se pudo reservar el nombre. Inténtalo de nuevo.'
+      };
     }
 
-    // 3. Post-write re-check for races: if another user grabbed the same
-    //    normalized name, the earliest createdAt wins.
-    const after = await findByNormalized(normalized);
-    console.log('[reserveUsername] Post-check found', after.length, 'records');
-    if (after.length > 1) {
-      const sorted = [...after].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-      const winner = sorted[0];
-      if (winner.userId !== userId) {
-        return { ok: false, error: 'Ese nombre acaba de ser reservado por otra persona. Elige otro.' };
+    const record: UsernameRecord = data.record || {
+      userId,
+      username: data.username || username.trim(),
+      usernameNormalized: normalizeUsername(data.username || username),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Mirror into SeaVerse so older clients still see the reservation
+    try {
+      const c = await getClient();
+      const existing = await getSeaverseUsername(userId);
+      const now = new Date().toISOString();
+      const display = record.username;
+      const normalized = record.usernameNormalized;
+      if (existing?.id) {
+        await c.update(existing.id, {
+          visibility: 'public',
+          data_value: {
+            userId,
+            username: display,
+            usernameNormalized: normalized,
+            createdAt: existing.createdAt,
+            updatedAt: now
+          }
+        });
+      } else {
+        await c.create({
+          table_name: TABLE,
+          visibility: 'public',
+          data_value: {
+            userId,
+            username: display,
+            usernameNormalized: normalized,
+            createdAt: now,
+            updatedAt: now
+          }
+        });
       }
+    } catch (mirrorErr) {
+      console.warn('[usernameService] SeaVerse mirror skipped:', mirrorErr);
     }
 
-    const record = await getUsernameForUser(userId);
-    console.log('[reserveUsername] Success! Final record:', record);
-    return { ok: true, record: record || undefined };
+    return { ok: true, record };
   } catch (error: any) {
     console.error('[reserveUsername] Error:', error);
     throw error;
   }
 }
-
