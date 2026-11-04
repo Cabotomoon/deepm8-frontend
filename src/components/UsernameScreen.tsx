@@ -125,9 +125,11 @@ export default function UsernameScreen({ userId, onReserved, suggestion }: Usern
       <div className="relative w-full max-w-md">
         <div className="rounded-3xl border border-white/10 bg-[#12121A]/90 backdrop-blur-xl shadow-[0_24px_80px_rgba(0,0,0,0.55)] p-6 sm:p-8">
           <div className="text-center mb-7">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 text-2xl shadow-lg shadow-violet-500/30">
-              ♟
-            </div>
+            <img
+              src="/branding/logo-m8.png"
+              alt="DeepM8"
+              className="mx-auto mb-4 h-20 w-auto object-contain"
+            />
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-200 via-blue-200 to-violet-400 bg-clip-text text-transparent">
               Elige tu nombre de jugador
             </h1>
