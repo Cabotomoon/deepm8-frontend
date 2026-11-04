@@ -13,7 +13,7 @@ import {
   type AuthUserProfile,
   type AuthResult
 } from '../services/authService';
-import { getUsernameForUser } from '../services/usernameService';
+import { fetchRegisteredUsername, getCachedConfirmedUsername } from '../services/usernameService';
 import {
   hasMigratableProfile,
   getBestLegacyProfile,
@@ -109,6 +109,11 @@ export function useChessGame() {
   const [authToken, setAuthToken] = useState<string | null>(null);
   // Email pending verification (kept in memory only, never as a credential)
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+  // True when the server could not confirm whether the user has a username
+  // (network error / timeout / invalid reply). It never means "no username".
+  const [usernameLookupFailed, setUsernameLookupFailed] = useState(false);
+  // Auth result waiting for a successful username lookup (used by retry).
+  const pendingAuthRef = useRef<AuthResult | null>(null);
 
   // Game mode - Start in loading while we restore the backend session
   const [gameMode, setGameMode] = useState<GameMode>('loading');
@@ -206,7 +211,7 @@ export function useChessGame() {
    *  has username, no profile yet → 'elo-selection'
    *
    * Google / email display names on the identity account are NOT treated as
-   * a chess username. Only Express / chess_usernames reservations count.
+   * a chess username. Only Express usernames.json reservations count.
    */
   const routeAfterAuth = useCallback(async (auth: AuthResult) => {
     setAuthToken(auth.token);
@@ -221,18 +226,37 @@ export function useChessGame() {
       return;
     }
 
-    let username: string | null = null;
-    try {
-      const record = await getUsernameForUser(auth.user.userId);
-      if (record?.username) username = record.username;
-    } catch {
-      username = null;
-    }
+    // Identity provider names (Google / SeaVerse) are ignored here.
+    // Only a row in the Express usernames.json store counts as "has username".
+    // Three outcomes: found / none (confirmed by the server) / unavailable.
+    const lookup = await fetchRegisteredUsername(auth.user.userId);
+    let username: string;
 
-    if (!username) {
+    if (lookup.status === 'found') {
+      username = lookup.username;
+    } else if (lookup.status === 'none') {
+      // Only here has the server CONFIRMED that the user has no username.
+      pendingAuthRef.current = null;
+      setUsernameLookupFailed(false);
       setGameMode('username');
       return;
+    } else {
+      // Server unreachable / timeout / invalid reply: this is NOT proof that
+      // the user has no username. Fall back to the last username the server
+      // confirmed on this device; without one, keep the loading screen and
+      // let the user retry instead of sending them to the username form.
+      const cached = getCachedConfirmedUsername(auth.user.userId);
+      if (!cached) {
+        pendingAuthRef.current = auth;
+        setUsernameLookupFailed(true);
+        setGameMode('loading');
+        return;
+      }
+      username = cached;
     }
+
+    pendingAuthRef.current = null;
+    setUsernameLookupFailed(false);
 
     // Keep authUser name in sync with the reserved username
     const syncedUser = { ...auth.user, name: username, username };
@@ -297,6 +321,17 @@ export function useChessGame() {
     await routeAfterAuth(auth);
   }, [routeAfterAuth]);
 
+  /**
+   * Retry the username lookup after the server could not be reached.
+   * Re-runs the same post-login routing with the auth result that was waiting.
+   */
+  const retryUsernameLookup = useCallback(async () => {
+    const pending = pendingAuthRef.current;
+    if (!pending) return;
+    setUsernameLookupFailed(false);
+    await routeAfterAuth(pending);
+  }, [routeAfterAuth]);
+
   /** Called by UsernameScreen once a unique username is reserved */
   const completeUsername = useCallback(async (username: string) => {
     if (!authUser) return;
@@ -334,6 +369,8 @@ export function useChessGame() {
     setAuthToken(null);
     setUserProfile(null);
     setPendingVerificationEmail(null);
+    pendingAuthRef.current = null;
+    setUsernameLookupFailed(false);
     setGameMode('auth');
   }, []);
 
@@ -885,6 +922,8 @@ export function useChessGame() {
     requireEmailVerification,
     signOut,
     pendingVerificationEmail,
+    usernameLookupFailed,
+    retryUsernameLookup,
 
     // Game mode
     gameMode,
