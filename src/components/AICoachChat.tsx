@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { llmService, ChatMessage } from '../services/llmService';
+import { llmService, type ChatMessage } from '../services/llmService';
 
 interface AICoachChatProps {
   onClose: () => void;

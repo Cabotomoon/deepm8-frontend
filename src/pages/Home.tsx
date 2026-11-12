@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef, Fragment } from 'react
 import { useChessGame, type StudyAnalysis } from '../hooks/useChessGame';
 import { getOpeningName } from '../services/openingBook';
 import { updateUsername, getUsername } from '../services/authService';
-import { reserveUsername } from '../services/usernameService';
+import { reserveUsername, fetchRegisteredUsername } from '../services/usernameService';
 import { getUserProfile, updateUserProfile } from '../services/localDataService';
 import AuthScreen from '../components/AuthScreen';
 import UsernameScreen from '../components/UsernameScreen';
@@ -612,15 +612,47 @@ export default function ChessGame() {
     return chessGamePro.authUser?.name || 'Jugador';
   };
 
-  // NOTE: The legacy localStorage "user-selection" entry flow has been replaced
-  // by the backend-backed auth gate (AuthScreen → EmailVerification → Username).
-  // Routing after authentication is handled centrally in useChessGame.
+  // NOTE: UserSelection (localStorage "elige un perfil") was unmounted from this
+  // tree — the file still exists but is never rendered. ProfileSetup is only a
+  // rename modal from the menu, not onboarding. Mandatory onboarding is UsernameScreen.
 
-  // Check if user needs to set username (backend-driven routing handles the
-  // primary path; this only re-opens the local rename modal if ever needed).
+  // Safety net: if routing ever lands on the menu / ELO screen for a user whose
+  // username the server CONFIRMS is missing, send them to UsernameScreen
+  // (Google/SeaVerse names do not count).
+  //  - Runs only on those two entry screens, never during pvp/ai/online/etc.,
+  //    so an active game is never interrupted.
+  //  - Checks once per user per session once the server has answered.
+  //  - Network errors, timeouts and invalid replies are NOT "no username":
+  //    they are ignored and the check is retried on the next menu entry.
+  const usernameVerifiedForRef = useRef<string | null>(null);
   useEffect(() => {
-    // Intentionally left as a no-op guard: username routing is owned by the hook.
-  }, [chessGamePro.authUser]);
+    const userId = chessGamePro.authUser?.userId;
+    if (!userId) {
+      usernameVerifiedForRef.current = null;
+      return;
+    }
+    if (gameMode !== 'menu' && gameMode !== 'elo-selection') return;
+    if (usernameVerifiedForRef.current === userId) return;
+
+    let cancelled = false;
+    (async () => {
+      const lookup = await fetchRegisteredUsername(userId);
+      if (cancelled) return;
+
+      if (lookup.status === 'found') {
+        usernameVerifiedForRef.current = userId;
+      } else if (lookup.status === 'none') {
+        console.log('[Home] Server confirmed: no username — showing UsernameScreen');
+        setGameMode('username');
+      } else {
+        console.warn('[Home] Username check skipped (server unavailable):', lookup.reason);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [chessGamePro.authUser?.userId, gameMode, setGameMode]);
 
   // 📊 Load game history when user profile is available
   useEffect(() => {
@@ -2339,8 +2371,33 @@ export default function ChessGame() {
             alt="DeepM8"
             className="h-28 object-contain mx-auto mb-6"
           />
-          <div className="w-14 h-14 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-400 mt-6">Cargando tu sesión...</p>
+          {chessGamePro.usernameLookupFailed ? (
+            <>
+              <p className="text-slate-300 mt-6 max-w-sm mx-auto px-4">
+                No pudimos conectar con el servidor para comprobar tu nombre de usuario.
+                Tu cuenta no se ha modificado.
+              </p>
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => { chessGamePro.retryUsernameLookup(); }}
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 font-semibold transition-colors"
+                >
+                  Reintentar
+                </button>
+                <button
+                  onClick={() => { chessGamePro.signOut(); }}
+                  className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-colors"
+                >
+                  Cerrar sesión
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-14 h-14 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-slate-400 mt-6">Cargando tu sesión...</p>
+            </>
+          )}
         </div>
       </div>
     );
